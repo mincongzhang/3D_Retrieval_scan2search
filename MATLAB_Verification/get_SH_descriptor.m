@@ -30,12 +30,12 @@ z1 = round(z1*2*R);
 grid = zeros(2*R,2*R,2*R); 
 n_points = length(x1);
 for i = 1:n_points
-    grid(y1(i)+1,z1(i)+1,z1(i)+1) = 1;
+    grid(y1(i)+1,x1(i)+1,z1(i)+1) = 1;
 end
 
 %get coordinates of grid voxel
 temp=reshape(grid,prod(size(grid)),1);
-[x_grid,y_grid,z_grid] = ind2sub(size(grid),find(temp==1));
+[y_grid,x_grid,z_grid] = ind2sub(size(grid),find(temp==1));
 % x_grid = [];
 % y_grid = [];
 % z_grid = [];
@@ -43,16 +43,23 @@ temp=reshape(grid,prod(size(grid)),1);
 %     for j = 1:2*R
 %         for k = 1:2*R
 %             if(grid(i,j,k)==1)
-%                 x_grid = [x_grid; i];
-%                 y_grid = [y_grid; j];
+%                 y_grid = [y_grid; i];
+%                 x_grid = [x_grid; j];
 %                 z_grid = [z_grid; k];
 %             end
 %         end
 %     end
 % end
 
+%get center of mass
+x_center = mean(x_grid);
+y_center = mean(y_grid);
+z_center = mean(z_grid);
+
 %draw
 scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
 figure,
 scatter3(x_grid,y_grid,z_grid,5,[0 0 1],'.'); view([60,-60,60]);
+hold on
+scatter3(x_center,y_center,z_center,5,[0 0 100],'r*'); view([60,-60,60]);
 
