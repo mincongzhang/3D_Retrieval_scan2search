@@ -56,10 +56,10 @@ x_center = mean(x_grid);
 y_center = mean(y_grid);
 z_center = mean(z_grid);
 
-%move center of mass to (R,R,R)
-x_grid = x_grid + (R - x_center);
-y_grid = y_grid + (R - y_center);
-z_grid = z_grid + (R - z_center);
+%move center of mass to (0,0,0)
+x_grid = x_grid - x_center;
+y_grid = y_grid - y_center;
+z_grid = z_grid - z_center;
 
 %verify
 % mean(x_grid)
@@ -67,24 +67,16 @@ z_grid = z_grid + (R - z_center);
 % mean(z_grid)
 
 %scale and make the average distance to CoM (center of mass) is R/2;
-dist = sqrt((x_grid-R).^2 + (y_grid-R).^2 + (z_grid-R).^2);
+dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
 mean_dist = mean(dist);
 scale_ratio = (R/2)/mean_dist;
-x_grid = x_grid - R; %move to origin
 x_grid = x_grid * scale_ratio;
-x_grid = x_grid + R; %move back
-
-y_grid = y_grid - R; %move to origin
 y_grid = y_grid * scale_ratio;
-y_grid = y_grid + R; %move back
-
-z_grid = z_grid - R; %move to origin
 z_grid = z_grid * scale_ratio;
-z_grid = z_grid + R; %move back
 
 %verify
-% dist = sqrt((x_grid-R).^2 + (y_grid-R).^2 + (z_grid-R).^2);
-% mean_dist = mean(dist)
+dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
+mean_dist = mean(dist)
 
 %draw
 scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
