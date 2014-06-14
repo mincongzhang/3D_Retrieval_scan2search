@@ -66,32 +66,14 @@ z_grid = z_grid + (R - z_center);
 % mean(y_grid)
 % mean(z_grid)
 
-%scale and make the average distance to CoM (center of mass) is R/2;
-dist = sqrt((x_grid-R).^2 + (y_grid-R).^2 + (z_grid-R).^2);
-mean_dist = mean(dist);
-scale_ratio = (R/2)/mean_dist;
-x_grid = x_grid - R; %move to origin
-x_grid = x_grid * scale_ratio;
-x_grid = x_grid + R; %move back
-
-y_grid = y_grid - R; %move to origin
-y_grid = y_grid * scale_ratio;
-y_grid = y_grid + R; %move back
-
-z_grid = z_grid - R; %move to origin
-z_grid = z_grid * scale_ratio;
-z_grid = z_grid + R; %move back
-
-%verify
-% dist = sqrt((x_grid-R).^2 + (y_grid-R).^2 + (z_grid-R).^2);
-% mean_dist = mean(dist)
+%scale and make the average distance to CoM ()
 
 %draw
-scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
+% scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
 figure,
 scatter3(x_grid,y_grid,z_grid,5,[0 0 1],'.'); view([60,-60,60]);
-hold on
-scatter3(x_center,y_center,z_center,5,[0 0 100],'r*'); view([60,-60,60]);
+% hold on
+% scatter3(x_center,y_center,z_center,5,[0 0 100],'r*'); view([60,-60,60]);
 
 %get SH
 % max radius is ceil(R*sqrt(2)) = 46; so we set m and r = 46
