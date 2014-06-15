@@ -1,4 +1,7 @@
 % This script is to get Spherical Harmonics Descriptors
+
+%%
+%PRE-PROCESSING
 clc
 clear
 close all
@@ -51,12 +54,12 @@ temp=reshape(grid,prod(size(grid)),1);
 %     end
 % end
 
-%get center of mass
+%get CoM (center of mass)
 x_center = mean(x_grid);
 y_center = mean(y_grid);
 z_center = mean(z_grid);
 
-%move center of mass to (0,0,0)
+%move CoM to (0,0,0)
 x_grid = x_grid - x_center;
 y_grid = y_grid - y_center;
 z_grid = z_grid - z_center;
@@ -66,7 +69,7 @@ z_grid = z_grid - z_center;
 % mean(y_grid)
 % mean(z_grid)
 
-%scale and make the average distance to CoM (center of mass) is R/2;
+%scale and make the average distance to CoM is R/2;
 dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
 mean_dist = mean(dist);
 scale_ratio = (R/2)/mean_dist;
@@ -75,18 +78,27 @@ y_grid = y_grid * scale_ratio;
 z_grid = z_grid * scale_ratio;
 
 %verify
-dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
-mean_dist = mean(dist)
+% dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
+% mean_dist = mean(dist)
 
 %draw
+figure,
 scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
+set(gca, 'XLim', [-100 100]);
+set(gca, 'YLim', [-100 100]);
+set(gca, 'ZLim', [-100 100]);
 figure,
 scatter3(x_grid,y_grid,z_grid,5,[0 0 1],'.'); view([60,-60,60]);
-hold on
-scatter3(x_center,y_center,z_center,5,[0 0 100],'r*'); view([60,-60,60]);
+set(gca, 'XLim', [-100 100]);
+set(gca, 'YLim', [-100 100]);
+set(gca, 'ZLim', [-100 100]);
 
-%get SH
+%%
+%SORT ACCORDING TO DISTANCE (MIN to MAX)
+
+%%
+%GET SPHERICAL HARMONICS
 % max radius is ceil(R*sqrt(2)) = 46; so we set m and r = 46
 m = 46;
 r = 46;
-
+SH = zeros(r,m);
