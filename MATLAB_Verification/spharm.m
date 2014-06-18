@@ -1,6 +1,6 @@
-function Ymn = spharm(L,M,THETA,PHI);
+function Ymn = spharm(L,M,THETA,PHI)
 if nargin==0
-  L=1;   % DEGREE
+  L=2;   % DEGREE
   M=1;   % ORDER
   THETA = pi/4;
   PHI = pi/4;
@@ -14,7 +14,7 @@ if L<M, error('The ORDER (M) must be less than or eqaul to the DEGREE(L).'); end
 Lmn=legendre(L,cos(PHI));
 
 if L~=0
-  Lmn=squeeze(Lmn(M+1,:,:));
+  Lmn=squeeze(Lmn(abs(M)+1,:,:));
 end
 
 a1=((2*L+1)/(4*pi));

@@ -21,24 +21,42 @@ output = output';
 
 % size(output) = (9690,4)
 radii = output(:,1);
-x1 = output(:,2);
-y1 = output(:,3);
-z1 = output(:,4);
+x     = output(:,2);
+y     = output(:,3);
+z     = output(:,4);
+phi   = atan(y./x);
+theta = acos(z./radii);
 
 %%
 %GET SPHERICAL HARMONICS
-% max radius is ceil(R*sqrt(2)) = 46; so we set m and r = 46
-max_m = 46;
-max_r = 46;
-SH = zeros(max_r,max_m);
+max_l = 32;
+max_r = 32;
+F_r = zeros(max_r,1);
 
-count = 1;
-for iter = 1:max_r
-    if(radii(count) < iter)
-        count = count+1;
+idx_n = 1;
+for idx_r = 1:max_r
+    while(radii(idx_n) < idx_r)
+        % calculate SH
+        F_lr = zeros(max_l,1);
+        for idx_l = 1:max_l
+            Y_ml = zeros(2*idx_l+1,1);
+            ml_count = 1;
+            for idx_m = -idx_l:idx_l
+                Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
+                ml_count = ml_count+1;
+            end
+            F_lr(idx_l,1) = sum(Y_ml);
+        end
+            F_r(idx_r,1) = sum(F_lr);
+        
+        if(idx_n>=length(radii))
+            break;
+        else
+            idx_n = idx_n+1
+        end
     end
 end
-count
+
 
 end
 
