@@ -14,7 +14,7 @@ if L<M, error('The ORDER (M) must be less than or eqaul to the DEGREE(L).'); end
 Lmn=legendre(L,cos(PHI));
 
 if L~=0
-  Lmn=squeeze(Lmn(abs(M)+1,:,:));
+  Lmn=squeeze(Lmn(M+1,:,:));
 end
 
 a1=((2*L+1)/(4*pi));

@@ -42,7 +42,12 @@ for idx_r = 1:max_r
             Y_ml = zeros(2*idx_l+1,1);
             ml_count = 1;
             for idx_m = -idx_l:idx_l
-                Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
+                if(idx_m>=0)
+                    Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
+                else
+                    Y_temp = spharm(idx_l,-idx_m,theta(idx_n),phi(idx_n));
+                    Y_ml(ml_count,1) = (-1)^(-idx_m) * conj(Y_temp);
+                end
                 ml_count = ml_count+1;
             end
             F_lr(idx_l,1) = sum(Y_ml);
