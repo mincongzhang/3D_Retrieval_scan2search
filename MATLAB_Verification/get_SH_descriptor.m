@@ -1,5 +1,5 @@
 % This script is to get Spherical Harmonics Descriptors
-function run()
+function F_r = SH()
 
 close all
 fv = stlread('femur.stl');
@@ -38,9 +38,12 @@ for idx_r = 1:max_r
     while(radii(idx_n) < idx_r)
         % calculate SH
         F_lr = zeros(max_l,1);
+        
+        %for each F_r
         for idx_l = 1:max_l
             Y_ml = zeros(2*idx_l+1,1);
             ml_count = 1;
+            %for each F_lr
             for idx_m = -idx_l:idx_l
                 if(idx_m>=0)
                     Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
@@ -52,7 +55,7 @@ for idx_r = 1:max_r
             end
             F_lr(idx_l,1) = sum(Y_ml);
         end
-            F_r(idx_r,1) = sum(F_lr);
+        F_r(idx_r,1) = sum(F_lr);
         
         if(idx_n>=length(radii))
             break;
@@ -61,7 +64,6 @@ for idx_r = 1:max_r
         end
     end
 end
-
 
 end
 
