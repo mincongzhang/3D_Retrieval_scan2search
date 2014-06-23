@@ -3,6 +3,9 @@
 
 Spherical harmonics descriptor
 
+Function: double gsl_sf_legendre_Plm (int l, int m, double x)
+Function: int gsl_sf_legendre_Plm_e (int l, int m, double x, gsl_sf_result * result)
+
 The Legendre polynomial P(n,x) can be defined by:
 
     P(0,x) = 1
