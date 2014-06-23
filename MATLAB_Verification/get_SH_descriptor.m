@@ -1,13 +1,27 @@
 % This script is to get Spherical Harmonics Descriptors in a regular way
-function F_r = SH()
+function F_r = get_SH_descriptor(filename,input_angle)
 
 close all
-fv = stlread('femur.stl');
+fv = stlread(filename);
 vertices = fv.vertices;
 
-x1 = vertices(:,1);
-y1 = vertices(:,2);
-z1 = vertices(:,3);
+x1 = vertices(1:500:end,1);
+y1 = vertices(1:500:end,2);
+z1 = vertices(1:500:end,3);
+
+%TEST
+%rect
+% x1 =[1 1 -1 -1 0  0 -1 1]';
+% y1 =[1 -1 1 -1 1 -1  0 0]';
+% z1 =[0 0 0 0 0 0 0 0]';
+
+% rotated
+% angle = pi/3;
+angle = input_angle;
+R = [cos(angle) -sin(angle);sin(angle) cos(angle)];
+result = R*[x1';y1'];
+x1 = result(1,:)';
+y1 = result(2,:)';
 
 %%
 %PRE-PROCESSING
@@ -69,6 +83,8 @@ for idx_r = 1:max_r
         end
     end
 end
+
+F_r = abs(F_r);
 
 end
 
