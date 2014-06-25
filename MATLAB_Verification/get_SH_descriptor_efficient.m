@@ -80,17 +80,12 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     y1 = y1-min(y1);
     z1 = z1-min(z1);
 
-    %normalize to 1
+    %normalize to 1 and rasterize to 2Rx2Rx2R voxel grid
     max_value = max([max(x1),max(y1),max(z1)]);
-    x1 = x1./max_value;
-    y1 = y1./max_value;
-    z1 = z1./max_value;
-
-    %rasterize to 2Rx2Rx2R voxel grid
     R = 32;
-    x1 = round(x1*2*R);
-    y1 = round(y1*2*R);
-    z1 = round(z1*2*R);
+    x1 = round(x1./max_value*2*R);
+    y1 = round(y1./max_value*2*R);
+    z1 = round(z1./max_value*2*R);
 
     grid = zeros(2*R,2*R,2*R); 
     n_points = length(x1);
