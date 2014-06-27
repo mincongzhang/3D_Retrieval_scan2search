@@ -22,7 +22,7 @@ double noise_standard_deviation = 0.01;
 //retrieval variables
 vector<double> sketchpoint_x;
 vector<double> sketchpoint_y;
-vector<double> grid_id_x,grid_id_y,grid_id_z;
+vector<int> grid_id_x,grid_id_y,grid_id_z;
 vector<MyMesh> projectedQueue;
 
 //shading parameters
@@ -406,14 +406,11 @@ void COpenGLControl::oglDrawScene(void)
 			//draw rasterized grid
 			else
 			{
-					//TEST
-					int grid_num = grid_id_x.size();
-					//END TEST
 					glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
 					glPointSize(2.0);
 					glBegin(GL_POINTS);
 					for(unsigned int grid_iter = 0 ;grid_iter<grid_id_x.size();grid_iter++){
-						glVertex3f(float(grid_id_x.at(grid_iter))/63,float(grid_id_y.at(grid_iter))/63,float(grid_id_z.at(grid_iter))/63);
+						glVertex3f(float(grid_id_x.at(grid_iter))/63.0,float(grid_id_y.at(grid_iter))/63.0,float(grid_id_z.at(grid_iter))/63.0);
 					}
 					glEnd();
 			}//end draw grid
