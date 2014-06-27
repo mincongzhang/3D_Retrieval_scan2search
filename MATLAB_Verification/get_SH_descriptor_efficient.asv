@@ -1,27 +1,13 @@
 % This script is to get Spherical Harmonics Descriptors in a regular way
-function F_r = get_SH_descriptor(filename,input_angle)
+function F_r = SH()
 
 close all
-fv = stlread(filename);
+fv = stlread('femur.stl');
 vertices = fv.vertices;
 
-x1 = vertices(1:end,1);
-y1 = vertices(1:end,2);
-z1 = vertices(1:end,3);
-
-%TEST
-%rect
-% x1 =[1 1 -1 -1 0  0 -1 1]';
-% y1 =[1 -1 1 -1 1 -1  0 0]';
-% z1 =[0 0 0 0 0 0 0 0]';
-
-% rotated
-% angle = pi/3;
-angle = input_angle;
-R = [cos(angle) -sin(angle);sin(angle) cos(angle)];
-result = R*[x1';y1'];
-x1 = result(1,:)';
-y1 = result(2,:)';
+x1 = vertices(:,1);
+y1 = vertices(:,2);
+z1 = vertices(:,3);
 
 %%
 %PRE-PROCESSING
@@ -79,12 +65,10 @@ for idx_r = 1:max_r
         if(idx_n>=length(radii))
             break;
         else
-            idx_n = idx_n+1;
+            idx_n = idx_n+1
         end
     end
 end
-
-F_r = abs(F_r);
 
 end
 
@@ -96,42 +80,72 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     y1 = y1-min(y1);
     z1 = z1-min(z1);
 
-    %normalize to 1
+    %normalize to 1 and rasterize to 2Rx2Rx2R voxel grid
     max_value = max([max(x1),max(y1),max(z1)]);
-    x1 = x1./max_value;
-    y1 = y1./max_value;
-    z1 = z1./max_value;
-
-    %rasterize to 2Rx2Rx2R voxel grid
     R = 32;
-    x1 = round(x1*2*R);
-    y1 = round(y1*2*R);
-    z1 = round(z1*2*R);
-
-    grid = zeros(2*R,2*R,2*R); 
-    n_points = length(x1);
+    x1 = round(x1./max_value*2*R);
+    y1 = round(y1./max_value*2*R);
+    z1 = round(z1./max_value*2*R);
+    
+    x_grid_grid = zeros(2*R);
+    y_grid_grid = zeros(2*R);
+    z_grid_grid = zeros(2*R);
+    x_grid = [];
+    y_grid = [];
+    z_grid = [];
+    n_points = length(x1)
     for j = 1:n_points
-        grid(y1(j)+1,x1(j)+1,z1(j)+1) = 1;
-    end
-
-    %get coordinates of grid voxel
-    temp=reshape(grid,prod(size(grid)),1);
-    [y_grid,x_grid,z_grid] = ind2sub(size(grid),find(temp==1));
-    % x_grid = [];
-    % y_grid = [];
-    % z_grid = [];
-    % for i = 1:2*R
-    %     for j = 1:2*R
-    %         for k = 1:2*R
-    %             if(grid(i,j,k)==1)
-    %                 y_grid = [y_grid; i];
-    %                 x_grid = [x_grid; j];
-    %                 z_grid = [z_grid; k];
-    %             end
-    %         end
-    %     end
-    % end
+        if(x_grid_grid(x1(j)+1)*y_grid_grid(y1(j)+1)*z_grid_grid(z1(j)+1)==0)
+            %有可能会重复啊！
+            %(1,0,0);(0,1,0);(0,0,1);
+            %register结果是
+            x_grid_grid(x1(j)+1)=1;
+            y_grid_grid(y1(j)+1)=1;
+            z_grid_grid(z1(j)+1)=1;
+            x_grid = [x_grid x1(j)+1];
+            y_grid = [y_grid y1(j)+1];
+            z_grid = [z_grid z1(j)+1];
+        end
+    end   
+    x_grid = x_grid';
+    y_grid = y_grid';
+    z_grid = z_grid';
     size(x_grid)
+    %A MUCH EFFICIENT METHOD COMES UP IN C++!
+    %     	/*normalize and rasterize*/
+    % 	int x_grid [2*RADIUS] = {};
+    % 	int y_grid [2*RADIUS] = {};
+    % 	int z_grid [2*RADIUS] = {};
+    % 	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+    % 	{
+    % 		//move to positive, normalize to 1 
+    % 		double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
+    % 		double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
+    % 		double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
+    % 
+    % 		*(mesh.point(v_it).data()+0) = x_normalize;
+    % 		*(mesh.point(v_it).data()+1) = y_normalize;
+    % 		*(mesh.point(v_it).data()+2) = z_normalize;
+    % 
+    % 		//rasterize to 2Rx2Rx2R voxel grid
+    % 		int x_rasterize = static_cast<int>(round(x_normalize*(2*RADIUS-1)));
+    % 		int y_rasterize = static_cast<int>(round(y_normalize*(2*RADIUS-1)));
+    % 		int z_rasterize = static_cast<int>(round(z_normalize*(2*RADIUS-1)));
+    % 		
+    % 		//If this vertex hasn't been registered
+    % 		if(x_grid[x_rasterize]*y_grid[y_rasterize]*z_grid[z_rasterize]!=1)
+    % 		{
+    % 			//register
+    % 			x_grid[x_rasterize] = 1;
+    % 			y_grid[y_rasterize] = 1;
+    % 			z_grid[z_rasterize] = 1;
+    % 
+    % 			//push back
+    % 			grid_id_x.push_back(double(x_rasterize));
+    % 			grid_id_y.push_back(double(y_rasterize));
+    % 			grid_id_z.push_back(double(z_rasterize));
+    % 		}
+    % 	}
 
     %get CoM (center of mass)
     x_center = mean(x_grid);

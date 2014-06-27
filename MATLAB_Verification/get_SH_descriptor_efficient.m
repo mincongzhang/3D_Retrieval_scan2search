@@ -87,16 +87,30 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     y1 = round(y1./max_value*2*R);
     z1 = round(z1./max_value*2*R);
     
-    grid = zeros(2*R,2*R,2*R); 
-    n_points = length(x1);
+    x_grid_grid = zeros(2*R);
+    y_grid_grid = zeros(2*R);
+    z_grid_grid = zeros(2*R);
+    x_grid = [];
+    y_grid = [];
+    z_grid = [];
+    n_points = length(x1)
     for j = 1:n_points
-        grid(y1(j)+1,x1(j)+1,z1(j)+1) = 1;
-    end
-
-    %get coordinates of grid voxel
-    temp=reshape(grid,prod(size(grid)),1);
-    [y_grid,x_grid,z_grid] = ind2sub(size(grid),find(temp==1));
-
+        if(x_grid_grid(x1(j)+1)*y_grid_grid(y1(j)+1)*z_grid_grid(z1(j)+1)==0)
+            %有可能会重复啊！
+            %(1,0,0);(0,1,0);(0,0,1);
+            %register结果是x,y,z在1处有值，最后得到的点是(1,1,1)
+            x_grid_grid(x1(j)+1)=1;
+            y_grid_grid(y1(j)+1)=1;
+            z_grid_grid(z1(j)+1)=1;
+            x_grid = [x_grid x1(j)+1];
+            y_grid = [y_grid y1(j)+1];
+            z_grid = [z_grid z1(j)+1];
+        end
+    end   
+    x_grid = x_grid';
+    y_grid = y_grid';
+    z_grid = z_grid';
+    size(x_grid)
     %A MUCH EFFICIENT METHOD COMES UP IN C++!
     %     	/*normalize and rasterize*/
     % 	int x_grid [2*RADIUS] = {};
