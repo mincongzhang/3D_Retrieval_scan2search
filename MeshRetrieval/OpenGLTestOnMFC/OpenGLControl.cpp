@@ -20,9 +20,7 @@ bool NORMALIZE_CONTROL = false;
 double noise_standard_deviation = 0.01; 
 
 //retrieval variables
-vector<double> sketchpoint_x;
-vector<double> sketchpoint_y;
-vector<int> grid_id_x,grid_id_y,grid_id_z;
+vector<float> grid_id_x,grid_id_y,grid_id_z,dist_vector;
 vector<MyMesh> projectedQueue;
 
 //shading parameters
@@ -331,7 +329,7 @@ void COpenGLControl::oglDrawScene(void)
 	//normalize the current mesh
 	if(NORMALIZE_CONTROL && meshsize>=1)
 	{
-		NormalizeMesh(meshQueue.at(meshsize-1),grid_id_x,grid_id_y,grid_id_z);
+		NormalizeMesh(meshQueue.at(meshsize-1),grid_id_x,grid_id_y,grid_id_z,dist_vector);
 	}
 
 	/*Draw Meshes*/
@@ -340,19 +338,19 @@ void COpenGLControl::oglDrawScene(void)
 			//x axis
 			glColor3f(GLfloat(1.0), GLfloat(0.0), GLfloat(0.0));
 			glBegin(GL_LINES);
-			glVertex3f(0.0,0.0,0.0);
+			glVertex3f(-1.0,0.0,0.0);
 			glVertex3f(1.0,0.0,0.0);
 			glEnd();
 			//y axis
 			glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(0.0));
 			glBegin(GL_LINES);
-			glVertex3f(0.0,0.0,0.0);
+			glVertex3f(0.0,-1.0,0.0);
 			glVertex3f(0.0,1.0,0.0);
 			glEnd();
 			//z axis
 			glColor3f(GLfloat(0.0), GLfloat(0.0), GLfloat(1.0));
 			glBegin(GL_LINES);
-			glVertex3f(0.0,0.0,0.0);
+			glVertex3f(0.0,0.0,-1.0);
 			glVertex3f(0.0,0.0,1.0);
 			glEnd();
 
@@ -410,7 +408,7 @@ void COpenGLControl::oglDrawScene(void)
 					glPointSize(2.0);
 					glBegin(GL_POINTS);
 					for(unsigned int grid_iter = 0 ;grid_iter<grid_id_x.size();grid_iter++){
-						glVertex3f(float(grid_id_x.at(grid_iter))/63.0,float(grid_id_y.at(grid_iter))/63.0,float(grid_id_z.at(grid_iter))/63.0);
+						glVertex3f(float(grid_id_x.at(grid_iter))/32.0,float(grid_id_y.at(grid_iter))/32.0,float(grid_id_z.at(grid_iter))/32.0);
 					}
 					glEnd();
 			}//end draw grid

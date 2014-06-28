@@ -83,9 +83,9 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     %normalize to 1 and rasterize to 2Rx2Rx2R voxel grid
     max_value = max([max(x1),max(y1),max(z1)]);
     R = 32;
-    x1 = round(x1./max_value*2*R);
-    y1 = round(y1./max_value*2*R);
-    z1 = round(z1./max_value*2*R);
+    x1 = round(x1./max_value*(2*R-1));
+    y1 = round(y1./max_value*(2*R-1));
+    z1 = round(z1./max_value*(2*R-1));
     
     x_grid_grid = zeros(2*R);
     y_grid_grid = zeros(2*R);
@@ -93,64 +93,26 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     x_grid = [];
     y_grid = [];
     z_grid = [];
+    grid = zeros(2*R,2*R,2*R);
     n_points = length(x1)
     for j = 1:n_points
-        if(x_grid_grid(x1(j)+1)*y_grid_grid(y1(j)+1)*z_grid_grid(z1(j)+1)==0)
-            %有可能会重复啊！
-            %(1,0,0);(0,1,0);(0,0,1);
-            %register结果是x,y,z在1处有值，最后得到的点是(1,1,1)
-            x_grid_grid(x1(j)+1)=1;
-            y_grid_grid(y1(j)+1)=1;
-            z_grid_grid(z1(j)+1)=1;
-            x_grid = [x_grid x1(j)+1];
-            y_grid = [y_grid y1(j)+1];
-            z_grid = [z_grid z1(j)+1];
+        if(grid(x1(j)+1,y1(j)+1,z1(j)+1)==0)
+            %register
+            grid(x1(j)+1, y1(j)+1, z1(j)+1)=1;
+            x_grid = [x_grid x1(j)];
+            y_grid = [y_grid y1(j)];
+            z_grid = [z_grid z1(j)];
         end
     end   
     x_grid = x_grid';
     y_grid = y_grid';
     z_grid = z_grid';
-    size(x_grid)
-    %A MUCH EFFICIENT METHOD COMES UP IN C++!
-    %     	/*normalize and rasterize*/
-    % 	int x_grid [2*RADIUS] = {};
-    % 	int y_grid [2*RADIUS] = {};
-    % 	int z_grid [2*RADIUS] = {};
-    % 	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
-    % 	{
-    % 		//move to positive, normalize to 1 
-    % 		double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
-    % 		double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
-    % 		double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
-    % 
-    % 		*(mesh.point(v_it).data()+0) = x_normalize;
-    % 		*(mesh.point(v_it).data()+1) = y_normalize;
-    % 		*(mesh.point(v_it).data()+2) = z_normalize;
-    % 
-    % 		//rasterize to 2Rx2Rx2R voxel grid
-    % 		int x_rasterize = static_cast<int>(round(x_normalize*(2*RADIUS-1)));
-    % 		int y_rasterize = static_cast<int>(round(y_normalize*(2*RADIUS-1)));
-    % 		int z_rasterize = static_cast<int>(round(z_normalize*(2*RADIUS-1)));
-    % 		
-    % 		//If this vertex hasn't been registered
-    % 		if(x_grid[x_rasterize]*y_grid[y_rasterize]*z_grid[z_rasterize]!=1)
-    % 		{
-    % 			//register
-    % 			x_grid[x_rasterize] = 1;
-    % 			y_grid[y_rasterize] = 1;
-    % 			z_grid[z_rasterize] = 1;
-    % 
-    % 			//push back
-    % 			grid_id_x.push_back(double(x_rasterize));
-    % 			grid_id_y.push_back(double(y_rasterize));
-    % 			grid_id_z.push_back(double(z_rasterize));
-    % 		}
-    % 	}
+    x_grid_size = size(x_grid)
 
     %get CoM (center of mass)
-    x_center = mean(x_grid);
-    y_center = mean(y_grid);
-    z_center = mean(z_grid);
+    x_center = mean(x_grid)
+    y_center = mean(y_grid)
+    z_center = mean(z_grid)
 
     %move CoM to (0,0,0)
     x_grid = x_grid - x_center;
@@ -164,8 +126,8 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
 
     %scale and make the average distance to CoM is R/2;
     dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
-    mean_dist = mean(dist);
-    scale_ratio = (R/2)/mean_dist;
+    mean_dist = mean(dist)
+    scale_ratio = (R/2)/mean_dist
     x_grid = x_grid * scale_ratio;
     y_grid = y_grid * scale_ratio;
     z_grid = z_grid * scale_ratio;
@@ -173,7 +135,7 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     
     final_dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
     %verify
-    % mean_dist = mean(dist)
+    final_mean_dist = mean(final_dist)
     % 
     % scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
     % set(gca, 'XLim', [-100 100]);

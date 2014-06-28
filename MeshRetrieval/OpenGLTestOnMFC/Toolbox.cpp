@@ -82,7 +82,7 @@ double round(double number)
 }
 
 /*find the max distance of the model*/
-void FindMaxMin(MyMesh &mesh, double &x_max, double &y_max, double &z_max, double &x_min, double &y_min, double &z_min)
+void FindMaxMin(MyMesh &mesh, float &x_max, float &y_max, float &z_max, float &x_min, float &y_min, float &z_min)
 {
 	//initial 
 	MyMesh::VertexIter v_it1 = mesh.vertices_begin();
