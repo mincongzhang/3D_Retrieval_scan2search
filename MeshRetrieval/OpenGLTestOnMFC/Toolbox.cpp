@@ -1,8 +1,10 @@
-
 #include "stdafx.h"
 #include "OpenGLControl.h"
 #include ".\openglcontrol.h"
 #include "MeshOperation.h"
+
+#include <math.h>
+#include <random>
 
 /*load histogram data*/
 void loadHistogram(string filname,double *histogram)
@@ -42,15 +44,15 @@ double similarity(double *histogram_test,double *histogram_sketch)
 	return similarity;
 }
 
-//Swap ith and jth elements in arrat[]
-void swap(double array[], int i, int j)
+//swap
+void swap(double &x,double &y)
 {
-	double temp = array[i];
-	array[i] = array[j];
-	array[j] = temp;
+	double temp = x;
+	x = y;
+	y = temp;
 }
 
-//Quick Sort of arry and get the index of original order of array
+//Quick Sort of array and get the index of original order of array
 void qsort_getid(double array[],double id_array[], int left_id, int right_id)
 {
 	if(left_id >= right_id)
@@ -60,15 +62,64 @@ void qsort_getid(double array[],double id_array[], int left_id, int right_id)
 	{
 		if(array[left_id]>array[i])
 		{
-			flag = flag+1;
-			swap(array,flag, i);
-			swap(id_array,flag, i);
+			flag++;
+			swap(array[flag],array[i]);
+			swap(id_array[flag],id_array[i]);
 		}
 	}
-	swap(array,flag,left_id);
-	swap(id_array,flag,left_id);
+	//swap(array,flag,left_id);
+	swap(array[flag],array[left_id]);
+	swap(id_array[flag],id_array[left_id]);
 	qsort_getid(array,id_array,left_id,flag-1);
 	qsort_getid(array,id_array,flag+1,right_id);
+}
+
+//according to distance vector sort phi and theta vectors
+bool qsortPolarCoordinate(int left_id, int right_id,
+						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector)
+{
+	if(left_id >= right_id)	return true;
+
+	int flag = left_id;
+	for(int i = left_id+1; i<=right_id; i++)
+	{
+		  if(dist_vector.at(left_id)>dist_vector.at(i))
+		{
+			flag++;
+			swap(dist_vector.at(flag),dist_vector.at(i));
+			swap(phi_vector.at(flag),phi_vector.at(i));
+			swap(theta_vector.at(flag),theta_vector.at(i));
+		}
+	}
+
+	swap(dist_vector.at(flag),dist_vector.at(left_id));
+	swap(phi_vector.at(flag),phi_vector.at(left_id));
+	swap(theta_vector.at(flag),theta_vector.at(left_id));
+
+	qsortPolarCoordinate(left_id,flag-1,dist_vector,phi_vector,theta_vector);
+	qsortPolarCoordinate(flag+1,right_id,dist_vector,phi_vector,theta_vector);
+}
+
+//get polar coordinate 
+bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector,
+						 vector<double> &phi_vector, vector<double> &theta_vector)
+{
+	for (unsigned int i = 0; i<grid_id_x.size();i++)
+	{
+		//phi   = atan(y/x);
+		//theta = acos(z/radious);
+		//The arc tangent of 1.000000 is 45.000000 degrees.
+		//The arc cosine of 0.500000 is 60.000000 degrees
+		double phi = atan(double(grid_id_y.at(i)/grid_id_x.at(i)));
+		double theta = acos(double(grid_id_z.at(i)/dist_vector.at(i)));
+		phi_vector.push_back(phi);
+		theta_vector.push_back(theta);
+	}
+
+	if(phi_vector.size()==theta_vector.size() && phi_vector.size()>0)	 
+		return true;
+	else     															 
+		return false;
 }
 
 /*Round*/
@@ -82,7 +133,7 @@ double round(double number)
 }
 
 /*find the max distance of the model*/
-void FindMaxMin(MyMesh &mesh, float &x_max, float &y_max, float &z_max, float &x_min, float &y_min, float &z_min)
+void FindMaxMin(MyMesh &mesh, double &x_max, double &y_max, double &z_max, double &x_min, double &y_min, double &z_min)
 {
 	//initial 
 	MyMesh::VertexIter v_it1 = mesh.vertices_begin();

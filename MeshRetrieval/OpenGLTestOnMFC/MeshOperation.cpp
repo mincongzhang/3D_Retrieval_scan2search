@@ -33,31 +33,27 @@ void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 			}
 		}
 	}
-	//TEST	SH
-	double SH;
-	SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
-	//TEST END
 	NOISE_CONTROL = false;
 }
 
 /*normalize the model and rasterize to 2R*2R*2R voxel grid*/
-void NormalizeMesh(MyMesh &mesh,vector<float> &grid_id_x,vector<float> &grid_id_y,vector<float> &grid_id_z,
-				   vector<float> &dist_vector)
+void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,
+				   vector<double> &dist_vector)
 {
-	float x_max,y_max,z_max,x_min,y_min,z_min;
+	double x_max,y_max,z_max,x_min,y_min,z_min;
 	FindMaxMin(mesh,x_max,y_max,z_max,x_min,y_min,z_min);
 
-	float distance_x = x_max - x_min;
-	float distance_y = y_max - y_min;
-	float distance_z = z_max - z_min;
-	float max_distance = distance_x;
+	double distance_x = x_max - x_min;
+	double distance_y = y_max - y_min;
+	double distance_z = z_max - z_min;
+	double max_distance = distance_x;
 
 	if (distance_y > max_distance) max_distance = distance_y;
 	if (distance_z > max_distance) max_distance = distance_z;
 
 	/*normalize and rasterize*/
 	//initial centroid
-	float centroid_x = 0.0,centroid_y = 0.0,centroid_z = 0.0;
+	double centroid_x = 0.0,centroid_y = 0.0,centroid_z = 0.0;
 
 	//create grid 
 	bool *grid;
@@ -70,9 +66,9 @@ void NormalizeMesh(MyMesh &mesh,vector<float> &grid_id_x,vector<float> &grid_id_
 		for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
 		{
 			//move to positive, normalize to 1 
-			float x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
-			float y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
-			float z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
+			double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
+			double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
+			double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
 
 			*(mesh.point(v_it).data()+0) = x_normalize;
 			*(mesh.point(v_it).data()+1) = y_normalize;
@@ -90,23 +86,23 @@ void NormalizeMesh(MyMesh &mesh,vector<float> &grid_id_x,vector<float> &grid_id_
 				grid[x_rasterize*2*RADIUS*2*RADIUS + y_rasterize*2*RADIUS + z_rasterize]=true;
 
 				//push back
-				grid_id_x.push_back(float(x_rasterize));
-				grid_id_y.push_back(float(y_rasterize));
-				grid_id_z.push_back(float(z_rasterize));
+				grid_id_x.push_back(double(x_rasterize));
+				grid_id_y.push_back(double(y_rasterize));
+				grid_id_z.push_back(double(z_rasterize));
 
 				//get centroid
-				centroid_x += float(x_rasterize);
-				centroid_y += float(y_rasterize);
-				centroid_z += float(z_rasterize);
+				centroid_x += double(x_rasterize);
+				centroid_y += double(y_rasterize);
+				centroid_z += double(z_rasterize);
 			}
 		}
 	}//end if(grid!=NULL)
 	//delete grid
 	delete [] grid;
 	
-	centroid_x/=float(grid_id_x.size());
-	centroid_y/=float(grid_id_y.size());
-	centroid_z/=float(grid_id_z.size());
+	centroid_x/=double(grid_id_x.size());
+	centroid_y/=double(grid_id_y.size());
+	centroid_z/=double(grid_id_z.size());
 
 	//move centroid to origin and get distance
 	float mean_dist = 0.0;
@@ -118,14 +114,14 @@ void NormalizeMesh(MyMesh &mesh,vector<float> &grid_id_x,vector<float> &grid_id_
 		grid_id_z.at(grid_iter) -= centroid_z;
 
 		//get distance between vertex and origin
-		float current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
+		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
 		mean_dist += current_dist;
 		dist_vector.push_back(current_dist);
 	}
-	mean_dist/=float(grid_id_x.size());
+	mean_dist/=double(grid_id_x.size());
 
 	//scale and make the average distance to center of mass is R/2
-	float scale_ratio = (float(RADIUS)/2.0)/mean_dist;
+	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
 	for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
 	{
 		grid_id_x.at(grid_iter) *= scale_ratio;
@@ -133,18 +129,38 @@ void NormalizeMesh(MyMesh &mesh,vector<float> &grid_id_x,vector<float> &grid_id_
 		grid_id_z.at(grid_iter) *= scale_ratio;
 	}
 
-	//TEST
-	//float mean_dist_test = 0.0;
-	//for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
-	//{
-	//	float dist_temp = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
-	//	mean_dist_test += dist_temp;
-	//}
-	//mean_dist_test /= float(grid_id_x.size());
-	//int test_done = 1;
-	//TEST END
-
 	NORMALIZE_CONTROL = FALSE;
+}
+
+/*compute spherical harmonics*/
+void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector)
+{
+	vector<double> phi_vector,theta_vector;
+	bool get_polar,get_sorted;
+	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
+	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
+
+	//test sorting
+	//vector<double> vector1;
+	//vector<double> vector2;
+	//vector<double> vector3;
+	//for(int testid = 7;testid>0;testid--)
+	//{
+	//	vector1.push_back(double(testid));
+	//	vector2.push_back(double(testid));
+	//	vector3.push_back(double(testid));
+	//}
+	//bool testresult = qsortPolarCoordinate(0,(vector1.size()-1),vector1,vector2,vector3);
+	//int testend = 0;
+
+	if(get_polar&&get_sorted)
+	{
+		//TEST	SH
+		double SH;
+		SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
+		//TEST END
+	 }
+
 }
 
 void ChooseCandidate(double candidate_index_array[],int candidateIndx)

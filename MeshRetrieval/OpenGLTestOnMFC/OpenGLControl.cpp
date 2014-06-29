@@ -15,13 +15,13 @@ vector<MyMesh>  meshQueue;
 
 bool NOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = false;
+bool SPHARM_CONTROL = false;
 
 //add noise variable
 double noise_standard_deviation = 0.01; 
 
 //retrieval variables
-vector<float> grid_id_x,grid_id_y,grid_id_z,dist_vector;
-vector<MyMesh> projectedQueue;
+vector<double> grid_id_x,grid_id_y,grid_id_z,dist_vector;
 
 //shading parameters
 GLfloat mat_specular[]={1.0f, 0.0f, 1.0f, 1.0f};
@@ -327,9 +327,14 @@ void COpenGLControl::oglDrawScene(void)
 		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
 	}
 	//normalize the current mesh
-	if(NORMALIZE_CONTROL && meshsize>=1)
+	if(NORMALIZE_CONTROL && meshsize>=1 && grid_id_x.size()==0)
 	{
 		NormalizeMesh(meshQueue.at(meshsize-1),grid_id_x,grid_id_y,grid_id_z,dist_vector);
+	}
+	//compute spherical harmonics
+	if(SPHARM_CONTROL)
+	{
+		ComputeSpharm(grid_id_x,grid_id_y,grid_id_z,dist_vector);
 	}
 
 	/*Draw Meshes*/

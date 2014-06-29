@@ -67,12 +67,14 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(Load, &CMeshRetrievalMFCDlg::OnBnClickedLoad)
 	ON_BN_CLICKED(Noise, &CMeshRetrievalMFCDlg::OnBnClickedNoise)
 	ON_BN_CLICKED(Normalize, &CMeshRetrievalMFCDlg::OnBnClickedNormalize)
+	ON_BN_CLICKED(Spharm, &CMeshRetrievalMFCDlg::OnBnClickedSpharm)
 	ON_BN_CLICKED(CANDIDATE1, &CMeshRetrievalMFCDlg::OnBnClickedCandidate1)
 	ON_BN_CLICKED(CANDIDATE2, &CMeshRetrievalMFCDlg::OnBnClickedCandidate2)
 	ON_BN_CLICKED(CANDIDATE3, &CMeshRetrievalMFCDlg::OnBnClickedCandidate3)
 	ON_BN_CLICKED(CANDIDATE4, &CMeshRetrievalMFCDlg::OnBnClickedCandidate4)
 	ON_BN_CLICKED(CANDIDATE5, &CMeshRetrievalMFCDlg::OnBnClickedCandidate5)
 	ON_BN_CLICKED(CANDIDATE6, &CMeshRetrievalMFCDlg::OnBnClickedCandidate6)
+
 END_MESSAGE_MAP()
 
 
@@ -245,6 +247,11 @@ void CMeshRetrievalMFCDlg::OnBnClickedNoise()
 void CMeshRetrievalMFCDlg::OnBnClickedNormalize()
 {
 	NORMALIZE_CONTROL = true;
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedSpharm()
+{
+	SPHARM_CONTROL = true;
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate1()

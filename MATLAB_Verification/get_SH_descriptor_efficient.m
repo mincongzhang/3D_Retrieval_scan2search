@@ -26,6 +26,8 @@ y     = output(:,3);
 z     = output(:,4);
 phi   = atan(y./x);
 theta = acos(z./radii);
+phi(1)
+theta(1)
 
 %test SH for same theta and phi, with different radius
 % radii = [1:32]';
