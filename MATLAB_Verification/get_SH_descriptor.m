@@ -9,14 +9,7 @@ x1 = vertices(1:end,1);
 y1 = vertices(1:end,2);
 z1 = vertices(1:end,3);
 
-%TEST
-%rect
-% x1 =[1 1 -1 -1 0  0 -1 1]';
-% y1 =[1 -1 1 -1 1 -1  0 0]';
-% z1 =[0 0 0 0 0 0 0 0]';
-
 % rotated
-% angle = pi/3;
 angle = input_angle;
 R = [cos(angle) -sin(angle);sin(angle) cos(angle)];
 result = R*[x1';y1'];
@@ -96,47 +89,39 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     y1 = y1-min(y1);
     z1 = z1-min(z1);
 
-    %normalize to 1
+    %normalize to 1 and rasterize to 2Rx2Rx2R voxel grid
     max_value = max([max(x1),max(y1),max(z1)]);
-    x1 = x1./max_value;
-    y1 = y1./max_value;
-    z1 = z1./max_value;
-
-    %rasterize to 2Rx2Rx2R voxel grid
     R = 32;
-    x1 = round(x1*2*R);
-    y1 = round(y1*2*R);
-    z1 = round(z1*2*R);
-
-    grid = zeros(2*R,2*R,2*R); 
-    n_points = length(x1);
+    x1 = round(x1./max_value*(2*R-1));
+    y1 = round(y1./max_value*(2*R-1));
+    z1 = round(z1./max_value*(2*R-1));
+    
+    x_grid_grid = zeros(2*R);
+    y_grid_grid = zeros(2*R);
+    z_grid_grid = zeros(2*R);
+    x_grid = [];
+    y_grid = [];
+    z_grid = [];
+    grid = zeros(2*R,2*R,2*R);
+    n_points = length(x1)
     for j = 1:n_points
-        grid(y1(j)+1,x1(j)+1,z1(j)+1) = 1;
-    end
-
-    %get coordinates of grid voxel
-    temp=reshape(grid,prod(size(grid)),1);
-    [y_grid,x_grid,z_grid] = ind2sub(size(grid),find(temp==1));
-    % x_grid = [];
-    % y_grid = [];
-    % z_grid = [];
-    % for i = 1:2*R
-    %     for j = 1:2*R
-    %         for k = 1:2*R
-    %             if(grid(i,j,k)==1)
-    %                 y_grid = [y_grid; i];
-    %                 x_grid = [x_grid; j];
-    %                 z_grid = [z_grid; k];
-    %             end
-    %         end
-    %     end
-    % end
-    size(x_grid)
+        if(grid(x1(j)+1,y1(j)+1,z1(j)+1)==0)
+            %register
+            grid(x1(j)+1, y1(j)+1, z1(j)+1)=1;
+            x_grid = [x_grid x1(j)];
+            y_grid = [y_grid y1(j)];
+            z_grid = [z_grid z1(j)];
+        end
+    end   
+    x_grid = x_grid';
+    y_grid = y_grid';
+    z_grid = z_grid';
+    x_grid_size = size(x_grid)
 
     %get CoM (center of mass)
-    x_center = mean(x_grid);
-    y_center = mean(y_grid);
-    z_center = mean(z_grid);
+    x_center = mean(x_grid)
+    y_center = mean(y_grid)
+    z_center = mean(z_grid)
 
     %move CoM to (0,0,0)
     x_grid = x_grid - x_center;
@@ -150,8 +135,8 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
 
     %scale and make the average distance to CoM is R/2;
     dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
-    mean_dist = mean(dist);
-    scale_ratio = (R/2)/mean_dist;
+    mean_dist = mean(dist)
+    scale_ratio = (R/2)/mean_dist
     x_grid = x_grid * scale_ratio;
     y_grid = y_grid * scale_ratio;
     z_grid = z_grid * scale_ratio;
@@ -159,7 +144,7 @@ function [x_grid,y_grid,z_grid,final_dist] = pre_process(x1,y1,z1)
     
     final_dist = sqrt((x_grid).^2 + (y_grid).^2 + (z_grid).^2);
     %verify
-    % mean_dist = mean(dist)
+    final_mean_dist = mean(final_dist)
     % 
     % scatter3(x1,y1,z1,5,[0 0 1],'.'); view([60,-60,60]);
     % set(gca, 'XLim', [-100 100]);

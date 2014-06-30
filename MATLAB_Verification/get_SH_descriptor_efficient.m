@@ -39,6 +39,7 @@ theta(1)
 max_l = 32;
 max_r = 32;
 F_r = zeros(max_r,1);
+SH = zeros(max_r,max_l);
 
 idx_n = 1;
 for idx_r = 1:max_r
@@ -63,6 +64,7 @@ for idx_r = 1:max_r
             F_lr(idx_l,1) = sum(Y_ml);
         end
         F_r(idx_r,1) = sum(F_lr);
+        sum(F_lr)
         
         if(idx_n==length(dist_vector))
             break;
