@@ -122,6 +122,17 @@ bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,ve
 		return false;
 }
 
+//get the sum of a double vector
+double getVectorSum(vector<double> input_vector) 
+{
+	double sum = 0.0;
+	for(unsigned int i = 0;i<input_vector.size();i++)
+	{
+		sum += input_vector.at(i);
+	}
+	return sum;
+}
+
 /*Round*/
 double round(double number)
 {

@@ -20,12 +20,12 @@ output = qsort_radius(dist',x_grid',y_grid',z_grid');
 output = output';
 
 % size(output) = (9690,4)
-radii = output(:,1);
+dist_vector = output(:,1);
 x     = output(:,2);
 y     = output(:,3);
 z     = output(:,4);
 phi   = atan(y./x);
-theta = acos(z./radii);
+theta = acos(z./dist_vector);
 phi(1)
 theta(1)
 
@@ -42,7 +42,7 @@ F_r = zeros(max_r,1);
 
 idx_n = 1;
 for idx_r = 1:max_r
-    while(radii(idx_n) < idx_r)
+    while(dist_vector(idx_n) < idx_r) %BUGGGGGGGGGGG HERE???
         % calculate SH
         F_lr = zeros(max_l,1);
         
@@ -64,7 +64,7 @@ for idx_r = 1:max_r
         end
         F_r(idx_r,1) = sum(F_lr);
         
-        if(idx_n>=length(radii))
+        if(idx_n==length(dist_vector))
             break;
         else
             idx_n = idx_n+1

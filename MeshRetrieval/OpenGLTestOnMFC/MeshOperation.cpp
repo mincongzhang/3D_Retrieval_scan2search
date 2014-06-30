@@ -156,9 +156,56 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 	if(get_polar&&get_sorted)
 	{
 		//TEST	SH
+		//getVectorSum		
 		double SH;
 		SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
-		//TEST END
+
+		//test double < int
+		//e.g. 0.999<1?
+
+		//begin
+		int max_l = RADIUS;
+		int max_r = RADIUS;
+		int idx_n = 0;
+		vector<double> F_r;
+		for (unsigned int idx_r = 0;idx_r < max_r;idx_r++)
+		{
+			//in every distance region
+			while(dist_vector.at(idx_n) < (idx_r+1))
+			{
+				//calculate spherical harmonics
+				vector<double> F_lr;
+
+				//for each F_r
+				for(unsigned int idx_l = 0;idx_l < max_l;idx_l++)
+				{
+					vector<double> Y_ml;
+					//for each F_lr
+					for(int idx_m = -idx_l;idx_m <= idx_l;idx_m++)
+					{
+						if(idx_m>=0)
+						{
+							//normal SH
+							//Y_ml.push_back();
+						}
+						else
+						{
+							//conj SH
+							//Y_ml.push_back();
+						}
+					}//F_lr finished
+					double sum_of_Y_ml = getVectorSum(Y_ml);
+					F_lr.push_back(sum_of_Y_ml);
+				}//F_r finishes
+				double sum_of_F_lr = getVectorSum(F_lr);
+				F_r.push_back(sum_of_F_lr);
+
+				idx_n++;
+				if(idx_n==dist_vector.size()) break;
+			}
+		}
+
+		
 	 }
 
 }
