@@ -7,8 +7,14 @@ Spherical harmonics descriptor
 ##Functions
 Pseudo code for spherical harmonics:
 
-    dff
-    fff
+    for each vertex
+        get radius region and radius index(idx_r);
+        for each frequency l (idx_l)
+            calculate F_lr = F(idx_l,idx_r);
+            spherical harmonics descriptor SH(idx_l,idx_r) += abs(F_lr);
+    SH = sqrt(SH);
+        
+    
 
 Function: double gsl_sf_legendre_sphPlm (int l, int m, double x)  
 Function: int gsl_sf_legendre_sphPlm_e (int l, int m, double x, gsl_sf_result * result)  
