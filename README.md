@@ -7,7 +7,7 @@ Spherical harmonics descriptor
 ##Functions
 Pseudo code for spherical harmonics:
 
-    for each vertex
+    for each rasterized vertex
         get radius region and radius index(idx_r);
         for each frequency l (idx_l)
             calculate F_lr = F(idx_l,idx_r);
