@@ -14,6 +14,7 @@ Pseudo code for spherical harmonics:
             spherical harmonics descriptor SH(idx_l,idx_r) += abs(F_lr);
     SH = sqrt(SH);
         
+*where F_lr is the following equation, l is m in the equation
 ![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical harmonics.jpg)    
 
 
