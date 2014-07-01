@@ -27,12 +27,12 @@ output = qsort_radius(dist',x_grid',y_grid',z_grid');
 output = output';
 
 % size(output) = (9690,4)
-dist_vector = output(:,1);
+radii = output(:,1);
 x     = output(:,2);
 y     = output(:,3);
 z     = output(:,4);
 phi   = atan(y./x);
-theta = acos(z./dist_vector);
+theta = acos(z./radii);
 
 %test SH for same theta and phi, with different radius
 % radii = [1:32]';
@@ -41,69 +41,44 @@ theta = acos(z./dist_vector);
 
 %%
 %GET SPHERICAL HARMONICS
-max_l = 16;
+max_l = 32;
 max_r = 32;
 F_r = zeros(max_r,1);
 SH = zeros(max_r,max_l);
 
-for idx_n = 1:100:length(dist_vector)
-    idx_r = ceil(dist_vector(idx_n));
-    for idx_l = 0:(max_l-1)
-        %calculate F_lr
-        Y_ml = 0;
-        for idx_m = -idx_l:idx_l
-            if(idx_m>=0)
-                Y_ml = Y_ml+spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
-            else
-                Y_temp = spharm(idx_l,-idx_m,theta(idx_n),phi(idx_n));
-                Y_ml = Y_ml+(-1)^(-idx_m) * conj(Y_temp);
-            end
-        end
-        F_lr = Y_ml;        
-        SH(idx_r,idx_l+1) = SH(idx_r,idx_l+1)+abs(F_lr)^2;
+idx_n = 1;
+for idx_r = 1:max_r
+    while(radii(idx_n) < idx_r)
+        % calculate SH
+        F_lr = zeros(max_l,1);
         
-        %draw
-        hold on;
-        bar3(SH);drawnow;view([60,-60,60]);
+        %for each F_r
+        for idx_l = 1:max_l
+            Y_ml = zeros(2*idx_l+1,1);
+            ml_count = 1;
+            %for each F_lr
+            for idx_m = -idx_l:idx_l
+                if(idx_m>=0)
+                    Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
+                else
+                    Y_temp = spharm(idx_l,-idx_m,theta(idx_n),phi(idx_n));
+                    Y_ml(ml_count,1) = (-1)^(-idx_m) * conj(Y_temp);
+                end
+                ml_count = ml_count+1;
+            end
+            F_lr(idx_l,1) = sum(Y_ml);
+        end
+        F_r(idx_r,1) = sum(F_lr);
+        
+        if(idx_n>=length(radii))
+            break;
+        else
+            idx_n = idx_n+1;
+        end
     end
-idx_n
 end
 
-SH = sqrt(SH);
-
-
-% idx_n = 1;
-% for idx_r = 1:max_r
-%     while(radii(idx_n) < idx_r)
-%         % calculate SH
-%         F_lr = zeros(max_l,1);
-%         
-%         %for each F_r
-%         for idx_l = 1:max_l
-%             Y_ml = zeros(2*idx_l+1,1);
-%             ml_count = 1;
-%             %for each F_lr
-%             for idx_m = -idx_l:idx_l
-%                 if(idx_m>=0)
-%                     Y_ml(ml_count,1) = spharm(idx_l,idx_m,theta(idx_n),phi(idx_n));
-%                 else
-%                     Y_temp = spharm(idx_l,-idx_m,theta(idx_n),phi(idx_n));
-%                     Y_ml(ml_count,1) = (-1)^(-idx_m) * conj(Y_temp);
-%                 end
-%                 ml_count = ml_count+1;
-%             end
-%             F_lr(idx_l,1) = sum(Y_ml);
-%         end
-%         F_r(idx_r,1) = sum(F_lr);
-%         
-%         if(idx_n>=length(radii))
-%             break;
-%         else
-%             idx_n = idx_n+1;
-%         end
-%     end
-% end
-
+F_r = abs(F_r);
 
 end
 
