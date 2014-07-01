@@ -14,7 +14,8 @@ Pseudo code for spherical harmonics:
             spherical harmonics descriptor SH(idx_l,idx_r) += abs(F_lr);
     SH = sqrt(SH);
         
-    
+![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical harmonics.jpg)    
+
 
 Function: double gsl_sf_legendre_sphPlm (int l, int m, double x)  
 Function: int gsl_sf_legendre_sphPlm_e (int l, int m, double x, gsl_sf_result * result)  
