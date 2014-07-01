@@ -3,8 +3,8 @@
 
 Spherical harmonics descriptor
 
-##Functions
 ========================
+##Functions
 
 Function: double gsl_sf_legendre_sphPlm (int l, int m, double x)  
 Function: int gsl_sf_legendre_sphPlm_e (int l, int m, double x, gsl_sf_result * result)  
@@ -16,8 +16,8 @@ The Legendre polynomial P(n,x) can be defined by:
     P(1,x) = x
     P(n,x) = (2*n-1)/n * x * P(n-1,x) - (n-1)/n * P(n-2,x)
 
-##reference:
 ========================
+##reference:
 
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
 http://blog.sciencenet.cn/blog-548663-715825.html  
