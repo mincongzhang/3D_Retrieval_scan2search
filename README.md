@@ -16,7 +16,7 @@ The Legendre polynomial P(n,x) can be defined by:
     P(n,x) = (2*n-1)/n * x * P(n-1,x) - (n-1)/n * P(n-2,x)
 
 
-##reference:
+##Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
 http://blog.sciencenet.cn/blog-548663-715825.html  
 2. Rodrigues' formula: equation dn/dxn = (d/dx)n:  
