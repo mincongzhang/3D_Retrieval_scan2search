@@ -40,5 +40,5 @@ http://www.chenkuantong.com/?p=1210
 http://www.cs.dartmouth.edu/~geelong/sphere/  
 5. GSL library to calculate Spherical harmonics:  
 https://www.gnu.org/software/gsl/manual/html_node/Associated-Legendre-Polynomials-and-Spherical-Harmonics.html
-6. Shape Descriptors from John Hopkins
+6. Shape Descriptors from John Hopkins  
 http://www.cs.jhu.edu/~misha/Code/ShapeSPH/ShapeDescriptor/
