@@ -135,10 +135,10 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 /*compute spherical harmonics*/
 void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector)
 {
-	vector<double> phi_vector,theta_vector;
-	bool get_polar,get_sorted;
-	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
-	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
+	//vector<double> phi_vector,theta_vector;	//radian
+	//bool get_polar,get_sorted;
+	//get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
+	//get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
 
 	//test sorting
 	//vector<double> vector1;
@@ -153,60 +153,72 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 	//bool testresult = qsortPolarCoordinate(0,(vector1.size()-1),vector1,vector2,vector3);
 	//int testend = 0;
 
-	if(get_polar&&get_sorted)
-	{
-		//TEST	SH
-		//getVectorSum		
-		double SH;
-		SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
+	//if(get_polar&&get_sorted)
+	//{
+		////TEST	SH
+		////getVectorSum		
+		//double SH;
+		//SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
 
-		//test double < int
-		//e.g. 0.999<1?
+		////test double < int
+		////e.g. 0.999<1?	  yes
 
-		//begin
-		int max_l = RADIUS;
-		int max_r = RADIUS;
-		int idx_n = 0;
-		vector<double> F_r;
-		for (unsigned int idx_r = 0;idx_r < max_r;idx_r++)
-		{
-			//in every distance region
-			while(dist_vector.at(idx_n) < (idx_r+1))
-			{
-				//calculate spherical harmonics
-				vector<double> F_lr;
+		////begin
+		////int max_l = RADIUS;
+		//int max_l = 16;
+		//int max_r = RADIUS;
 
-				//for each F_r
-				for(unsigned int idx_l = 0;idx_l < max_l;idx_l++)
-				{
-					vector<double> Y_ml;
-					//for each F_lr
-					for(int idx_m = -idx_l;idx_m <= idx_l;idx_m++)
-					{
-						if(idx_m>=0)
-						{
-							//normal SH
-							//Y_ml.push_back();
-						}
-						else
-						{
-							//conj SH
-							//Y_ml.push_back();
-						}
-					}//F_lr finished
-					double sum_of_Y_ml = getVectorSum(Y_ml);
-					F_lr.push_back(sum_of_Y_ml);
-				}//F_r finishes
-				double sum_of_F_lr = getVectorSum(F_lr);
-				F_r.push_back(sum_of_F_lr);
+		////initial descriptor
+		//double *SH_descriptor;
+		//SH_descriptor = new double [max_r*max_l]();
+		//SH_descriptor[max_l*max_r-1] =10.0;
+		//double getdouble1 = SH_descriptor[max_l*max_r-1];
+		//double getdouble2 = SH_descriptor[8];
 
-				idx_n++;
-				if(idx_n==dist_vector.size()) break;
-			}
-		}
+		////test phi and theta is radian or degree: radian
+		////double phi   = atan(1/1);
+		////double phi2  = atan(sqrt(3.0));
+		////double theta = acos(0.5);
+		////double test = 0.0;
 
-		
-	 }
+		//for(int idx_n = 0;idx_n<dist_vector.size();idx_n+=100)
+		//{
+		//	int idx_r = ceil(dist_vector.at(idx_n));
+		//	//for each frequency
+		//	for(int idx_l = 0;idx_l<max_l;idx_l++)
+		//	{
+		//		//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
+		//		//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
+		//		//cos(x) input should be a radian
+		//		//theta_vector and phi_vector are radian
+
+		//		double Yml_real = 0.0;
+		//		double Yml_img = 0.0;
+		//		double NPml = 0.0;
+		//		//traverse frequency range
+		//		for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
+		//		{
+		//			if(idx_m>=0)
+		//			{
+		//				NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
+		//				Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
+		//				Yml_img  +=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+		//			}
+		//			else
+		//			{
+		//				NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
+		//				Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
+		//				Yml_img  -=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+		//			}
+		//		}//finish traversing frequency range
+		//		SH_descriptor[(idx_r-1)*max_r+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
+		//	}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
+		//}// end of for(int idx_n = 0;idx_n<dist_vector.size();idx_n++)
+		//delete [] SH_descriptor;
+	 //}//end of if(get_polar&&get_sorted)
+		//						   
+	
+	SPHARM_CONTROL = false;
 
 }
 

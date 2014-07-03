@@ -108,8 +108,8 @@ bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,ve
 	{
 		//phi   = atan(y/x);
 		//theta = acos(z/radious);
-		//The arc tangent of 1.000000 is 45.000000 degrees.
-		//The arc cosine of 0.500000 is 60.000000 degrees
+		//atan(sqrt(3.0))=1.047=pi/3
+		//acos(0.5)      =1.047=pi/3
 		double phi = atan(double(grid_id_y.at(i)/grid_id_x.at(i)));
 		double theta = acos(double(grid_id_z.at(i)/dist_vector.at(i)));
 		phi_vector.push_back(phi);
