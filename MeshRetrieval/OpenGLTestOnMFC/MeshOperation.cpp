@@ -120,7 +120,6 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 	}
 	mean_dist/=double(grid_id_x.size());
 
-	//double test_final_mean_dist = 0.0;
 	//scale and make the average distance to center of mass is R/2
 	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
 	for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
@@ -132,9 +131,7 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 		//again get distance between vertex and origin
 		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
 		dist_vector.push_back(current_dist);
-		//test_final_mean_dist += current_dist;
 	}
-	//test_final_mean_dist/=double(grid_id_x.size());
 
 	NORMALIZE_CONTROL = FALSE;
 }
@@ -146,19 +143,6 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 	bool get_polar,get_sorted;
 	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
 	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
-
-	/*test sorting
-	vector<double> vector1;
-	vector<double> vector2;
-	vector<double> vector3;
-	for(int testid = 7;testid>0;testid--)
-	{
-		vector1.push_back(double(testid));
-		vector2.push_back(double(testid));
-		vector3.push_back(double(testid));
-	}
-	bool testresult = qsortPolarCoordinate(0,(vector1.size()-1),vector1,vector2,vector3);
-	int testend = 0;*/
 
 	if(get_polar&&get_sorted)
 	{
@@ -221,7 +205,7 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 			{
 				for(unsigned int idx_l=0;idx_l<max_l;idx_l++)
 				{
-					myfile << SH_descriptor[(idx_r-1)*max_l+idx_l]<< " ";
+					myfile << SH_descriptor[idx_r*max_l+idx_l]<< " ";
 				}
 				myfile << "\n";
 			}
