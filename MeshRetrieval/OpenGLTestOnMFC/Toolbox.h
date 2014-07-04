@@ -1,6 +1,3 @@
-#include <math.h>
-#include <stdio.h>
-#include <random>
 #pragma once
 #include "afxwin.h"
 
@@ -24,6 +21,10 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 void loadHistogram(string filname,double *histogram);
 double similarity(double *histogram_test,double *histogram_sketch);
 void qsort_getid(double array[],double id_array[], int left_id, int right_id);
-void swap(double array[], int i, int j);
+bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector,
+						 vector<double> &phi_vector, vector<double> &theta_vector);
+bool qsortPolarCoordinate(int left_id, int right_id,
+						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector);
+double getVectorSum(vector<double> input_vector);
 double round(double number);
 void FindMaxMin(MyMesh &mesh, double &x_max, double &y_max, double &z_max, double &x_min, double &y_min, double &z_min);

@@ -106,7 +106,7 @@ BEGIN
     PUSHBUTTON      "LoadMesh",Load,30,297,57,14
     LTEXT           "Left mouse button: Rotate      Mid mouse button: Zoom in/out Right mouse button: Translate",IDC_STATIC,442,305,99,28
     PUSHBUTTON      "AddNoise",Noise,29,322,57,14
-    PUSHBUTTON      "Normalize",Normalize,103,321,60,14
+    PUSHBUTTON      "Normalize",Normalize,96,298,60,14
     CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,261,310,53,10
     CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,261,322,53,10
     CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,314,310,53,10
@@ -114,6 +114,7 @@ BEGIN
     CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,367,310,53,10
     CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,367,322,53,10
     GROUPBOX        "Candidate",IDC_STATIC,250,296,173,41
+    PUSHBUTTON      "Spharm",Spharm,166,298,59,14
 END
 
 

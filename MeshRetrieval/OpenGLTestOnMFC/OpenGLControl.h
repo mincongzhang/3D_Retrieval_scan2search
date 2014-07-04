@@ -17,7 +17,7 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 extern  vector<MyMesh> meshQueue;
 extern bool NOISE_CONTROL;
 extern bool NORMALIZE_CONTROL;
-extern double theta_x,theta_y;
+extern bool SPHARM_CONTROL;
 
 class COpenGLControl : public CWnd
 {

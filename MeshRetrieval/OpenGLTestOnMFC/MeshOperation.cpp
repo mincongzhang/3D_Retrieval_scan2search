@@ -5,6 +5,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <random>
+#include <string>
 
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_blas.h>
@@ -116,10 +117,10 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 		//get distance between vertex and origin
 		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
 		mean_dist += current_dist;
-		dist_vector.push_back(current_dist);
 	}
 	mean_dist/=double(grid_id_x.size());
 
+	//double test_final_mean_dist = 0.0;
 	//scale and make the average distance to center of mass is R/2
 	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
 	for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
@@ -127,7 +128,13 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 		grid_id_x.at(grid_iter) *= scale_ratio;
 		grid_id_y.at(grid_iter) *= scale_ratio;
 		grid_id_z.at(grid_iter) *= scale_ratio;
+
+		//again get distance between vertex and origin
+		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
+		dist_vector.push_back(current_dist);
+		//test_final_mean_dist += current_dist;
 	}
+	//test_final_mean_dist/=double(grid_id_x.size());
 
 	NORMALIZE_CONTROL = FALSE;
 }
@@ -135,88 +142,96 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 /*compute spherical harmonics*/
 void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector)
 {
-	//vector<double> phi_vector,theta_vector;	//radian
-	//bool get_polar,get_sorted;
-	//get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
-	//get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
+	vector<double> phi_vector,theta_vector;	//radian
+	bool get_polar,get_sorted;
+	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
+	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
 
-	//test sorting
-	//vector<double> vector1;
-	//vector<double> vector2;
-	//vector<double> vector3;
-	//for(int testid = 7;testid>0;testid--)
-	//{
-	//	vector1.push_back(double(testid));
-	//	vector2.push_back(double(testid));
-	//	vector3.push_back(double(testid));
-	//}
-	//bool testresult = qsortPolarCoordinate(0,(vector1.size()-1),vector1,vector2,vector3);
-	//int testend = 0;
+	/*test sorting
+	vector<double> vector1;
+	vector<double> vector2;
+	vector<double> vector3;
+	for(int testid = 7;testid>0;testid--)
+	{
+		vector1.push_back(double(testid));
+		vector2.push_back(double(testid));
+		vector3.push_back(double(testid));
+	}
+	bool testresult = qsortPolarCoordinate(0,(vector1.size()-1),vector1,vector2,vector3);
+	int testend = 0;*/
 
-	//if(get_polar&&get_sorted)
-	//{
-		////TEST	SH
-		////getVectorSum		
-		//double SH;
-		//SH = gsl_sf_legendre_sphPlm(1, 1, cos(M_PI/4));
+	if(get_polar&&get_sorted)
+	{
 
-		////test double < int
-		////e.g. 0.999<1?	  yes
+		//begin
+		//int max_l = RADIUS;
+		int max_l = RADIUS;
+		int max_r = RADIUS;
 
-		////begin
-		////int max_l = RADIUS;
-		//int max_l = 16;
-		//int max_r = RADIUS;
+		//initial descriptor
+		double *SH_descriptor;
+		SH_descriptor = new double [max_r*max_l]();
 
-		////initial descriptor
-		//double *SH_descriptor;
-		//SH_descriptor = new double [max_r*max_l]();
-		//SH_descriptor[max_l*max_r-1] =10.0;
-		//double getdouble1 = SH_descriptor[max_l*max_r-1];
-		//double getdouble2 = SH_descriptor[8];
+		for(unsigned int idx_n = 0;idx_n<dist_vector.size();idx_n++)
+		{
+			int idx_r = ceil(dist_vector.at(idx_n));
+			if (idx_r>max_r) continue;
 
-		////test phi and theta is radian or degree: radian
-		////double phi   = atan(1/1);
-		////double phi2  = atan(sqrt(3.0));
-		////double theta = acos(0.5);
-		////double test = 0.0;
+			//for each frequency
+			for(int idx_l = 0;idx_l<max_l;idx_l++)
+			{
+				//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
+				//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
+				//cos(x) input should be a radian
+				//theta_vector and phi_vector are radian
 
-		//for(int idx_n = 0;idx_n<dist_vector.size();idx_n+=100)
-		//{
-		//	int idx_r = ceil(dist_vector.at(idx_n));
-		//	//for each frequency
-		//	for(int idx_l = 0;idx_l<max_l;idx_l++)
-		//	{
-		//		//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
-		//		//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
-		//		//cos(x) input should be a radian
-		//		//theta_vector and phi_vector are radian
+				double Yml_real = 0.0;
+				double Yml_img = 0.0;
+				double NPml = 0.0;
+				//traverse frequency range
+				for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
+				{
+					if(idx_m>=0)
+					{
+						NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
+						Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
+						Yml_img  +=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+					}
+					else
+					{
+						NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
+						Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
+						Yml_img  -=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+					}
+				}//finish traversing frequency range
+				SH_descriptor[(idx_r-1)*max_l+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
+			}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
+		}// end of for(int idx_n = 0;idx_n<dist_vector.size();idx_n++)
 
-		//		double Yml_real = 0.0;
-		//		double Yml_img = 0.0;
-		//		double NPml = 0.0;
-		//		//traverse frequency range
-		//		for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
-		//		{
-		//			if(idx_m>=0)
-		//			{
-		//				NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
-		//				Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
-		//				Yml_img  +=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
-		//			}
-		//			else
-		//			{
-		//				NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
-		//				Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
-		//				Yml_img  -=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
-		//			}
-		//		}//finish traversing frequency range
-		//		SH_descriptor[(idx_r-1)*max_r+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
-		//	}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
-		//}// end of for(int idx_n = 0;idx_n<dist_vector.size();idx_n++)
-		//delete [] SH_descriptor;
-	 //}//end of if(get_polar&&get_sorted)
-		//						   
+		/*write out the data*/
+		string filename = "D:\\GoogleDrive\\3dindustri.es\\codes\\MeshRetrieval\\Output_data\\SH_descriptor";
+		// open file
+		ofstream myfile;
+		myfile.open(filename+".txt");
+	    //write file header
+		if (myfile.is_open())
+		{
+			//(idx_r-1)*max_l+idx_l
+			for(unsigned int idx_r=0;idx_r<max_r;idx_r++)
+			{
+				for(unsigned int idx_l=0;idx_l<max_l;idx_l++)
+				{
+					myfile << SH_descriptor[(idx_r-1)*max_l+idx_l]<< " ";
+				}
+				myfile << "\n";
+			}
+
+			myfile.close();
+		}
+
+		delete [] SH_descriptor;
+	 }//end of if(get_polar&&get_sorted)
+								   
 	
 	SPHARM_CONTROL = false;
 

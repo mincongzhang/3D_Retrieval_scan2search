@@ -40,12 +40,11 @@ public:
 	afx_msg void OnBnClickedNoise();
 	afx_msg void OnBnClickedNormalize();
 	afx_msg void OnBnClickedSketch();
+	afx_msg void OnBnClickedSpharm();
 	afx_msg void OnBnClickedCandidate1();
 	afx_msg void OnBnClickedCandidate2();
 	afx_msg void OnBnClickedCandidate3();
 	afx_msg void OnBnClickedCandidate4();
 	afx_msg void OnBnClickedCandidate5();
 	afx_msg void OnBnClickedCandidate6();
-	afx_msg void OnBnClickedRetrievalback();
-	afx_msg void OnBnClickedRetrievalseat();
 };

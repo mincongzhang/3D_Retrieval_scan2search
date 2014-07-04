@@ -39,5 +39,6 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 void NormalizeMesh(MyMesh &mesh);
 void AddNoise(double noise_standard_deviation,MyMesh &mesh);
 void ChooseCandidate(double candidate_index_array[],int candidateIndx);
-void NormalizeMesh(MyMesh &mesh,
-				   vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z);
+void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,
+				   vector<double> &dist_vector);
+void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector);
