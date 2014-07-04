@@ -3,8 +3,6 @@
 
 Spherical harmonics descriptor
 
-SHIT! GITHUB reverted my code!!and I didn't backup my new code!
-
 ##Functions
 Pseudo code for spherical harmonics:
 
