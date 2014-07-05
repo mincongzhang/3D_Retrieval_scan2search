@@ -250,14 +250,16 @@ another2 = sqrt(another2);
 
 bar3(origin);view([60,-60,60]);set(gcf,'renderer','zbuffer');
 figure,
-bar3(another2);view([60,-60,60]);set(gcf,'renderer','zbuffer');
+bar3(rotatexyz);view([60,-60,60]);set(gcf,'renderer','zbuffer');set(gca, 'ZLim', [0.0 60.0]);
+figure,
 % bar3(addnoise);view([60,-60,60]);set(gcf,'renderer','zbuffer');
 % figure,
-% bar3(phi_changed);view([60,-60,60]);set(gcf,'renderer','zbuffer');
-% figure,
-% bar3(theta_changed);view([60,-60,60]);set(gcf,'renderer','zbuffer');
+bar3(phi_changed);view([60,-60,60]);set(gcf,'renderer','zbuffer');
+figure,
+bar3(theta_changed);view([60,-60,60]);set(gcf,'renderer','zbuffer');
 % figure,
 % bar3(another);view([60,-60,60]);set(gcf,'renderer','zbuffer');
+% bar3(another2);view([60,-60,60]);set(gcf,'renderer','zbuffer');
 
 max(origin(:))
 max(rotatexyz(:))
@@ -279,3 +281,6 @@ origin_another2 = sum(origin_another2(:))
 
 origin_addnoise = abs(origin-addnoise);
 origin_addnoise = sum(origin_addnoise(:))
+
+phi_changed_rotatexyz = abs(phi_changed-rotatexyz);
+phi_changed_rotatexyz = sum(phi_changed_rotatexyz(:))
