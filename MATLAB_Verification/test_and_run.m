@@ -22,24 +22,8 @@
 % SH_manual = P*N*i^(m+abs(m))
 % 
 % %MATLAB
+SH_matlab = spharm(l,m,pi/4,pi/4)/exp(1i*m*pi/4)
 
-R_vector = [1:32];
-phi_vector = ones(1,32);
-theta_vector = ones(1,32)*3;
-for r = 1:32
-    for l = 1:32
-        for m = -l:l
-            if(m>=0)
-                Y_ml(l,r) = spharm(l,m,phi_vector(r),theta_vector(r));
-            else
-                Y_temp = spharm(l,-m,phi_vector(r),theta_vector(r));
-                Y_ml(l,r) = (-1)^(-m) * conj(Y_temp);
-            end
-        end
-    end
-end
-figure,
-bar3(abs(Y_ml))
 
 
 %%
