@@ -133,6 +133,17 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 		dist_vector.push_back(current_dist);
 	}
 
+	//TEST rotate xyz
+	double rotate_angle = M_PI/3.0;
+	for(unsigned int id=0;id<grid_id_x.size();id++)
+	{
+		double x = grid_id_x.at(id);
+		double y = grid_id_y.at(id);
+
+		grid_id_x.at(id) = x*cos(rotate_angle)-y*sin(rotate_angle);
+		grid_id_y.at(id) = x*sin(rotate_angle)+y*cos(rotate_angle);
+	}
+
 	NORMALIZE_CONTROL = FALSE;
 }
 
@@ -141,14 +152,22 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 {
 	vector<double> phi_vector,theta_vector;	//radian
 	bool get_polar,get_sorted;
+
 	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
 	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
+
+	//TEST	rotation invariant
+	//add some offset to phi
+	//for(unsigned int t=0;t<phi_vector.size();t++)
+	//{
+	//	theta_vector.at(t)+=1;
+	//	//theta_vector
+	//}
 
 	if(get_polar&&get_sorted)
 	{
 
 		//begin
-		//int max_l = RADIUS;
 		int max_l = RADIUS;
 		int max_r = RADIUS;
 
@@ -180,20 +199,59 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 						NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
 						Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
 						Yml_img  +=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+
 					}
 					else
 					{
 						NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
-						Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
-						Yml_img  -=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
+						Yml_real += NPml*cos(double(-idx_m)*phi_vector.at(idx_n));
+						Yml_img  -=	NPml*sin(double(-idx_m)*phi_vector.at(idx_n));
 					}
 				}//finish traversing frequency range
-				SH_descriptor[(idx_r-1)*max_l+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
+				SH_descriptor[(idx_r-1)*max_l+idx_l] += sqrt(pow(Yml_real,2.0) + pow(Yml_img,2.0));
 			}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
 		}// end of for(int idx_n = 0;idx_n<dist_vector.size();idx_n++)
 
+
+		//TEST rotational invariant
+		//double phi = 0.0;
+		//double theta = 0.0;
+		//for(int idx_r=1;idx_r<=max_r;idx_r++)
+		//{
+		//	phi+=M_PI/32.0;
+		//	//for each frequency
+		//	for(int idx_l = 0;idx_l<max_l;idx_l++)
+		//	{
+		//		//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
+		//		//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
+		//		//cos(x) input should be a radian
+		//		//theta_vector and phi_vector are radian
+
+		//		double Yml_real = 0.0;
+		//		double Yml_img = 0.0;
+		//		double NPml = 0.0;
+		//		//traverse frequency range
+		//		for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
+		//		{
+		//			if(idx_m>=0)
+		//			{
+		//				NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta));
+		//				Yml_real += NPml*cos(double(idx_m)*phi);
+		//				Yml_img  +=	NPml*sin(double(idx_m)*phi);
+		//			}
+		//			else
+		//			{
+		//				NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta));
+		//				Yml_real += NPml*cos(double(-idx_m)*phi);
+		//				Yml_img  -=	NPml*sin(double(-idx_m)*phi);
+		//			}
+		//		}//finish traversing frequency range
+		//		SH_descriptor[(idx_r-1)*max_l+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
+		//	}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
+		//}
+
 		/*write out the data*/
-		string filename = "D:\\GoogleDrive\\3dindustri.es\\codes\\MeshRetrieval\\Output_data\\SH_descriptor";
+		string filename = "D:\\GoogleDrive\\3dindustri.es\\codes\\MeshRetrieval\\Output_data\\SH_descriptor_ago-1";
 		// open file
 		ofstream myfile;
 		myfile.open(filename+".txt");
