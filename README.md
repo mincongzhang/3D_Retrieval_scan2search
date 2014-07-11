@@ -10,8 +10,8 @@ Pseudo code for spherical harmonics:
         get radius region and radius index(idx_r);
         for each frequency l (idx_l)
             calculate F_lr = F(idx_l,idx_r);
-            spherical harmonics descriptor SH(idx_l,idx_r) += abs(F_lr);
-    //SH = sqrt(SH);
+            spherical harmonics descriptor SH(idx_l,idx_r) += F_lr^2;
+    SH = sqrt(SH);
         
 *where F_lr is the following equation, l is m in the equation
 ![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical harmonics.jpg)    
