@@ -4,6 +4,8 @@
 Spherical harmonics descriptor
 
 ##Functions
+Maybe need an algorithm for rasterization
+
 Pseudo code for spherical harmonics:
 
     for each rasterized vertex
