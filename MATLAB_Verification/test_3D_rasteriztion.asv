@@ -1,0 +1,7 @@
+%rasterization between two 3D points
+grid = zeros(10,10,10);
+p1 = [0,0,0];
+p2 = [10,10,10];
+%expect 1 1 1 2 2 2 3 3 3...10 10 10
+v12 = p2-p1;
+v12_norm = v12./(sqrt(v12(1)^2+v12(2)^2+v12(3)^2));
