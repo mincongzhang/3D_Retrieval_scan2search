@@ -2,28 +2,28 @@
 function run()
     clc
     clear
-    
+    close all
     grid = zeros(10,10,10);
     p1 = [1,1,1];
     p2 = [10,10,10];
     p3 = [1,10,10];
 
     [grid,coord12,len12] = fillGridLine(p1,p2,grid);
-    [grid,coord13,len23] = fillGridLine(p2,p3,grid);
-    [grid,coord23,len13] = fillGridLine(p1,p3,grid);
+    [grid,coord23,len23] = fillGridLine(p2,p3,grid);
+    [grid,coord13,len13] = fillGridLine(p1,p3,grid);
 
     len12
-    len23
-    diff = len12-len23;
+    len13
+    diff = len12-len13;
     if(diff>=0)
-        for i = 1:len23
+        for i = 1:len13
             i
             [grid,~,~] = fillGridLine(coord12(i,:),coord13(i,:),grid);
         end
         
-        for i = len23+1:len12
+        for i = len13+1:len12
             i
-            [grid,~,~] = fillGridLine(coord12(i,:),coord13(len23,:),grid);
+            [grid,~,~] = fillGridLine(coord12(i,:),coord13(len13,:),grid);
         end
         
     end
