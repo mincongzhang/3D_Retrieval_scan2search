@@ -37,9 +37,11 @@ http://blog.sciencenet.cn/blog-548663-715825.html
 http://wenku.baidu.com/view/72c151ef102de2bd960588f2  
 3. Rotation Invariant Spherical Harmonic of 3D Shape:  
 http://www.chenkuantong.com/?p=1210  
-4. Spherical harmonics library:  
+4. An explaination of a_mn component:
+https://www.ngs.noaa.gov/PUBS_LIB/Geodesy4Layman/TR80003F.HTM
+5. Spherical harmonics library:  
 http://www.cs.dartmouth.edu/~geelong/sphere/  
-5. GSL library to calculate Spherical harmonics:  
+6. GSL library to calculate Spherical harmonics:  
 https://www.gnu.org/software/gsl/manual/html_node/Associated-Legendre-Polynomials-and-Spherical-Harmonics.html
-6. Shape Descriptors from John Hopkins  
+7. Shape Descriptors from John Hopkins  
 http://www.cs.jhu.edu/~misha/Code/ShapeSPH/ShapeDescriptor/
