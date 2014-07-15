@@ -37,7 +37,7 @@ http://blog.sciencenet.cn/blog-548663-715825.html
 http://wenku.baidu.com/view/72c151ef102de2bd960588f2  
 3. Rotation Invariant Spherical Harmonic of 3D Shape:  
 http://www.chenkuantong.com/?p=1210  
-4. An explaination of a_mn component:
+4. An explaination of a_mn component:  
 https://www.ngs.noaa.gov/PUBS_LIB/Geodesy4Layman/TR80003F.HTM
 5. Spherical harmonics library:  
 http://www.cs.dartmouth.edu/~geelong/sphere/  
