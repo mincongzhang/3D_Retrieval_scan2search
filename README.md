@@ -42,8 +42,8 @@ https://www.ngs.noaa.gov/PUBS_LIB/Geodesy4Layman/TR80003F.HTM
 5. Spherical harmonics library:  
 http://www.cs.dartmouth.edu/~geelong/sphere/  
 6. Spherical Harmonics Visual Representation:  
-http://afj-phd.blogspot.co.uk/2008/11/spherical-harmonics-visual.html
+http://afj-phd.blogspot.co.uk/2008/11/spherical-harmonics-visual.html  
 7. GSL library to calculate Spherical harmonics:  
-https://www.gnu.org/software/gsl/manual/html_node/Associated-Legendre-Polynomials-and-Spherical-Harmonics.html
+https://www.gnu.org/software/gsl/manual/html_node/Associated-Legendre-Polynomials-and-Spherical-Harmonics.html  
 8 Shape Descriptors from John Hopkins  
 http://www.cs.jhu.edu/~misha/Code/ShapeSPH/ShapeDescriptor/
