@@ -32,8 +32,8 @@ function [Ymn,THETA,PHI,Xm,Ym,Zm]=spharm(L,M,RES,PLOT_FLAG);
 
 % Define constants (REQUIRED THAT L(DEGREE)>=M(ORDER))
 if nargin==0
-  L=3;   % DEGREE
-  M=2;   % ORDER
+  L=1;   % DEGREE
+  M=0;   % ORDER
   RES=[55 55];
 end
 
@@ -62,7 +62,7 @@ a1=((2*L+1)/(4*pi));
 a2=factorial(L-M)/factorial(L+M);
 C=sqrt(a1*a2);
 
-Ymn=C*Lmn.*exp(i*M*THETA);
+Ymn=C*Lmn%.*exp(i*M*THETA);
 
 [Xm,Ym,Zm]=sph2cart(THETA,PHI-pi/2,abs(Ymn).^2);
 [Xr,Yr,Zr]=sph2cart(THETA,PHI-pi/2,real(Ymn).^2);
