@@ -306,7 +306,7 @@ void COpenGLControl::oglInitialize(void)
 		0.0, 1.0, 0.0);       /* up is in positive Y direction */
 
 	//load initial mesh 
-	string init_mesh_filname = "./MeshData/femur.stl";
+	string init_mesh_filname = "./MeshData/ago-1.ply";
 	MyMesh init_mesh;
 	OpenMesh::IO::read_mesh(init_mesh, init_mesh_filname);
 	meshQueue.push_back(init_mesh);

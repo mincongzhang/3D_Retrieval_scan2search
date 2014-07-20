@@ -24,20 +24,6 @@
 %     finalX = real(temp);
 %     finalY = imag(temp);
 % end
-l = 1;
-m = 0;
-theta = pi/4;
-phi = pi/4;
-l = 2;
-YML_star = 0;
-for m = -l:l
-    YML_star = conj(spharm(l,m,theta,phi));
-end
-
-RECOVER = 0;
-for t = 0:0.01:pi
-    for p = 0:0.01:2*pi
-        RECOVER = RECOVER + YML_star
-    end
-end
-YML_recover = 
+clc
+clear
+[Ymn,PHI,THETA,Xm,Ym,Zm]=spharm_array(2,2);

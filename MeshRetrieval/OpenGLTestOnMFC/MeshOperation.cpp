@@ -79,7 +79,7 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 			int x_rasterize = static_cast<int>(round(x_normalize*(2*RADIUS-1)));
 			int y_rasterize = static_cast<int>(round(y_normalize*(2*RADIUS-1)));
 			int z_rasterize = static_cast<int>(round(z_normalize*(2*RADIUS-1)));
-		
+
 			//If this vertex hasn't been registered
 			if(grid[x_rasterize*2*RADIUS*2*RADIUS + y_rasterize*2*RADIUS + z_rasterize]!=true)
 			{
@@ -100,7 +100,7 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 	}//end if(grid!=NULL)
 	//delete grid
 	delete [] grid;
-	
+
 	centroid_x/=double(grid_id_x.size());
 	centroid_y/=double(grid_id_y.size());
 	centroid_z/=double(grid_id_z.size());
@@ -134,7 +134,7 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 	}
 
 	//TEST rotate xyz
-	double rotate_angle = M_PI/3.0;
+	double rotate_angle = 0.0;//M_PI/3.0;
 	for(unsigned int id=0;id<grid_id_x.size();id++)
 	{
 		double x = grid_id_x.at(id);
@@ -170,55 +170,61 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 		//begin
 		int max_l = RADIUS;
 		int max_r = RADIUS;
+		int idx_n = 0;
 
 		//initial descriptor
 		double *SH_descriptor;
 		SH_descriptor = new double [max_r*max_l]();
 
-		for(unsigned int idx_n = 0;idx_n<dist_vector.size();idx_n++)
+		//for(unsigned int idx_n = 0;idx_n<dist_vector.size();idx_n++)
+		//{
+		//	int idx_r = ceil(dist_vector.at(idx_n));
+		//	if (idx_r>max_r) continue;
+		for(unsigned int idx_r = 1;idx_r<=RADIUS;idx_r++)
 		{
-			int idx_r = ceil(dist_vector.at(idx_n));
-			if (idx_r>max_r) continue;
-
 			//for each frequency
 			for(int idx_l = 0;idx_l<max_l;idx_l++)
 			{
-				//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
-				//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
-				//cos(x) input should be a radian
-				//theta_vector and phi_vector are radian
-
-				double Yml_real = 0.0;
-				double Yml_img = 0.0;
-				double NPml = 0.0;
+				vector<double> 	a_ml_pow;
 				//traverse frequency range
 				for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
 				{
-					if(idx_m>=0)
+					vector<double> Yml_real,Yml_imag;
+					double NPml;
+					while(dist_vector.at(idx_n)<idx_r)
 					{
-						NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
-						Yml_real += NPml*cos(double(idx_m)*phi_vector.at(idx_n));
-						Yml_img  +=	NPml*sin(double(idx_m)*phi_vector.at(idx_n));
-
-					}
-					else
-					{
-						NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
-						Yml_real += NPml*cos(double(-idx_m)*phi_vector.at(idx_n));
-						Yml_img  -=	NPml*sin(double(-idx_m)*phi_vector.at(idx_n));
-					}
+						//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
+						//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
+						//cos(x) input should be a radian
+						//theta_vector and phi_vector are radians
+						if(idx_m>=0)
+						{
+							NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
+							Yml_real.push_back(NPml*cos(double(idx_m)*phi_vector.at(idx_n)));
+							Yml_imag.push_back(NPml*sin(double(idx_m)*phi_vector.at(idx_n)));
+						} else {
+							NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
+							Yml_real.push_back(NPml*cos(double(-idx_m)*phi_vector.at(idx_n)));
+							Yml_imag.push_back(NPml*sin(double(-idx_m)*phi_vector.at(idx_n)));
+						}
+						idx_n++;
+					}//while(dist_vector.at(idx_n)<idx_r)
+					double 	a_ml_real,a_ml_imag;
+					a_ml_real=accumulate(Yml_real.begin(),Yml_real.end(),0.0);
+					a_ml_imag=accumulate(Yml_imag.begin(),Yml_imag.end(),0.0);
+					a_ml_pow.push_back(pow(a_ml_real,2.0)+pow(a_ml_imag,2.0));
+					if(idx_l!=max_l-1) idx_n-=Yml_real.size();
 				}//finish traversing frequency range
-				SH_descriptor[(idx_r-1)*max_l+idx_l] += sqrt(pow(Yml_real,2.0) + pow(Yml_img,2.0));
-			}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
-		}// end of for(int idx_n = 0;idx_n<dist_vector.size();idx_n++)
+				SH_descriptor[(idx_r-1)*max_l+idx_l] = accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0);
+			}	//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
+		}// for(unsigned int idx_r = 0;idx_r<RADIUS;idx_r++)
 
-
-		//TEST rotational invariant
+		//TEST 1 rotational invariant
 		//double phi = 0.0;
 		//double theta = 0.0;
 		//for(int idx_r=1;idx_r<=max_r;idx_r++)
 		//{
-		//	phi+=M_PI/32.0;
+		//	theta+=M_PI/32.0;
 		//	//for each frequency
 		//	for(int idx_l = 0;idx_l<max_l;idx_l++)
 		//	{
@@ -241,7 +247,7 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 		//			}
 		//			else
 		//			{
-		//				NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta));
+		//				NPml = pow(-1.0,idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta));
 		//				Yml_real += NPml*cos(double(-idx_m)*phi);
 		//				Yml_img  -=	NPml*sin(double(-idx_m)*phi);
 		//			}
@@ -250,14 +256,42 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 		//	}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
 		//}
 
+		////TEST 2 reconstruct
+		//int re_l = 16;
+		//double * YML_real;
+		//YML_real = new double [2*re_l+1]();
+		//double * YML_imag;
+		//YML_imag = new double [2*re_l+1]();
+		//double Yml_real = 0.0;
+		//double Yml_img = 0.0;
+		//double NPml = 0.0;
+		//theta = M_PI/4.0;
+		//phi = 0.0;
+		//for(int idx_m=-re_l;idx_m<=re_l;idx_m++)
+		//{
+		//	if(idx_m>=0)
+		//	{
+		//		NPml = gsl_sf_legendre_sphPlm(re_l,idx_m,cos(theta));
+		//		YML_real[idx_m+16] = NPml*cos(double(idx_m)*phi);
+		//		YML_imag[idx_m+16] = NPml*sin(double(idx_m)*phi);
+		//	}
+		//	else
+		//	{
+		//		NPml = pow(-1.0,idx_m)*gsl_sf_legendre_sphPlm(re_l,-idx_m,cos(theta));
+		//		YML_real[idx_m+16] = NPml*cos(double(-idx_m)*phi);
+		//		YML_imag[idx_m+16] = -NPml*sin(double(-idx_m)*phi);
+		//	}
+		//}
+
 		/*write out the data*/
-		string filename = "D:\\GoogleDrive\\3dindustri.es\\codes\\MeshRetrieval\\Output_data\\SH_descriptor_ago-1";
+		string filename = "./Output_data/after_diss";
 		// open file
 		ofstream myfile;
 		myfile.open(filename+".txt");
-	    //write file header
+		//write file header
 		if (myfile.is_open())
 		{
+			//write SH
 			//(idx_r-1)*max_l+idx_l
 			for(unsigned int idx_r=0;idx_r<max_r;idx_r++)
 			{
@@ -272,9 +306,9 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 		}
 
 		delete [] SH_descriptor;
-	 }//end of if(get_polar&&get_sorted)
-								   
-	
+	}//end of if(get_polar&&get_sorted)
+
+
 	SPHARM_CONTROL = false;
 
 }
