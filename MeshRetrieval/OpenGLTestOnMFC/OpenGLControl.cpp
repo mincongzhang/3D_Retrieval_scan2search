@@ -2,6 +2,7 @@
 #include "OpenGLControl.h"
 #include ".\openglcontrol.h"
 #include "MeshOperation.h"
+#include "point.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -21,7 +22,8 @@ bool SPHARM_CONTROL = false;
 double noise_standard_deviation = 0.01; 
 
 //retrieval variables
-vector<double> grid_id_x,grid_id_y,grid_id_z,dist_vector;
+vector<Point> grid_points;
+vector<double> dist_vector;
 
 //shading parameters
 GLfloat mat_specular[]={1.0f, 0.0f, 1.0f, 1.0f};
@@ -327,14 +329,14 @@ void COpenGLControl::oglDrawScene(void)
 		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
 	}
 	//normalize the current mesh
-	if(NORMALIZE_CONTROL && meshsize>=1 && grid_id_x.size()==0)
+	if(NORMALIZE_CONTROL && meshsize>=1 && grid_points.size()==0)
 	{
-		NormalizeMesh(meshQueue.at(meshsize-1),grid_id_x,grid_id_y,grid_id_z,dist_vector);
+		NormalizeMesh(meshQueue.at(meshsize-1),grid_points,dist_vector);
 	}
 	//compute spherical harmonics
 	if(SPHARM_CONTROL)
 	{
-		ComputeSpharm(grid_id_x,grid_id_y,grid_id_z,dist_vector);
+		ComputeSpharm(grid_points,dist_vector);
 	}
 
 	/*Draw Meshes*/
@@ -360,7 +362,7 @@ void COpenGLControl::oglDrawScene(void)
 			glEnd();
 
 			//draw mesh
-			if(grid_id_x.size()==0)
+			if(grid_points.size()==0)
 			{
 				glEnable(GL_LIGHTING);
 				//change the colour for each mesh
@@ -412,8 +414,8 @@ void COpenGLControl::oglDrawScene(void)
 					glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
 					glPointSize(2.0);
 					glBegin(GL_POINTS);
-					for(unsigned int grid_iter = 0 ;grid_iter<grid_id_x.size();grid_iter++){
-						glVertex3f(float(grid_id_x.at(grid_iter))/32.0,float(grid_id_y.at(grid_iter))/32.0,float(grid_id_z.at(grid_iter))/32.0);
+					for(unsigned int grid_iter = 0 ;grid_iter<grid_points.size();grid_iter++){
+						glVertex3f(float(grid_points.at(grid_iter).x())/32.0,float(grid_points.at(grid_iter).y())/32.0,float(grid_points.at(grid_iter).z())/32.0);
 					}
 					glEnd();
 			}//end draw grid

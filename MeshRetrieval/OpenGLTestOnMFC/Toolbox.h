@@ -1,5 +1,6 @@
 #pragma once
 #include "afxwin.h"
+#include "point.h"
 
 #include <vector>
 #include <fstream>
@@ -21,7 +22,7 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 void loadHistogram(string filname,double *histogram);
 double similarity(double *histogram_test,double *histogram_sketch);
 void qsort_getid(double array[],double id_array[], int left_id, int right_id);
-bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector,
+bool  GetPolarCoordinate(vector<Point> &grid_points,vector<double> &dist_vector,
 						 vector<double> &phi_vector, vector<double> &theta_vector);
 bool qsortPolarCoordinate(int left_id, int right_id,
 						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector);

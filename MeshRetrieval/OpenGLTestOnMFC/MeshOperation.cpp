@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "MeshOperation.h"
+#include "point.h"
+#include "vector.h"
 
 #include <math.h>
 #include <cmath>
@@ -37,9 +39,44 @@ void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 	NOISE_CONTROL = false;
 }
 
+int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],vector<Point> &grid_points)
+{
+	Vector v12 = point2-point1;
+	double len12 = v12.norm();
+	v12.normalise();
+
+	int n_points = 0;
+	for(unsigned int n=0;n<=floor(len12);n++)
+	{
+		Point temp_p;
+		temp_p.x() = round(point1.x()+v12.x()*double(n));
+		temp_p.y() = round(point1.y()+v12.y()*double(n));
+		temp_p.z() = round(point1.z()+v12.z()*double(n));
+
+		int grid_coordinate	= int(temp_p.x()*2*RADIUS*2*RADIUS + temp_p.y()*2*RADIUS + temp_p.z());
+		if(grid[grid_coordinate]!=true)
+		{
+			grid[grid_coordinate] = true;
+			inter12.push_back(temp_p);
+			grid_points.push_back(temp_p);
+			n_points++;
+		}
+	}
+
+	int grid_coordinate_p2 = int(point2.x()*2*RADIUS*2*RADIUS + point2.y()*2*RADIUS + point2.z());
+	if(grid[grid_coordinate_p2]!=true)
+	{
+		grid[grid_coordinate_p2] = true;
+		inter12.push_back(point2);
+		grid_points.push_back(point2);
+		n_points++;
+	} 
+
+	return n_points;
+}
+
 /*normalize the model and rasterize to 2R*2R*2R voxel grid*/
-void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,
-				   vector<double> &dist_vector)
+void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_vector)
 {
 	double x_max,y_max,z_max,x_min,y_min,z_min;
 	FindMaxMin(mesh,x_max,y_max,z_max,x_min,y_min,z_min);
@@ -52,9 +89,52 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 	if (distance_y > max_distance) max_distance = distance_y;
 	if (distance_z > max_distance) max_distance = distance_z;
 
-	/*normalize and rasterize*/
+	/*normalize*/
 	//initial centroid
-	double centroid_x = 0.0,centroid_y = 0.0,centroid_z = 0.0;
+	Point centroid(0.0,0.0,0.0);
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		//move to positive, normalize to 1 
+		double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
+		double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
+		double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
+
+		*(mesh.point(v_it).data()+0) = x_normalize;
+		*(mesh.point(v_it).data()+1) = y_normalize;
+		*(mesh.point(v_it).data()+2) = z_normalize;
+
+		//get centroid
+		centroid.x() += double(x_normalize);
+		centroid.y() += double(y_normalize);
+		centroid.z() += double(z_normalize);
+	}
+	centroid.x()/=double(mesh.n_vertices());
+	centroid.y()/=double(mesh.n_vertices());
+	centroid.z()/=double(mesh.n_vertices());
+
+	//get distance
+	float mean_dist = 0.0;
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		//get distance between vertex and origin
+		double current_dist = sqrt(pow(*(mesh.point(v_it).data()+0)-centroid.x(),2.0) 
+			+ pow(*(mesh.point(v_it).data()+1)-centroid.y(),2.0) + pow(*(mesh.point(v_it).data()+2)-centroid.z(),2.0));
+		mean_dist += current_dist;
+	}
+	mean_dist/=double(mesh.n_vertices());
+
+	//scale and make the average distance to center of mass is R/2
+	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		*(mesh.point(v_it).data()+0) *= scale_ratio;
+		*(mesh.point(v_it).data()+1) *= scale_ratio;
+		*(mesh.point(v_it).data()+2) *= scale_ratio;
+
+		////again get distance between vertex and origin
+		//double current_dist = sqrt(pow(*(mesh.point(v_it).data()+0),2.0) + pow(*(mesh.point(v_it).data()+1),2.0) + pow(*(mesh.point(v_it).data()+2),2.0));
+		//dist_vector.push_back(current_dist);
+	}
 
 	//create grid 
 	bool *grid;
@@ -62,124 +142,123 @@ void NormalizeMesh(MyMesh &mesh,vector<double> &grid_id_x,vector<double> &grid_i
 	grid = new bool [grid_size];
 	memset(grid,false,grid_size*sizeof(bool));
 
-	if(grid!=NULL)
+
+	/*rasterize*/
+	for(MyMesh::FaceIter f_it=mesh.faces_begin();f_it!=mesh.faces_end();++f_it)
 	{
-		for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+		vector<Point> face_points;
+
+		for(MyMesh::FaceVertexIter v_it=mesh.fv_iter(f_it);v_it;++v_it)
 		{
-			//move to positive, normalize to 1 
-			double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
-			double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
-			double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
+			Point temp_face_point;
+			temp_face_point.x() = *(mesh.point(v_it).data()+0);
+			temp_face_point.y() = *(mesh.point(v_it).data()+1);
+			temp_face_point.z() = *(mesh.point(v_it).data()+2);
+			face_points.push_back(temp_face_point);
 
-			*(mesh.point(v_it).data()+0) = x_normalize;
-			*(mesh.point(v_it).data()+1) = y_normalize;
-			*(mesh.point(v_it).data()+2) = z_normalize;
+			//test face points
+			int grid_coordinate	= int(temp_face_point.x()*2*RADIUS*2*RADIUS + temp_face_point.y()*2*RADIUS + temp_face_point.z());
+			if(grid_coordinate>262144-1 || grid_coordinate<0)  continue; 
 
-			//rasterize to 2Rx2Rx2R voxel grid
-			int x_rasterize = static_cast<int>(round(x_normalize*(2*RADIUS-1)));
-			int y_rasterize = static_cast<int>(round(y_normalize*(2*RADIUS-1)));
-			int z_rasterize = static_cast<int>(round(z_normalize*(2*RADIUS-1)));
-
-			//If this vertex hasn't been registered
-			if(grid[x_rasterize*2*RADIUS*2*RADIUS + y_rasterize*2*RADIUS + z_rasterize]!=true)
+			if(grid[grid_coordinate]!=true)
 			{
-				//register
-				grid[x_rasterize*2*RADIUS*2*RADIUS + y_rasterize*2*RADIUS + z_rasterize]=true;
-
-				//push back
-				grid_id_x.push_back(double(x_rasterize));
-				grid_id_y.push_back(double(y_rasterize));
-				grid_id_z.push_back(double(z_rasterize));
-
-				//get centroid
-				centroid_x += double(x_rasterize);
-				centroid_y += double(y_rasterize);
-				centroid_z += double(z_rasterize);
+				grid[grid_coordinate] = true;
+				grid_points.push_back(temp_face_point);
 			}
 		}
-	}//end if(grid!=NULL)
-	//delete grid
-	delete [] grid;
 
-	centroid_x/=double(grid_id_x.size());
-	centroid_y/=double(grid_id_y.size());
-	centroid_z/=double(grid_id_z.size());
+		//fill the edges for a triangle face
+		vector<Point> inter12,inter23,inter13;
+		int n_points12 = fillGridLine(face_points.at(0),face_points.at(1),inter12,grid,grid_points);
+		int n_points23 = fillGridLine(face_points.at(1),face_points.at(2),inter23,grid,grid_points);
+		int n_points13 = fillGridLine(face_points.at(0),face_points.at(2),inter13,grid,grid_points);
 
-	//move centroid to origin and get distance
-	float mean_dist = 0.0;
-	for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
-	{
-		//move centroid to origin
-		grid_id_x.at(grid_iter) -= centroid_x;
-		grid_id_y.at(grid_iter) -= centroid_y;
-		grid_id_z.at(grid_iter) -= centroid_z;
-
-		//get distance between vertex and origin
-		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
-		mean_dist += current_dist;
+		//fill in the face
+		if(n_points12>=n_points13 && n_points13>0)
+		{
+			for(unsigned int n=0;n<n_points13;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(n),temp_inter,grid,grid_points);
+			}
+			for(unsigned int n=n_points13;n<n_points12;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(inter13.size()-1),temp_inter,grid,grid_points);
+			}
+		} 
+		else if(n_points13>=n_points12 && n_points12>0)
+		{
+			for(unsigned int n=0;n<n_points12;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(n),temp_inter,grid,grid_points);
+			}
+			for(unsigned int n=n_points12;n<n_points13;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(inter12.size()-1),inter13.at(n),temp_inter,grid,grid_points);
+			}
+		}
 	}
-	mean_dist/=double(grid_id_x.size());
 
-	//scale and make the average distance to center of mass is R/2
-	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
-	for (unsigned int grid_iter = 0;grid_iter<grid_id_x.size();grid_iter++)
+	//test mean distance
+	Point centroid_after(0.0,0.0,0.0);
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
 	{
-		grid_id_x.at(grid_iter) *= scale_ratio;
-		grid_id_y.at(grid_iter) *= scale_ratio;
-		grid_id_z.at(grid_iter) *= scale_ratio;
+		centroid_after.x()+=grid_points.at(p_it).x();
+		centroid_after.y()+=grid_points.at(p_it).y();
+		centroid_after.z()+=grid_points.at(p_it).z();
 
-		//again get distance between vertex and origin
-		double current_dist = sqrt(pow(grid_id_x.at(grid_iter),2) + pow(grid_id_y.at(grid_iter),2) + pow(grid_id_z.at(grid_iter),2));
+	}
+	centroid_after.x()/=grid_points.size();
+	centroid_after.y()/=grid_points.size();
+	centroid_after.z()/=grid_points.size();
+
+	//move grid to the origin and get distance vector
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		grid_points.at(p_it).x() -= centroid_after.x();
+		grid_points.at(p_it).y() -= centroid_after.y();
+		grid_points.at(p_it).z() -= centroid_after.z();
+
+		double current_dist = pow(grid_points.at(p_it).x(),2.0)+pow(grid_points.at(p_it).y(),2.0)+pow(grid_points.at(p_it).z(),2.0);
+		current_dist = sqrt(current_dist);
 		dist_vector.push_back(current_dist);
 	}
 
 	//TEST rotate xyz
-	double rotate_angle = 0.0;//M_PI/3.0;
-	for(unsigned int id=0;id<grid_id_x.size();id++)
+	double rotate_angle = M_PI/6.0;
+	for(unsigned int id=0;id<grid_points.size();id++)
 	{
-		double x = grid_id_x.at(id);
-		double y = grid_id_y.at(id);
+		double x = grid_points.at(id).x();
+		double y = grid_points.at(id).y();
 
-		grid_id_x.at(id) = x*cos(rotate_angle)-y*sin(rotate_angle);
-		grid_id_y.at(id) = x*sin(rotate_angle)+y*cos(rotate_angle);
+		grid_points.at(id).x() = x*cos(rotate_angle)-y*sin(rotate_angle);
+		grid_points.at(id).y() = x*sin(rotate_angle)+y*cos(rotate_angle);
 	}
 
 	NORMALIZE_CONTROL = FALSE;
 }
 
 /*compute spherical harmonics*/
-void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector)
+void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector)
 {
 	vector<double> phi_vector,theta_vector;	//radian
 	bool get_polar,get_sorted;
 
-	get_polar = GetPolarCoordinate(grid_id_x,grid_id_y,grid_id_z,dist_vector,phi_vector,theta_vector);
+	get_polar = GetPolarCoordinate(grid_points,dist_vector,phi_vector,theta_vector);
 	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
-
-	//TEST	rotation invariant
-	//add some offset to phi
-	//for(unsigned int t=0;t<phi_vector.size();t++)
-	//{
-	//	theta_vector.at(t)+=1;
-	//	//theta_vector
-	//}
 
 	if(get_polar&&get_sorted)
 	{
-
 		//begin
 		int max_l = RADIUS;
 		int max_r = RADIUS;
 		int idx_n = 0;
-
-		//initial descriptor
 		double *SH_descriptor;
 		SH_descriptor = new double [max_r*max_l]();
 
-		//for(unsigned int idx_n = 0;idx_n<dist_vector.size();idx_n++)
-		//{
-		//	int idx_r = ceil(dist_vector.at(idx_n));
-		//	if (idx_r>max_r) continue;
 		for(unsigned int idx_r = 1;idx_r<=RADIUS;idx_r++)
 		{
 			//for each frequency
@@ -284,7 +363,7 @@ void ComputeSpharm(vector<double> &grid_id_x,vector<double> &grid_id_y,vector<do
 		//}
 
 		/*write out the data*/
-		string filename = "./Output_data/after_diss";
+		string filename = "./Output_data/changed_class";
 		// open file
 		ofstream myfile;
 		myfile.open(filename+".txt");

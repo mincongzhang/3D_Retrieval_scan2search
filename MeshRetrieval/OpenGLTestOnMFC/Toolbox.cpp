@@ -2,6 +2,7 @@
 #include "OpenGLControl.h"
 #include ".\openglcontrol.h"
 #include "MeshOperation.h"
+#include "point.h"
 
 #include <math.h>
 #include <random>
@@ -101,17 +102,17 @@ bool qsortPolarCoordinate(int left_id, int right_id,
 }
 
 //get polar coordinate 
-bool  GetPolarCoordinate(vector<double> &grid_id_x, vector<double> &grid_id_y,vector<double> &grid_id_z,vector<double> &dist_vector,
+bool  GetPolarCoordinate(vector<Point> &grid_points,vector<double> &dist_vector,
 						 vector<double> &phi_vector, vector<double> &theta_vector)
 {
-	for (unsigned int i = 0; i<grid_id_x.size();i++)
+	for (unsigned int i = 0; i<grid_points.size();i++)
 	{
 		//phi   = atan(y/x);
 		//theta = acos(z/radious);
 		//atan(sqrt(3.0))=1.047=pi/3
 		//acos(0.5)      =1.047=pi/3
-		double phi = atan(double(grid_id_y.at(i)/grid_id_x.at(i)));
-		double theta = acos(double(grid_id_z.at(i)/dist_vector.at(i)));
+		double phi = atan(double(grid_points.at(i).y()/grid_points.at(i).x()));
+		double theta = acos(double(grid_points.at(i).z()/dist_vector.at(i)));
 		phi_vector.push_back(phi);
 		theta_vector.push_back(theta);
 	}
