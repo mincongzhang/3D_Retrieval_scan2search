@@ -30,6 +30,12 @@ The Legendre polynomial P(n,x) can be defined by:
     P(n,x) = (2*n-1)/n * x * P(n-1,x) - (n-1)/n * P(n-2,x)
 
 
+##notes
+computing SH very slow: precompute?   
+(1)divide and concour  http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
+(2)FFT to fourier then SH:http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method  
+(3)face based? http://liris.cnrs.fr/Documents/Liris-2276.pdf  
+
 ##Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
 http://blog.sciencenet.cn/blog-548663-715825.html  
