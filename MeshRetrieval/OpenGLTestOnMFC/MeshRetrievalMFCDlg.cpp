@@ -75,6 +75,8 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(CANDIDATE5, &CMeshRetrievalMFCDlg::OnBnClickedCandidate5)
 	ON_BN_CLICKED(CANDIDATE6, &CMeshRetrievalMFCDlg::OnBnClickedCandidate6)
 
+	ON_BN_CLICKED(Rasterize, &CMeshRetrievalMFCDlg::OnBnClickedRasterize)
+	ON_BN_CLICKED(BatchTransform, &CMeshRetrievalMFCDlg::OnBnClickedBatchtransform)
 END_MESSAGE_MAP()
 
 
@@ -249,6 +251,11 @@ void CMeshRetrievalMFCDlg::OnBnClickedNormalize()
 	NORMALIZE_CONTROL = true;
 }
 
+void CMeshRetrievalMFCDlg::OnBnClickedRasterize()
+{
+	RASTERIZE_CONTROL = true;
+}
+
 void CMeshRetrievalMFCDlg::OnBnClickedSpharm()
 {
 	SPHARM_CONTROL = true;
@@ -282,4 +289,11 @@ void CMeshRetrievalMFCDlg::OnBnClickedCandidate5()
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate6()
 {
 	ChooseCandidate(candidate_index_array,base+5);
+}
+
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedBatchtransform()
+{
+	BATCH_CONTROL = true;
 }

@@ -75,8 +75,31 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 	return n_points;
 }
 
-/*normalize the model and rasterize to 2R*2R*2R voxel grid*/
-void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_vector)
+/*write the output SH*/
+void WriteSH(string &write_filename,const int &max_r,const int &max_l,double SH_descriptor[])
+{
+	// open file
+	ofstream myfile;
+	myfile.open(write_filename);
+	//write file header
+	if (myfile.is_open())
+	{
+		//write SH
+		//(idx_r-1)*max_l+idx_l
+		for(unsigned int idx_r=0;idx_r<max_r;idx_r++)
+		{
+			for(unsigned int idx_l=0;idx_l<max_l;idx_l++)
+			{
+				myfile << SH_descriptor[idx_r*max_l+idx_l]<< " ";
+			}
+			myfile << "\n";
+		}
+		myfile.close();
+	}
+}
+
+/*normalize the model */
+void NormalizeMesh(MyMesh &mesh)
 {
 	double x_max,y_max,z_max,x_min,y_min,z_min;
 	FindMaxMin(mesh,x_max,y_max,z_max,x_min,y_min,z_min);
@@ -131,19 +154,24 @@ void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		*(mesh.point(v_it).data()+1) *= scale_ratio;
 		*(mesh.point(v_it).data()+2) *= scale_ratio;
 
-		////again get distance between vertex and origin
-		//double current_dist = sqrt(pow(*(mesh.point(v_it).data()+0),2.0) + pow(*(mesh.point(v_it).data()+1),2.0) + pow(*(mesh.point(v_it).data()+2),2.0));
-		//dist_vector.push_back(current_dist);
+		//scale back to range [0,1] for better viewing 
+		*(mesh.point(v_it).data()+0) /= double(2*RADIUS);
+		*(mesh.point(v_it).data()+1) /= double(2*RADIUS);
+		*(mesh.point(v_it).data()+2) /= double(2*RADIUS);
 	}
 
+	NORMALIZE_CONTROL = FALSE;
+}
+
+/*rasterize the model to 2R*2R*2R voxel grid*/
+void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_vector)
+{
 	//create grid 
 	bool *grid;
 	int grid_size = 2*RADIUS*2*RADIUS*2*RADIUS;
 	grid = new bool [grid_size];
 	memset(grid,false,grid_size*sizeof(bool));
 
-
-	/*rasterize*/
 	for(MyMesh::FaceIter f_it=mesh.faces_begin();f_it!=mesh.faces_end();++f_it)
 	{
 		vector<Point> face_points;
@@ -151,15 +179,19 @@ void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		for(MyMesh::FaceVertexIter v_it=mesh.fv_iter(f_it);v_it;++v_it)
 		{
 			Point temp_face_point;
-			temp_face_point.x() = *(mesh.point(v_it).data()+0);
-			temp_face_point.y() = *(mesh.point(v_it).data()+1);
-			temp_face_point.z() = *(mesh.point(v_it).data()+2);
+			//scale back from range [0,1] to [0,2R]
+			temp_face_point.x() = *(mesh.point(v_it).data()+0)*2*RADIUS;
+			temp_face_point.y() = *(mesh.point(v_it).data()+1)*2*RADIUS;
+			temp_face_point.z() = *(mesh.point(v_it).data()+2)*2*RADIUS;
 			face_points.push_back(temp_face_point);
 
-			//test face points
+			//get grid coordinate
 			int grid_coordinate	= int(temp_face_point.x()*2*RADIUS*2*RADIUS + temp_face_point.y()*2*RADIUS + temp_face_point.z());
-			if(grid_coordinate>262144-1 || grid_coordinate<0)  continue; 
 
+			//discard points out of range
+			if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
+
+			//if not registered
 			if(grid[grid_coordinate]!=true)
 			{
 				grid[grid_coordinate] = true;
@@ -202,7 +234,7 @@ void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		}
 	}
 
-	//test mean distance
+	//get centroid again
 	Point centroid_after(0.0,0.0,0.0);
 	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
 	{
@@ -211,9 +243,9 @@ void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		centroid_after.z()+=grid_points.at(p_it).z();
 
 	}
-	centroid_after.x()/=grid_points.size();
-	centroid_after.y()/=grid_points.size();
-	centroid_after.z()/=grid_points.size();
+	centroid_after.x()/=double(grid_points.size());
+	centroid_after.y()/=double(grid_points.size());
+	centroid_after.z()/=double(grid_points.size());
 
 	//move grid to the origin and get distance vector
 	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
@@ -227,22 +259,24 @@ void NormalizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		dist_vector.push_back(current_dist);
 	}
 
+	delete [] grid;
+
 	//TEST rotate xyz
-	double rotate_angle = M_PI/6.0;
-	for(unsigned int id=0;id<grid_points.size();id++)
-	{
-		double x = grid_points.at(id).x();
-		double y = grid_points.at(id).y();
+	//double rotate_angle = M_PI/6.0;
+	//for(unsigned int id=0;id<grid_points.size();id++)
+	//{
+	//	double x = grid_points.at(id).x();
+	//	double y = grid_points.at(id).y();
 
-		grid_points.at(id).x() = x*cos(rotate_angle)-y*sin(rotate_angle);
-		grid_points.at(id).y() = x*sin(rotate_angle)+y*cos(rotate_angle);
-	}
+	//	grid_points.at(id).x() = x*cos(rotate_angle)-y*sin(rotate_angle);
+	//	grid_points.at(id).y() = x*sin(rotate_angle)+y*cos(rotate_angle);
+	//}
 
-	NORMALIZE_CONTROL = FALSE;
+	RASTERIZE_CONTROL = FALSE;
 }
 
 /*compute spherical harmonics*/
-void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector)
+void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string write_filename)
 {
 	vector<double> phi_vector,theta_vector;	//radian
 	bool get_polar,get_sorted;
@@ -294,7 +328,7 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector)
 					a_ml_pow.push_back(pow(a_ml_real,2.0)+pow(a_ml_imag,2.0));
 					if(idx_l!=max_l-1) idx_n-=Yml_real.size();
 				}//finish traversing frequency range
-				SH_descriptor[(idx_r-1)*max_l+idx_l] = accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0);
+				SH_descriptor[(idx_r-1)*max_l+idx_l] = sqrt(accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0));
 			}	//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
 		}// for(unsigned int idx_r = 0;idx_r<RADIUS;idx_r++)
 
@@ -363,33 +397,44 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector)
 		//}
 
 		/*write out the data*/
-		string filename = "./Output_data/changed_class";
-		// open file
-		ofstream myfile;
-		myfile.open(filename+".txt");
-		//write file header
-		if (myfile.is_open())
-		{
-			//write SH
-			//(idx_r-1)*max_l+idx_l
-			for(unsigned int idx_r=0;idx_r<max_r;idx_r++)
-			{
-				for(unsigned int idx_l=0;idx_l<max_l;idx_l++)
-				{
-					myfile << SH_descriptor[idx_r*max_l+idx_l]<< " ";
-				}
-				myfile << "\n";
-			}
-
-			myfile.close();
-		}
+		WriteSH(write_filename,max_r,max_l,SH_descriptor);
 
 		delete [] SH_descriptor;
 	}//end of if(get_polar&&get_sorted)
 
-
 	SPHARM_CONTROL = false;
+}
 
+/*batch transform*/
+void BatchTrans(void)
+{
+	int file_num = 5;
+
+	for(unsigned int file_id=3;file_id<=file_num;file_id++)
+	{
+		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
+		string read_filename = "./MeshData/data ("+id+").stl";
+		string write_filename = "./MeshSHData/SH"+id+".txt";
+
+		MyMesh mesh_to_transform;
+		OpenMesh::IO::read_mesh(mesh_to_transform, read_filename);
+
+		vector<Point> grid_points_to_transform;
+		vector<double> dist_vector_to_transform;
+
+		NormalizeMesh(mesh_to_transform);
+		RasterizeMesh(mesh_to_transform,grid_points_to_transform,dist_vector_to_transform);
+		ComputeSpharm(grid_points_to_transform,dist_vector_to_transform,write_filename);
+
+	}
+
+	//ifstream fin("hello.txt");
+	//if (!fin)
+	//{
+	//	std::cout << "can not open this file" << endl;
+	//}
+
+	BATCH_CONTROL = false;
 }
 
 void ChooseCandidate(double candidate_index_array[],int candidateIndx)

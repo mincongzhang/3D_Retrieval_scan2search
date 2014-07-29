@@ -16,7 +16,9 @@ vector<MyMesh>  meshQueue;
 
 bool NOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = false;
+bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
+bool BATCH_CONTROL = false;
 
 //add noise variable
 double noise_standard_deviation = 0.01; 
@@ -192,19 +194,19 @@ void COpenGLControl::OnMouseMove(UINT nFlags, CPoint point)
 	// Left mouse button
 	if (nFlags & MK_LBUTTON)
 	{
-			m_fRotX += (float)0.5f * diffY;
+		m_fRotX += (float)0.5f * diffY;
 
-			if ((m_fRotX > 360.0f) || (m_fRotX < -360.0f))
-			{
-				m_fRotX = 0.0f;
-			}
+		if ((m_fRotX > 360.0f) || (m_fRotX < -360.0f))
+		{
+			m_fRotX = 0.0f;
+		}
 
-			m_fRotY += (float)0.5f * diffX;
+		m_fRotY += (float)0.5f * diffX;
 
-			if ((m_fRotY > 360.0f) || (m_fRotY < -360.0f))
-			{
-				m_fRotY = 0.0f;
-			}
+		if ((m_fRotY > 360.0f) || (m_fRotY < -360.0f))
+		{
+			m_fRotY = 0.0f;
+		}
 	}
 	// Middle mouse button
 	else if (nFlags & MK_MBUTTON)
@@ -328,97 +330,109 @@ void COpenGLControl::oglDrawScene(void)
 	{
 		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
 	}
-	//normalize the current mesh
-	if(NORMALIZE_CONTROL && meshsize>=1 && grid_points.size()==0)
+	//normalize current mesh
+	if(NORMALIZE_CONTROL && meshsize>=1 )
 	{
-		NormalizeMesh(meshQueue.at(meshsize-1),grid_points,dist_vector);
+		NormalizeMesh(meshQueue.at(meshsize-1));
+	}
+	//rasterize current mesh
+	if(RASTERIZE_CONTROL&& meshsize>=1 && grid_points.size()==0)
+	{
+		RasterizeMesh(meshQueue.at(meshsize-1),grid_points,dist_vector);
 	}
 	//compute spherical harmonics
 	if(SPHARM_CONTROL)
 	{
-		ComputeSpharm(grid_points,dist_vector);
+		string write_filename = "./DemoSH/demo.txt";
+		ComputeSpharm(grid_points,dist_vector,write_filename);
+	}
+
+	//batch transform
+	if(BATCH_CONTROL)
+	{
+		 BatchTrans();
 	}
 
 	/*Draw Meshes*/
 	for (unsigned int i=0;i<meshsize;i++)
 	{
-			//x axis
-			glColor3f(GLfloat(1.0), GLfloat(0.0), GLfloat(0.0));
-			glBegin(GL_LINES);
-			glVertex3f(-1.0,0.0,0.0);
-			glVertex3f(1.0,0.0,0.0);
-			glEnd();
-			//y axis
-			glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(0.0));
-			glBegin(GL_LINES);
-			glVertex3f(0.0,-1.0,0.0);
-			glVertex3f(0.0,1.0,0.0);
-			glEnd();
-			//z axis
-			glColor3f(GLfloat(0.0), GLfloat(0.0), GLfloat(1.0));
-			glBegin(GL_LINES);
-			glVertex3f(0.0,0.0,-1.0);
-			glVertex3f(0.0,0.0,1.0);
-			glEnd();
+		//x axis
+		glColor3f(GLfloat(1.0), GLfloat(0.0), GLfloat(0.0));
+		glBegin(GL_LINES);
+		glVertex3f(-1.0,0.0,0.0);
+		glVertex3f(1.0,0.0,0.0);
+		glEnd();
+		//y axis
+		glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(0.0));
+		glBegin(GL_LINES);
+		glVertex3f(0.0,-1.0,0.0);
+		glVertex3f(0.0,1.0,0.0);
+		glEnd();
+		//z axis
+		glColor3f(GLfloat(0.0), GLfloat(0.0), GLfloat(1.0));
+		glBegin(GL_LINES);
+		glVertex3f(0.0,0.0,-1.0);
+		glVertex3f(0.0,0.0,1.0);
+		glEnd();
 
-			//draw mesh
-			if(grid_points.size()==0)
+		//draw mesh
+		if(grid_points.size()==0)
+		{
+			glEnable(GL_LIGHTING);
+			//change the colour for each mesh
+			switch (i) 
 			{
-				glEnable(GL_LIGHTING);
-				//change the colour for each mesh
-				switch (i) 
-				{
-				case 0:
-					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
-					break;
-				case 1:
-					glColor3f(GLfloat(0.6), GLfloat(0.8), GLfloat(1.0));
-					break;
-				case 2:
-					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
-					break;
-				case 3:
-					glColor3f(GLfloat(0.6), GLfloat(1.0), GLfloat(1.0));
-					break;
-				default:
-					glColor3f(GLfloat(0.5), GLfloat(0.5), GLfloat(0.5));
-				};
+			case 0:
+				glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+				break;
+			case 1:
+				glColor3f(GLfloat(0.6), GLfloat(0.8), GLfloat(1.0));
+				break;
+			case 2:
+				glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+				break;
+			case 3:
+				glColor3f(GLfloat(0.6), GLfloat(1.0), GLfloat(1.0));
+				break;
+			default:
+				glColor3f(GLfloat(0.5), GLfloat(0.5), GLfloat(0.5));
+			};
 
-				meshQueue.at(i).request_face_normals();
-				meshQueue.at(i).update_normals();
+			meshQueue.at(i).request_face_normals();
+			meshQueue.at(i).update_normals();
 
-				GLdouble norms[3]={0.0,0.0,0.0};
-				for(MyMesh::FaceIter f_it=meshQueue.at(i).faces_begin();f_it!=meshQueue.at(i).faces_end();++f_it)
-				{
-					for(int n=0;n<3;n++){
-						norms[n]=(GLdouble)*(meshQueue.at(i).normal(f_it).data()+n);
-					}
-					glNormal3dv(norms);
-
-					glPushMatrix();
-					glBegin(GL_POLYGON);
-					for(MyMesh::FaceVertexIter v_it=meshQueue.at(i).fv_iter(f_it);v_it;++v_it)
-					{
-						glVertex3fv(meshQueue.at(i).point(v_it).data());
-					}
-					glEnd();
-					glPopMatrix();
+			GLdouble norms[3]={0.0,0.0,0.0};
+			for(MyMesh::FaceIter f_it=meshQueue.at(i).faces_begin();f_it!=meshQueue.at(i).faces_end();++f_it)
+			{
+				for(int n=0;n<3;n++){
+					norms[n]=(GLdouble)*(meshQueue.at(i).normal(f_it).data()+n);
 				}
+				glNormal3dv(norms);
 
-				//release the face normals
-				meshQueue.at(i).release_face_normals();
+				glPushMatrix();
+				glBegin(GL_POLYGON);
+				for(MyMesh::FaceVertexIter v_it=meshQueue.at(i).fv_iter(f_it);v_it;++v_it)
+				{
+					glVertex3fv(meshQueue.at(i).point(v_it).data());
+				}
+				glEnd();
+				glPopMatrix();
 			}
-			//draw rasterized grid
-			else
-			{
-					glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
-					glPointSize(2.0);
-					glBegin(GL_POINTS);
-					for(unsigned int grid_iter = 0 ;grid_iter<grid_points.size();grid_iter++){
-						glVertex3f(float(grid_points.at(grid_iter).x())/32.0,float(grid_points.at(grid_iter).y())/32.0,float(grid_points.at(grid_iter).z())/32.0);
-					}
-					glEnd();
-			}//end draw grid
+
+			//release the face normals
+			meshQueue.at(i).release_face_normals();
+		}
+		//draw rasterized grid
+		else
+		{
+			glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
+			glPointSize(2.0);
+			glBegin(GL_POINTS);
+			for(unsigned int grid_iter = 0 ;grid_iter<grid_points.size();grid_iter++){
+				glVertex3f(float(grid_points.at(grid_iter).x())/32.0,float(grid_points.at(grid_iter).y())/32.0,float(grid_points.at(grid_iter).z())/32.0);
+			}
+			glEnd();
+		}//end draw grid
 	}//end for (unsigned int i=0;i<meshsize;i++)
 }//end void COpenGLControl::oglDrawScene(void)
 
