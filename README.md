@@ -3,6 +3,8 @@
 
 Spherical harmonics descriptor
 
+batch transform finished
+
 ##Functions
 
 Pseudo code for spherical harmonics:
