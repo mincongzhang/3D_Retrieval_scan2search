@@ -3,7 +3,6 @@
 
 Spherical harmonics descriptor
 
-batch transform finished
 
 ##Functions
 
