@@ -3,7 +3,6 @@
 
 Spherical harmonics descriptor
 
-
 ##Functions
 
 Pseudo code for spherical harmonics:
