@@ -3,6 +3,9 @@
 
 Spherical harmonics descriptor
 
+SH computation has out of memory problem. Don't know why
+ 
+
 ##Functions
 
 Pseudo code for spherical harmonics:
