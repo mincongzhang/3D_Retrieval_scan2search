@@ -77,6 +77,7 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 
 	ON_BN_CLICKED(Rasterize, &CMeshRetrievalMFCDlg::OnBnClickedRasterize)
 	ON_BN_CLICKED(BatchTransform, &CMeshRetrievalMFCDlg::OnBnClickedBatchtransform)
+	ON_BN_CLICKED(Denoise, &CMeshRetrievalMFCDlg::OnBnClickedDenoise)
 END_MESSAGE_MAP()
 
 
@@ -296,4 +297,10 @@ void CMeshRetrievalMFCDlg::OnBnClickedCandidate6()
 void CMeshRetrievalMFCDlg::OnBnClickedBatchtransform()
 {
 	BATCH_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedDenoise()
+{
+	LAPLACE_DENOISE_CONTROL = true;
 }

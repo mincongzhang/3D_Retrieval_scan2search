@@ -47,4 +47,7 @@ public:
 	afx_msg void OnBnClickedCandidate4();
 	afx_msg void OnBnClickedCandidate5();
 	afx_msg void OnBnClickedCandidate6();
+	afx_msg void OnBnClickedRasterize();
+	afx_msg void OnBnClickedBatchtransform();
+	afx_msg void OnBnClickedDenoise();
 };

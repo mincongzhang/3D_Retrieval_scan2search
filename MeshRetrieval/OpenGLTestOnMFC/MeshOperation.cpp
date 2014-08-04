@@ -39,6 +39,49 @@ void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 	NOISE_CONTROL = false;
 }
 
+/*Uniform Laplacian smoothing*/
+void LaplaceDenoise(MyMesh &mesh)
+{
+	//Find neighbour points for calculating normal vectors
+	MyMesh::Point  neighbourPt1;
+	MyMesh::Point  neighbourPt2;
+
+	//calculate normal for each vertex 
+	std::vector<MyMesh::Point> neighbours;
+	MyMesh::Point               currentPt;
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{   
+		//Find one-ring neighbours
+		MyMesh::VertexIter          v_it;
+		MyMesh::VertexVertexIter    vv_it;
+		v_it = it;
+		for (vv_it=mesh.vv_iter(v_it); vv_it; ++vv_it)
+		{
+			neighbours.push_back(mesh.point(vv_it));
+		}
+
+		int neighbours_size = neighbours.size();
+
+		//define a scale factor to make gradual change
+		double scale_factor = 0.01; 
+
+		//assign to normal_mesh
+		for(int d=0;d<3;d++)
+		{
+			double laplace_vector = 0.0;
+			for(int i=0;i<neighbours_size;i++)
+			{
+				laplace_vector += neighbours.at(i).data()[d];// - currentPt.data()[d];
+			}
+			laplace_vector /= double(neighbours_size);
+
+			*(mesh.point(it).data()+d) -= float(scale_factor*laplace_vector);
+		}
+	}// end of for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+
+	LAPLACE_DENOISE_CONTROL = false;
+}
+
 int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],vector<Point> &grid_points)
 {
 	Vector v12 = point2-point1;
@@ -304,7 +347,8 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 				{
 					vector<double> Yml_real,Yml_imag;
 					double NPml;
-					while(dist_vector.at(idx_n)<idx_r)
+
+					while(idx_n<=(dist_vector.size()-1) && dist_vector.at(idx_n)<idx_r)
 					{
 						//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
 						//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
@@ -321,7 +365,9 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 							Yml_imag.push_back(NPml*sin(double(-idx_m)*phi_vector.at(idx_n)));
 						}
 						idx_n++;
+						if(idx_n==(dist_vector.size()-1)) break;
 					}//while(dist_vector.at(idx_n)<idx_r)
+
 					double 	a_ml_real,a_ml_imag;
 					a_ml_real=accumulate(Yml_real.begin(),Yml_real.end(),0.0);
 					a_ml_imag=accumulate(Yml_imag.begin(),Yml_imag.end(),0.0);
@@ -408,9 +454,9 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 /*batch transform*/
 void BatchTrans(void)
 {
-	int file_num = 5;
+	int file_num = 30;
 
-	for(unsigned int file_id=3;file_id<=file_num;file_id++)
+	for(unsigned int file_id=21;file_id<=file_num;file_id++)
 	{
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
 		string read_filename = "./MeshData/data ("+id+").stl";

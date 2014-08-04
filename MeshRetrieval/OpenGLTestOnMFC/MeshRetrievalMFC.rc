@@ -96,7 +96,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
 END
 
-IDD_MeshRetrievalMFC_DIALOG DIALOGEX 0, 0, 551, 354
+IDD_MeshRetrievalMFC_DIALOG DIALOGEX 0, 0, 551, 367
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "MeshRetrieval"
@@ -105,16 +105,19 @@ BEGIN
     CONTROL         "",IDC_PIC_OPENGL,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,24,17,503,272
     PUSHBUTTON      "LoadMesh",Load,30,297,57,14
     LTEXT           "Left mouse button: Rotate      Mid mouse button: Zoom in/out Right mouse button: Translate",IDC_STATIC,442,305,99,28
-    PUSHBUTTON      "AddNoise",Noise,29,322,57,14
-    PUSHBUTTON      "Normalize",Normalize,96,298,60,14
-    CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,261,310,53,10
-    CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,261,322,53,10
-    CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,314,310,53,10
-    CONTROL         "Candidate4",CANDIDATE4,"Button",BS_AUTORADIOBUTTON,314,322,53,10
-    CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,367,310,53,10
-    CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,367,322,53,10
-    GROUPBOX        "Candidate",IDC_STATIC,250,296,173,41
-    PUSHBUTTON      "Spharm",Spharm,166,298,59,14
+    PUSHBUTTON      "AddNoise",Noise,95,298,57,14
+    PUSHBUTTON      "Normalize",Normalize,30,318,57,14
+    CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,261,312,53,10
+    CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,261,329,53,10
+    CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,314,312,53,10
+    CONTROL         "Candidate4",CANDIDATE4,"Button",BS_AUTORADIOBUTTON,314,329,53,10
+    CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,367,312,53,10
+    CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,367,329,53,10
+    GROUPBOX        "Candidate",IDC_STATIC,250,296,173,55
+    PUSHBUTTON      "Spharm",Spharm,162,319,59,14
+    PUSHBUTTON      "Rasterize",Rasterize,95,319,57,14
+    PUSHBUTTON      "BatchTransform",BatchTransform,30,339,57,14
+    PUSHBUTTON      "Denoise",Denoise,162,298,60,14
 END
 
 
@@ -180,7 +183,7 @@ BEGIN
         VERTGUIDE, 24
         VERTGUIDE, 527
         TOPMARGIN, 7
-        BOTTOMMARGIN, 347
+        BOTTOMMARGIN, 360
         HORZGUIDE, 17
         HORZGUIDE, 289
     END

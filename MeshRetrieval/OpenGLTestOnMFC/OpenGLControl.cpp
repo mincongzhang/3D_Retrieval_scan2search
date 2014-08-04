@@ -15,6 +15,7 @@ using namespace std;
 vector<MyMesh>  meshQueue;
 
 bool NOISE_CONTROL = false;
+bool LAPLACE_DENOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = false;
 bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
@@ -310,7 +311,7 @@ void COpenGLControl::oglInitialize(void)
 		0.0, 1.0, 0.0);       /* up is in positive Y direction */
 
 	//load initial mesh 
-	string init_mesh_filname = "./MeshData/ago-1.ply";
+	string init_mesh_filname = "./MeshData/data (10).stl";
 	MyMesh init_mesh;
 	OpenMesh::IO::read_mesh(init_mesh, init_mesh_filname);
 	meshQueue.push_back(init_mesh);
@@ -329,6 +330,11 @@ void COpenGLControl::oglDrawScene(void)
 	if(NOISE_CONTROL && meshsize>=1)
 	{
 		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
+	}
+	//denoise
+	if(LAPLACE_DENOISE_CONTROL && meshsize>=1)
+	{
+		LaplaceDenoise(meshQueue.at(meshsize-1));
 	}
 	//normalize current mesh
 	if(NORMALIZE_CONTROL && meshsize>=1 )
@@ -350,7 +356,7 @@ void COpenGLControl::oglDrawScene(void)
 	//batch transform
 	if(BATCH_CONTROL)
 	{
-		 BatchTrans();
+		BatchTrans();
 	}
 
 	/*Draw Meshes*/
