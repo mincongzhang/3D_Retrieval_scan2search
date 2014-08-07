@@ -50,4 +50,5 @@ public:
 	afx_msg void OnBnClickedRasterize();
 	afx_msg void OnBnClickedBatchtransform();
 	afx_msg void OnBnClickedDenoise();
+	afx_msg void OnBnClickedRetrieve();
 };

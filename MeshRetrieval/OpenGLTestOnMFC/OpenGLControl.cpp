@@ -16,10 +16,11 @@ vector<MyMesh>  meshQueue;
 
 bool NOISE_CONTROL = false;
 bool LAPLACE_DENOISE_CONTROL = false;
-bool NORMALIZE_CONTROL = false;
+bool NORMALIZE_CONTROL = true;
 bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
 bool BATCH_CONTROL = false;
+bool RETRIEVE_CONTROL = false;
 
 //add noise variable
 double noise_standard_deviation = 0.01; 
@@ -311,7 +312,7 @@ void COpenGLControl::oglInitialize(void)
 		0.0, 1.0, 0.0);       /* up is in positive Y direction */
 
 	//load initial mesh 
-	string init_mesh_filname = "./MeshData/data (10).stl";
+	string init_mesh_filname = "./MeshDatabase/data (10).stl";
 	MyMesh init_mesh;
 	OpenMesh::IO::read_mesh(init_mesh, init_mesh_filname);
 	meshQueue.push_back(init_mesh);
@@ -357,6 +358,12 @@ void COpenGLControl::oglDrawScene(void)
 	if(BATCH_CONTROL)
 	{
 		BatchTrans();
+	}
+	//retrieve
+	if(RETRIEVE_CONTROL)
+	{
+		RetrieveMesh();
+		grid_points.clear();
 	}
 
 	/*Draw Meshes*/

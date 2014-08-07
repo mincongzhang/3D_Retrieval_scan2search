@@ -23,7 +23,6 @@ using namespace std;
 
 #define DATASIZE 30
 #define RADIUS 32
-extern double candidate_index_array[DATASIZE];
 
 struct MyTraits : public OpenMesh::DefaultTraits
 {
@@ -38,8 +37,9 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 void AddNoise(double noise_standard_deviation,MyMesh &mesh);
 void LaplaceDenoise(MyMesh &mesh);
-void ChooseCandidate(double candidate_index_array[],int candidateIndx);
+void ChooseCandidate(int index);
 void NormalizeMesh(MyMesh &mesh);
 void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_vector);
 void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string write_filename);
 void BatchTrans(void);
+void RetrieveMesh(void);

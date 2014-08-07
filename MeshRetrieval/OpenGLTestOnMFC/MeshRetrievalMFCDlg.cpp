@@ -11,8 +11,6 @@
 #define new DEBUG_NEW
 #endif
 
-int base = 0;
-
 // CAboutDlg dialog used for App About
 char fileName[256]={0};
 
@@ -78,6 +76,7 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(Rasterize, &CMeshRetrievalMFCDlg::OnBnClickedRasterize)
 	ON_BN_CLICKED(BatchTransform, &CMeshRetrievalMFCDlg::OnBnClickedBatchtransform)
 	ON_BN_CLICKED(Denoise, &CMeshRetrievalMFCDlg::OnBnClickedDenoise)
+	ON_BN_CLICKED(Retrieve, &CMeshRetrievalMFCDlg::OnBnClickedRetrieve)
 END_MESSAGE_MAP()
 
 
@@ -238,7 +237,10 @@ void CMeshRetrievalMFCDlg::OnBnClickedLoad()
 	{
 		std::cerr << x.what() << std::endl;
 	}
-	meshQueue.reserve(10);
+	meshQueue.reserve(3);
+	//initial
+	meshQueue.clear();
+	NORMALIZE_CONTROL = true;
 	meshQueue.push_back(mesh);
 }
 
@@ -264,32 +266,32 @@ void CMeshRetrievalMFCDlg::OnBnClickedSpharm()
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate1()
 {
-	ChooseCandidate(candidate_index_array,base+0);
+	ChooseCandidate(1);
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate2()
 {
-	ChooseCandidate(candidate_index_array,base+1);
+	ChooseCandidate(2);
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate3()
 {
-	ChooseCandidate(candidate_index_array,base+2);
+	ChooseCandidate(3);
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate4()
 {
-	ChooseCandidate(candidate_index_array,base+3);
+	ChooseCandidate(4);
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate5()
 {
-	ChooseCandidate(candidate_index_array,base+4);
+	ChooseCandidate(5);
 }
 
 void CMeshRetrievalMFCDlg::OnBnClickedCandidate6()
 {
-	ChooseCandidate(candidate_index_array,base+5);
+	ChooseCandidate(6);
 }
 
 
@@ -303,4 +305,10 @@ void CMeshRetrievalMFCDlg::OnBnClickedBatchtransform()
 void CMeshRetrievalMFCDlg::OnBnClickedDenoise()
 {
 	LAPLACE_DENOISE_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRetrieve()
+{
+	RETRIEVE_CONTROL = true;
 }

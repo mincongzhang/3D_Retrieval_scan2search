@@ -13,8 +13,12 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
-double candidate_index_array[DATASIZE] = {}; 
+
 using namespace std; // make std:: accessible
+
+const int MAX_R = 32;
+const int MAX_L = 32;
+double candidate_index_array[DATASIZE] = {}; 
 
 /*Add random Gaussian Noise to verteices*/
 void AddNoise(double noise_standard_deviation,MyMesh &mesh)
@@ -119,7 +123,7 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 }
 
 /*write the output SH*/
-void WriteSH(string &write_filename,const int &max_r,const int &max_l,double SH_descriptor[])
+void WriteSH(string &write_filename,double SH_descriptor[])
 {
 	// open file
 	ofstream myfile;
@@ -128,12 +132,12 @@ void WriteSH(string &write_filename,const int &max_r,const int &max_l,double SH_
 	if (myfile.is_open())
 	{
 		//write SH
-		//(idx_r-1)*max_l+idx_l
-		for(unsigned int idx_r=0;idx_r<max_r;idx_r++)
+		//(idx_r-1)*MAX_L+idx_l
+		for(unsigned int idx_r=0;idx_r<MAX_R;idx_r++)
 		{
-			for(unsigned int idx_l=0;idx_l<max_l;idx_l++)
+			for(unsigned int idx_l=0;idx_l<MAX_L;idx_l++)
 			{
-				myfile << SH_descriptor[idx_r*max_l+idx_l]<< " ";
+				myfile << SH_descriptor[idx_r*MAX_R+idx_l]<< " ";
 			}
 			myfile << "\n";
 		}
@@ -330,16 +334,14 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 	if(get_polar&&get_sorted)
 	{
 		//begin
-		int max_l = RADIUS;
-		int max_r = RADIUS;
 		int idx_n = 0;
 		double *SH_descriptor;
-		SH_descriptor = new double [max_r*max_l]();
+		SH_descriptor = new double [MAX_R*MAX_L]();
 
 		for(unsigned int idx_r = 1;idx_r<=RADIUS;idx_r++)
 		{
 			//for each frequency
-			for(int idx_l = 0;idx_l<max_l;idx_l++)
+			for(int idx_l = 0;idx_l<MAX_L;idx_l++)
 			{
 				vector<double> 	a_ml_pow;
 				//traverse frequency range
@@ -372,78 +374,14 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 					a_ml_real=accumulate(Yml_real.begin(),Yml_real.end(),0.0);
 					a_ml_imag=accumulate(Yml_imag.begin(),Yml_imag.end(),0.0);
 					a_ml_pow.push_back(pow(a_ml_real,2.0)+pow(a_ml_imag,2.0));
-					if(idx_l!=max_l-1) idx_n-=Yml_real.size();
+					if(idx_l!=MAX_L-1) idx_n-=Yml_real.size();
 				}//finish traversing frequency range
-				SH_descriptor[(idx_r-1)*max_l+idx_l] = sqrt(accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0));
-			}	//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
+				SH_descriptor[(idx_r-1)*MAX_R+idx_l] = sqrt(accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0));
+			}	//end of for(int idx_l = 0;idx_l<MAX_L;idx_l++)
 		}// for(unsigned int idx_r = 0;idx_r<RADIUS;idx_r++)
 
-		//TEST 1 rotational invariant
-		//double phi = 0.0;
-		//double theta = 0.0;
-		//for(int idx_r=1;idx_r<=max_r;idx_r++)
-		//{
-		//	theta+=M_PI/32.0;
-		//	//for each frequency
-		//	for(int idx_l = 0;idx_l<max_l;idx_l++)
-		//	{
-		//		//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
-		//		//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
-		//		//cos(x) input should be a radian
-		//		//theta_vector and phi_vector are radian
-
-		//		double Yml_real = 0.0;
-		//		double Yml_img = 0.0;
-		//		double NPml = 0.0;
-		//		//traverse frequency range
-		//		for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
-		//		{
-		//			if(idx_m>=0)
-		//			{
-		//				NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta));
-		//				Yml_real += NPml*cos(double(idx_m)*phi);
-		//				Yml_img  +=	NPml*sin(double(idx_m)*phi);
-		//			}
-		//			else
-		//			{
-		//				NPml = pow(-1.0,idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta));
-		//				Yml_real += NPml*cos(double(-idx_m)*phi);
-		//				Yml_img  -=	NPml*sin(double(-idx_m)*phi);
-		//			}
-		//		}//finish traversing frequency range
-		//		SH_descriptor[(idx_r-1)*max_l+idx_l] += pow(Yml_real,2.0) + pow(Yml_img,2.0);
-		//	}//end of for(int idx_l = 0;idx_l<max_l;idx_l++)
-		//}
-
-		////TEST 2 reconstruct
-		//int re_l = 16;
-		//double * YML_real;
-		//YML_real = new double [2*re_l+1]();
-		//double * YML_imag;
-		//YML_imag = new double [2*re_l+1]();
-		//double Yml_real = 0.0;
-		//double Yml_img = 0.0;
-		//double NPml = 0.0;
-		//theta = M_PI/4.0;
-		//phi = 0.0;
-		//for(int idx_m=-re_l;idx_m<=re_l;idx_m++)
-		//{
-		//	if(idx_m>=0)
-		//	{
-		//		NPml = gsl_sf_legendre_sphPlm(re_l,idx_m,cos(theta));
-		//		YML_real[idx_m+16] = NPml*cos(double(idx_m)*phi);
-		//		YML_imag[idx_m+16] = NPml*sin(double(idx_m)*phi);
-		//	}
-		//	else
-		//	{
-		//		NPml = pow(-1.0,idx_m)*gsl_sf_legendre_sphPlm(re_l,-idx_m,cos(theta));
-		//		YML_real[idx_m+16] = NPml*cos(double(-idx_m)*phi);
-		//		YML_imag[idx_m+16] = -NPml*sin(double(-idx_m)*phi);
-		//	}
-		//}
-
 		/*write out the data*/
-		WriteSH(write_filename,max_r,max_l,SH_descriptor);
+		WriteSH(write_filename,SH_descriptor);
 
 		delete [] SH_descriptor;
 	}//end of if(get_polar&&get_sorted)
@@ -459,8 +397,8 @@ void BatchTrans(void)
 	for(unsigned int file_id=21;file_id<=file_num;file_id++)
 	{
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
-		string read_filename = "./MeshData/data ("+id+").stl";
-		string write_filename = "./MeshSHData/SH"+id+".txt";
+		string read_filename = "./MeshDatabase/data ("+id+").stl";
+		string write_filename = "./MeshSHDatabase/SH"+id+".txt";
 
 		MyMesh mesh_to_transform;
 		OpenMesh::IO::read_mesh(mesh_to_transform, read_filename);
@@ -483,35 +421,69 @@ void BatchTrans(void)
 	BATCH_CONTROL = false;
 }
 
-void ChooseCandidate(double candidate_index_array[],int candidateIndx)
+/*retrieve mesh*/
+void RetrieveMesh(void)
 {
-	int index = candidateIndx;
+	double *currentSH;
+	double *databaseSH;
+	//double *diffSH;
+	currentSH = new double [MAX_R*MAX_L]();
+	databaseSH = new double [MAX_R*MAX_L]();
+	//diffSH = new double [DATASIZE]();
+	double diffSH[DATASIZE] = {};
 
-	if(index>=10) index = index-10;
+	//get current model SH
+	string currentSH_filename = "./DemoSH/demo.txt";
+	ifstream currentSH_file(currentSH_filename);
 
-	int CandidateIdx = int(candidate_index_array[DATASIZE-index-1]);
+	for(int idx_r = 0; idx_r < MAX_R; idx_r++){
+		for(int idx_l = 0; idx_l < MAX_L; idx_l++){
+			currentSH_file >> currentSH[idx_r*MAX_R+idx_l];
+		}
+	}
+	currentSH_file.close();
+
+	//get database model SH
+	for(int file_id=1;file_id<=DATASIZE;file_id++)
+	{
+		//assign candidate index
+		candidate_index_array[file_id-1] = file_id;
+
+		//get SH
+		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
+		string databaseSH_filename = "./MeshSHDatabase/SH"+id+".txt";
+		ifstream databaseSH_file(databaseSH_filename);
+
+		for(int idx_r = 0; idx_r < MAX_R; idx_r++){
+			for(int idx_l = 0; idx_l < MAX_L; idx_l++){
+				databaseSH_file >> databaseSH[idx_r*MAX_R+idx_l];
+				diffSH[file_id-1] += abs(databaseSH[idx_r*MAX_R+idx_l]-currentSH[idx_r*MAX_R+idx_l]);
+			}
+		}
+		databaseSH_file.close();
+	}
+
+	qsort_getid(diffSH,candidate_index_array,0,DATASIZE-1);
+
+	delete [] currentSH;
+	delete [] databaseSH;
+	//delete [] diffSH;
+
+	RETRIEVE_CONTROL = false;
+}
+
+void ChooseCandidate(int index)
+{
+	int candidate_id= candidate_index_array[index-1];
 	//number to string
-	string CandidateIdx_S = static_cast<ostringstream*>( &(ostringstream() << CandidateIdx) )->str();
-	string back_filname = "./MeshData/back/back"+CandidateIdx_S+".obj";
-	string seat_filname = "./MeshData/seat/seat"+CandidateIdx_S+".obj";
-	string leg_filname = "./MeshData/leg/leg"+CandidateIdx_S+".obj";
+	string candidate_id_s = static_cast<ostringstream*>( &(ostringstream() << candidate_id) )->str();
+	string candidate_filname = "./MeshDatabase/data ("+candidate_id_s+").stl";
 
 	//load candidate mesh 
-	MyMesh back_mesh,seat_mesh,leg_mesh;
-	OpenMesh::IO::read_mesh(back_mesh, back_filname);
-	OpenMesh::IO::read_mesh(seat_mesh, seat_filname);
-	OpenMesh::IO::read_mesh(leg_mesh,  leg_filname);
+	MyMesh candidate_mesh;
+	OpenMesh::IO::read_mesh(candidate_mesh, candidate_filname);
 	meshQueue.clear();
-	if(candidateIndx<10)
-	{
-		meshQueue.push_back(seat_mesh);
-		meshQueue.push_back(back_mesh);	
-		meshQueue.push_back(leg_mesh);
-	}
-	if(candidateIndx>=10)
-	{
-		meshQueue.push_back(back_mesh);	
-		meshQueue.push_back(seat_mesh);
-		meshQueue.push_back(leg_mesh);
-	}
+	meshQueue.push_back(candidate_mesh);
+
+	NORMALIZE_CONTROL = true;
 }
