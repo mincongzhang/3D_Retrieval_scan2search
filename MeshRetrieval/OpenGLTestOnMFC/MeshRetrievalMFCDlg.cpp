@@ -77,6 +77,9 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(BatchTransform, &CMeshRetrievalMFCDlg::OnBnClickedBatchtransform)
 	ON_BN_CLICKED(Denoise, &CMeshRetrievalMFCDlg::OnBnClickedDenoise)
 	ON_BN_CLICKED(Retrieve, &CMeshRetrievalMFCDlg::OnBnClickedRetrieve)
+	ON_BN_CLICKED(Rotate_X, &CMeshRetrievalMFCDlg::OnBnClickedX)
+	ON_BN_CLICKED(Rotate_Y, &CMeshRetrievalMFCDlg::OnBnClickedY)
+	ON_BN_CLICKED(Rotate_Z, &CMeshRetrievalMFCDlg::OnBnClickedZ)
 END_MESSAGE_MAP()
 
 
@@ -311,4 +314,22 @@ void CMeshRetrievalMFCDlg::OnBnClickedDenoise()
 void CMeshRetrievalMFCDlg::OnBnClickedRetrieve()
 {
 	RETRIEVE_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedX()
+{
+	ROTATE_CONTROL = 1;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedY()
+{
+	ROTATE_CONTROL = 2;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedZ()
+{
+	ROTATE_CONTROL = 3;
 }

@@ -20,6 +20,57 @@ const int MAX_R = 32;
 const int MAX_L = 32;
 double candidate_index_array[DATASIZE] = {}; 
 
+/*rotate mesh according to centre of mass*/
+void RotateMesh(MyMesh &mesh)
+{
+	Point centroid(0.0,0.0,0.0);
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{
+		centroid.x() += mesh.point(it).data()[0];
+		centroid.y() += mesh.point(it).data()[1];
+		centroid.z() += mesh.point(it).data()[2];
+	}
+	centroid.x()/=float(mesh.n_vertices());
+	centroid.y()/=float(mesh.n_vertices());
+	centroid.z()/=float(mesh.n_vertices());
+
+	double rotate_angle = M_PI/20.0;
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{
+		switch(ROTATE_CONTROL){
+		case 1:	
+			{
+				double y = mesh.point(it).data()[1] - centroid.y();
+				double z = mesh.point(it).data()[2] - centroid.z();
+
+				*(mesh.point(it).data()+1) = y*cos(rotate_angle)-z*sin(rotate_angle) + centroid.y();
+				*(mesh.point(it).data()+2) = y*sin(rotate_angle)+z*cos(rotate_angle) + centroid.z();
+			}
+			break;
+		case 2:
+			{
+				double x = mesh.point(it).data()[0] - centroid.x();
+				double z = mesh.point(it).data()[2] - centroid.z();
+
+				*(mesh.point(it).data()+0) = x*cos(rotate_angle)-z*sin(rotate_angle) + centroid.x();
+				*(mesh.point(it).data()+2) = x*sin(rotate_angle)+z*cos(rotate_angle) + centroid.z();
+			} 
+			break;
+		case 3:
+			{
+				double x = mesh.point(it).data()[0] - centroid.x();
+				double y = mesh.point(it).data()[1] - centroid.y();
+
+				*(mesh.point(it).data()+0) = x*cos(rotate_angle)-y*sin(rotate_angle) + centroid.x();
+				*(mesh.point(it).data()+1) = x*sin(rotate_angle)+y*cos(rotate_angle) + centroid.y();
+			}
+			break;
+		}
+	}
+
+	ROTATE_CONTROL = 0;
+}
+
 /*Add random Gaussian Noise to verteices*/
 void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 {
@@ -307,17 +358,6 @@ void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 	}
 
 	delete [] grid;
-
-	//TEST rotate xyz
-	//double rotate_angle = M_PI/6.0;
-	//for(unsigned int id=0;id<grid_points.size();id++)
-	//{
-	//	double x = grid_points.at(id).x();
-	//	double y = grid_points.at(id).y();
-
-	//	grid_points.at(id).x() = x*cos(rotate_angle)-y*sin(rotate_angle);
-	//	grid_points.at(id).y() = x*sin(rotate_angle)+y*cos(rotate_angle);
-	//}
 
 	RASTERIZE_CONTROL = FALSE;
 }

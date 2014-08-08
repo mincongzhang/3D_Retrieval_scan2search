@@ -23,8 +23,11 @@
 #define Rasterize                       1023
 #define BatchTransform                  1024
 #define Denoise                         1025
-#define IDC_BUTTON1                     1026
 #define Retrieve                        1026
+#define Rotate_X                        1027
+#define Rotate_Y                        1028
+#define IDC_BUTTON4                     1029
+#define Rotate_Z                        1029
 
 // Next default values for new objects
 // 
@@ -32,7 +35,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1027
+#define _APS_NEXT_CONTROL_VALUE         1030
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

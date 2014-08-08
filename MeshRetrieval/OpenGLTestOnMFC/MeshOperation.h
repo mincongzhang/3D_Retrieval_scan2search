@@ -35,6 +35,7 @@ using namespace std;
 
 typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
+void RotateMesh(MyMesh &mesh);
 void AddNoise(double noise_standard_deviation,MyMesh &mesh);
 void LaplaceDenoise(MyMesh &mesh);
 void ChooseCandidate(int index);

@@ -14,6 +14,7 @@ using namespace std;
 //Queue for all meshes
 vector<MyMesh>  meshQueue;
 
+int ROTATE_CONTROL = 0;
 bool NOISE_CONTROL = false;
 bool LAPLACE_DENOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = true;
@@ -337,7 +338,12 @@ void COpenGLControl::oglDrawScene(void)
 	{
 		LaplaceDenoise(meshQueue.at(meshsize-1));
 	}
+	//rotate mesh
+	if(ROTATE_CONTROL>0 && meshsize>=1)
 	//normalize current mesh
+	{
+		RotateMesh(meshQueue.at(meshsize-1));
+	}
 	if(NORMALIZE_CONTROL && meshsize>=1 )
 	{
 		NormalizeMesh(meshQueue.at(meshsize-1));

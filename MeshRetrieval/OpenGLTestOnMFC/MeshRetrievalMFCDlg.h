@@ -51,4 +51,7 @@ public:
 	afx_msg void OnBnClickedBatchtransform();
 	afx_msg void OnBnClickedDenoise();
 	afx_msg void OnBnClickedRetrieve();
+	afx_msg void OnBnClickedX();
+	afx_msg void OnBnClickedY();
+	afx_msg void OnBnClickedZ();
 };
