@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MeshOperation.h"
+#include "PolarPoint.h"
 #include "point.h"
 #include "vector.h"
 
@@ -262,11 +263,15 @@ void NormalizeMesh(MyMesh &mesh)
 }
 
 /*rasterize the model to 2R*2R*2R voxel grid*/
-void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_vector)
+void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points)
 {
+	//reserve space 
+	grid_points.reserve(10000);
+
 	//create grid 
-	bool *grid;
 	int grid_size = 2*RADIUS*2*RADIUS*2*RADIUS;
+
+	bool *grid;
 	grid = new bool [grid_size];
 	memset(grid,false,grid_size*sizeof(bool));
 
@@ -351,10 +356,6 @@ void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 		grid_points.at(p_it).x() -= centroid_after.x();
 		grid_points.at(p_it).y() -= centroid_after.y();
 		grid_points.at(p_it).z() -= centroid_after.z();
-
-		double current_dist = pow(grid_points.at(p_it).x(),2.0)+pow(grid_points.at(p_it).y(),2.0)+pow(grid_points.at(p_it).z(),2.0);
-		current_dist = sqrt(current_dist);
-		dist_vector.push_back(current_dist);
 	}
 
 	delete [] grid;
@@ -363,15 +364,14 @@ void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points,vector<double> &dist_
 }
 
 /*compute spherical harmonics*/
-void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string write_filename)
+void ComputeSpharm(vector<Point> &grid_points,string write_filename)
 {
-	vector<double> phi_vector,theta_vector;	//radian
-	bool get_polar,get_sorted;
+	vector<PolarPoint> grid_polar_points;
+	grid_polar_points.reserve(10000);
+	GetPolarCoordinate(grid_points,grid_polar_points);
+	sort(grid_polar_points.begin(),grid_polar_points.end());
 
-	get_polar = GetPolarCoordinate(grid_points,dist_vector,phi_vector,theta_vector);
-	get_sorted = qsortPolarCoordinate(0,(dist_vector.size()-1),dist_vector,phi_vector,theta_vector);
-
-	if(get_polar&&get_sorted)
+	if(grid_polar_points.size()==grid_points.size())
 	{
 		//begin
 		int idx_n = 0;
@@ -390,24 +390,25 @@ void ComputeSpharm(vector<Point> &grid_points,vector<double> &dist_vector,string
 					vector<double> Yml_real,Yml_imag;
 					double NPml;
 
-					while(idx_n<=(dist_vector.size()-1) && dist_vector.at(idx_n)<idx_r)
+					while(idx_n<=(grid_polar_points.size()-1) && grid_polar_points.at(idx_n).distance()<idx_r)
 					{
 						//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
 						//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
 						//cos(x) input should be a radian
 						//theta_vector and phi_vector are radians
+						PolarPoint current_p = grid_polar_points.at(idx_n);
 						if(idx_m>=0)
 						{
-							NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(theta_vector.at(idx_n)));
-							Yml_real.push_back(NPml*cos(double(idx_m)*phi_vector.at(idx_n)));
-							Yml_imag.push_back(NPml*sin(double(idx_m)*phi_vector.at(idx_n)));
+							NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(current_p.theta()));
+							Yml_real.push_back(NPml*cos(double(idx_m)*current_p.phi()));
+							Yml_imag.push_back(NPml*sin(double(idx_m)*current_p.phi()));
 						} else {
-							NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(theta_vector.at(idx_n)));
-							Yml_real.push_back(NPml*cos(double(-idx_m)*phi_vector.at(idx_n)));
-							Yml_imag.push_back(NPml*sin(double(-idx_m)*phi_vector.at(idx_n)));
+							NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(current_p.theta()));
+							Yml_real.push_back(NPml*cos(double(-idx_m)*current_p.phi()));
+							Yml_imag.push_back(NPml*sin(double(-idx_m)*current_p.phi()));
 						}
 						idx_n++;
-						if(idx_n==(dist_vector.size()-1)) break;
+						if(idx_n==(grid_polar_points.size()-1)) break;
 					}//while(dist_vector.at(idx_n)<idx_r)
 
 					double 	a_ml_real,a_ml_imag;
@@ -444,11 +445,10 @@ void BatchTrans(void)
 		OpenMesh::IO::read_mesh(mesh_to_transform, read_filename);
 
 		vector<Point> grid_points_to_transform;
-		vector<double> dist_vector_to_transform;
 
 		NormalizeMesh(mesh_to_transform);
-		RasterizeMesh(mesh_to_transform,grid_points_to_transform,dist_vector_to_transform);
-		ComputeSpharm(grid_points_to_transform,dist_vector_to_transform,write_filename);
+		RasterizeMesh(mesh_to_transform,grid_points_to_transform);
+		ComputeSpharm(grid_points_to_transform,write_filename);
 
 	}
 
