@@ -28,7 +28,6 @@ double noise_standard_deviation = 0.01;
 
 //retrieval variables
 vector<Point> grid_points;
-vector<double> dist_vector;
 
 //shading parameters
 GLfloat mat_specular[]={1.0f, 0.0f, 1.0f, 1.0f};
@@ -349,15 +348,16 @@ void COpenGLControl::oglDrawScene(void)
 		NormalizeMesh(meshQueue.at(meshsize-1));
 	}
 	//rasterize current mesh
-	if(RASTERIZE_CONTROL&& meshsize>=1 && grid_points.size()==0)
+	if(RASTERIZE_CONTROL&& meshsize>=1)
 	{
-		RasterizeMesh(meshQueue.at(meshsize-1),grid_points,dist_vector);
+		grid_points.clear();
+		RasterizeMesh(meshQueue.at(meshsize-1),grid_points);
 	}
 	//compute spherical harmonics
 	if(SPHARM_CONTROL)
 	{
 		string write_filename = "./DemoSH/demo.txt";
-		ComputeSpharm(grid_points,dist_vector,write_filename);
+		ComputeSpharm(grid_points,write_filename);
 	}
 
 	//batch transform

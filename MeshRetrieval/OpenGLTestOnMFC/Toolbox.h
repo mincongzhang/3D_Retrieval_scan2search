@@ -1,12 +1,9 @@
 #pragma once
 #include "afxwin.h"
 #include "point.h"
+#include "PolarPoint.h"
 
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <string>
-using namespace std;
 
 #undef min
 #undef max
@@ -22,10 +19,7 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 void loadHistogram(string filname,double *histogram);
 double similarity(double *histogram_test,double *histogram_sketch);
 void qsort_getid(double array[],double id_array[], int left_id, int right_id);
-bool  GetPolarCoordinate(vector<Point> &grid_points,vector<double> &dist_vector,
-						 vector<double> &phi_vector, vector<double> &theta_vector);
-bool qsortPolarCoordinate(int left_id, int right_id,
-						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector);
+void GetPolarCoordinate(vector<Point> &grid_points,vector<PolarPoint> &grid_polar_points);
 double getVectorSum(vector<double> input_vector);
 double round(double number);
 void FindMaxMin(MyMesh &mesh, double &x_max, double &y_max, double &z_max, double &x_min, double &y_min, double &z_min);
