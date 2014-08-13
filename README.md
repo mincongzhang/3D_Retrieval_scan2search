@@ -3,6 +3,8 @@
 
 Spherical harmonics descriptor
 
+Bilateral filter is used for denoising
+
 ##Functions
 
 Pseudo code for spherical harmonics:
