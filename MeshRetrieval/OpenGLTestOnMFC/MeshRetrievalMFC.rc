@@ -106,7 +106,7 @@ BEGIN
     PUSHBUTTON      "LoadMesh",Load,30,297,57,14
     LTEXT           "Left mouse button: Rotate      Mid mouse button: Zoom in/out Right mouse button: Translate",IDC_STATIC,442,305,99,28
     PUSHBUTTON      "AddNoise",Noise,95,298,57,14
-    PUSHBUTTON      "Normalize",Normalize,30,318,57,14
+    PUSHBUTTON      "Normalize",Normalize,30,330,57,14
     CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,261,312,53,10
     CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,261,329,53,10
     CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,314,312,53,10
@@ -114,10 +114,14 @@ BEGIN
     CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,367,312,53,10
     CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,367,329,53,10
     GROUPBOX        "Candidate",IDC_STATIC,250,296,173,55
-    PUSHBUTTON      "Spharm",Spharm,162,319,59,14
-    PUSHBUTTON      "Rasterize",Rasterize,95,319,57,14
-    PUSHBUTTON      "BatchTransform",BatchTransform,30,339,57,14
+    PUSHBUTTON      "Spharm",Spharm,162,330,59,14
+    PUSHBUTTON      "Rasterize",Rasterize,95,330,57,14
+    PUSHBUTTON      "BatchTransform",BatchTransform,30,345,57,15
     PUSHBUTTON      "Denoise",Denoise,162,298,60,14
+    PUSHBUTTON      "Retrieve",Retrieve,162,345,59,14
+    PUSHBUTTON      "Rotate_X",Rotate_X,30,314,57,14
+    PUSHBUTTON      "Rotate_Y",Rotate_Y,95,314,57,14
+    PUSHBUTTON      "Rotate_Z",Rotate_Z,162,314,60,14
 END
 
 

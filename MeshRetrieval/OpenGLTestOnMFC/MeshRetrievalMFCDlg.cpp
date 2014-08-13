@@ -307,7 +307,7 @@ void CMeshRetrievalMFCDlg::OnBnClickedBatchtransform()
 
 void CMeshRetrievalMFCDlg::OnBnClickedDenoise()
 {
-	LAPLACE_DENOISE_CONTROL = true;
+	DENOISE_CONTROL = true;
 }
 
 

@@ -13,6 +13,7 @@
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <ANN/ANN.h>
 
 
 using namespace std; // make std:: accessible
@@ -93,49 +94,6 @@ void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 		}
 	}
 	NOISE_CONTROL = false;
-}
-
-/*Uniform Laplacian smoothing*/
-void LaplaceDenoise(MyMesh &mesh)
-{
-	//Find neighbour points for calculating normal vectors
-	MyMesh::Point  neighbourPt1;
-	MyMesh::Point  neighbourPt2;
-
-	//calculate normal for each vertex 
-	std::vector<MyMesh::Point> neighbours;
-	MyMesh::Point               currentPt;
-	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
-	{   
-		//Find one-ring neighbours
-		MyMesh::VertexIter          v_it;
-		MyMesh::VertexVertexIter    vv_it;
-		v_it = it;
-		for (vv_it=mesh.vv_iter(v_it); vv_it; ++vv_it)
-		{
-			neighbours.push_back(mesh.point(vv_it));
-		}
-
-		int neighbours_size = neighbours.size();
-
-		//define a scale factor to make gradual change
-		double scale_factor = 0.01; 
-
-		//assign to normal_mesh
-		for(int d=0;d<3;d++)
-		{
-			double laplace_vector = 0.0;
-			for(int i=0;i<neighbours_size;i++)
-			{
-				laplace_vector += neighbours.at(i).data()[d];// - currentPt.data()[d];
-			}
-			laplace_vector /= double(neighbours_size);
-
-			*(mesh.point(it).data()+d) -= float(scale_factor*laplace_vector);
-		}
-	}// end of for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
-
-	LAPLACE_DENOISE_CONTROL = false;
 }
 
 int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],vector<Point> &grid_points)
@@ -452,12 +410,6 @@ void BatchTrans(void)
 
 	}
 
-	//ifstream fin("hello.txt");
-	//if (!fin)
-	//{
-	//	std::cout << "can not open this file" << endl;
-	//}
-
 	BATCH_CONTROL = false;
 }
 
@@ -466,11 +418,11 @@ void RetrieveMesh(void)
 {
 	double *currentSH;
 	double *databaseSH;
-	//double *diffSH;
+	double *diffSH;
 	currentSH = new double [MAX_R*MAX_L]();
 	databaseSH = new double [MAX_R*MAX_L]();
-	//diffSH = new double [DATASIZE]();
-	double diffSH[DATASIZE] = {};
+	diffSH = new double [DATASIZE]();
+	
 
 	//get current model SH
 	string currentSH_filename = "./DemoSH/demo.txt";
@@ -503,11 +455,11 @@ void RetrieveMesh(void)
 		databaseSH_file.close();
 	}
 
-	qsort_getid(diffSH,candidate_index_array,0,DATASIZE-1);
+	getSortedID(diffSH,candidate_index_array,0,DATASIZE-1);
 
 	delete [] currentSH;
 	delete [] databaseSH;
-	//delete [] diffSH;
+	delete [] diffSH;
 
 	RETRIEVE_CONTROL = false;
 }
@@ -526,4 +478,200 @@ void ChooseCandidate(int index)
 	meshQueue.push_back(candidate_mesh);
 
 	NORMALIZE_CONTROL = true;
+}
+
+
+/*Denoising*/
+//kd tree
+// Global variables
+//
+const int dim = 3;				// dimension
+double eps = 0.0;				// error bound
+istream* dataIn = NULL;		// input for data points
+istream* queryIn = NULL;	// input for query points
+
+void FindNeighbours(int neighbour_num,ANNkd_tree* kdTree,ANNpointArray meshArray,ANNpoint Pt,
+					std::vector<MyMesh::Point> &neighbours,vector<double> &distVector,double &radius)
+{
+	ANNidxArray		nnIdx;					// near neighbor indices
+	ANNdistArray	dists;					// near neighbor distances
+	nnIdx = new ANNidx[neighbour_num];		// allocate near neigh indices
+	dists = new ANNdist[neighbour_num];		// allocate near neighbor dists
+
+	kdTree->annkSearch(			// search
+		Pt,						// query point
+		neighbour_num,	        // number of near neighbors
+		nnIdx,					// nearest neighbors (returned)
+		dists,					// distance (returned)
+		eps);					// error bound
+
+	//radius = max(dist)
+	for (int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)>radius)
+		{
+			radius = *(dists+i); 
+		}
+	}
+
+	radius /= 0.9; //reject outlying points 
+
+	for(int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)<radius)
+		{
+			ANNpoint current_neighbour;
+			MyMesh::Point  neighbourPt;
+			current_neighbour = annAllocPt(dim);
+
+			current_neighbour = meshArray[*(nnIdx+i)];
+			neighbourPt.data()[0] = double(current_neighbour[0]);
+			neighbourPt.data()[1] = double(current_neighbour[1]);
+			neighbourPt.data()[2] = double(current_neighbour[2]);
+			neighbours.push_back(neighbourPt);
+			distVector.push_back(*(dists+i));
+		}
+	}
+
+	delete [] nnIdx; 
+	delete [] dists;
+}
+
+/*Get normal vectors from OpenMesh library
+-> bilateral filter denoising of vertices*/
+void BilateralDenoise(MyMesh &mesh)
+{
+	/*ANN kd-tree find nearest point*/
+	ANNpointArray	meshArray;				// mesh points array
+	ANNpoint		Pt;						// point
+	ANNkd_tree*		kdTree;					// search structure
+
+	int PtNum = mesh.n_vertices();
+	meshArray = annAllocPts(PtNum, dim);
+	Pt = annAllocPt(dim);
+
+	//assign mesh points to ANN array
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{   
+		//Pt get the space of data array
+		double getPt[3] = {};
+
+		//Pt get the coordinates of mesh point
+		int index = it->idx();
+		Pt = meshArray[index];
+		for(int d = 0;d < dim; d++)
+		{
+			getPt[d] = *(mesh.point(it).data()+d);
+			Pt[d] = getPt[d];
+		}
+		//assign Pt coordinates to data array
+		meshArray[index] = Pt;
+	}
+
+	//build kd-tree
+	kdTree = new ANNkd_tree(	// build search structure
+		meshArray,				// the data points
+		PtNum,					// number of points
+		dim);					// dimension of space
+
+	/*Request vertex normal*/
+	// request vertex normals, so the mesh reader can use normal information
+	// if available
+	mesh.request_vertex_normals();
+
+	OpenMesh::IO::Options opt;
+
+	// If the file did not provide vertex normals, then calculate them
+	if ( !opt.check( OpenMesh::IO::Options::VertexNormal ) )
+	{
+		// we need face normals to update the vertex normals
+		mesh.request_face_normals();
+		// let the mesh update the normals
+		mesh.update_normals();
+
+		// dispose the face normals, as we don't need them anymore
+		mesh.release_face_normals();
+	}
+
+	/*Bilateral filtering*/
+	//initial parameters for denoising
+	double radius = 0.0;
+	double sigma_c = 0.05; //depend on the distance of the points
+	double sigma_s = 0.0;
+	int neighbour_num = 12;
+
+	//get certain neighbour and denoise
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{   
+		//Pt get the coordinates from mesh array
+		int index = it->idx();
+		Pt = meshArray[index];
+		std::vector<MyMesh::Point> neighbours;
+		vector<double> distVector;
+
+		//Find K(neighbours for normal calculation) nearest neighbours, 
+		//return neighbours,distVector,radius
+		FindNeighbours(neighbour_num,kdTree,meshArray,Pt,
+			neighbours,distVector,radius);
+
+		//get height from current vertex to tangent plane
+		//update neighbour number
+		neighbour_num = neighbours.size();
+		vector<double> height;
+		double mean_height = 0.0;
+		for(int i=0;i<neighbour_num;i++)
+		{
+			MyMesh::Point  current_neighbour;
+			current_neighbour = neighbours.at(i);
+
+			//get normal vector from normal mesh
+			double normal_vector[3]={};
+			normal_vector[0]= *mesh.normal(it).data();
+			normal_vector[1]= *(mesh.normal(it).data()+1);
+			normal_vector[2]= *(mesh.normal(it).data()+2);
+
+			//calculate height
+			height.push_back((Pt[0]-current_neighbour.data()[0])*normal_vector[0]+(Pt[1]-current_neighbour.data()[1])*normal_vector[1]+(Pt[2]-current_neighbour.data()[2])*normal_vector[2]);
+			mean_height += height.at(i);
+		}
+
+		//Calculate standard deviation(sigma_s)
+		mean_height /= neighbour_num;
+		for(int i=0;i<neighbour_num;i++)
+		{
+			sigma_s +=  pow((height.at(i)-mean_height),2);
+		}
+		sigma_s = sqrt(sigma_s);
+
+		//Bilateral Mesh Denoising
+		double sum = 0;
+		double normalizer = 0;
+		double t,Wc,Ws;
+
+		for(int i=0;i<neighbour_num;i++)
+		{
+			//get t
+			t = distVector.at(i);
+
+			//get Wc, Ws, sum, normalizer
+			Wc = exp(-t*t/(2*sigma_c*sigma_c));
+			Ws = exp(-height.at(i)*height.at(i)/(2*sigma_s*sigma_s));
+			sum += (Wc*Ws)*height.at(i);
+			normalizer += Wc*Ws;
+		}
+
+		//assign back to original mesh
+		for(int d=0;d<dim;d++){
+			//new_v = v-n*(sum/normalizer)
+			*(mesh.point(it).data()+d) += -(*(mesh.normal(it).data()+d))*float(sum/normalizer);
+		}
+
+	}// end of for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+
+	// clean kd-tree
+	delete kdTree;
+	annClose(); 
+
+
+	DENOISE_CONTROL = false;
 }

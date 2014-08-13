@@ -16,7 +16,7 @@ vector<MyMesh>  meshQueue;
 
 int ROTATE_CONTROL = 0;
 bool NOISE_CONTROL = false;
-bool LAPLACE_DENOISE_CONTROL = false;
+bool DENOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = true;
 bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
@@ -333,9 +333,9 @@ void COpenGLControl::oglDrawScene(void)
 		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
 	}
 	//denoise
-	if(LAPLACE_DENOISE_CONTROL && meshsize>=1)
+	if(DENOISE_CONTROL && meshsize>=1)
 	{
-		LaplaceDenoise(meshQueue.at(meshsize-1));
+		BilateralDenoise(meshQueue.at(meshsize-1));
 	}
 	//rotate mesh
 	if(ROTATE_CONTROL>0 && meshsize>=1)

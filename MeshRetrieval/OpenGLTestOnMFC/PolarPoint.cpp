@@ -3,36 +3,36 @@
 
 PolarPoint::PolarPoint(double phi,double theta,double distance){
 	//constructor
-	phi_ = phi;
-	theta_ = theta;
-	distance_ = distance;
+	_phi = phi;
+	_theta = theta;
+	_distance = distance;
 }
 
 PolarPoint::PolarPoint(const PolarPoint & p){
 	//initialisation from another point
-	phi_ = p.phi_;
-	theta_ = p.theta_;
-	distance_ = p.distance_;
+	_phi = p._phi;
+	_theta = p._theta;
+	_distance = p._distance;
 }
 
 PolarPoint & PolarPoint::operator=(const PolarPoint & p){
 	if(this == & p)	 return *this;
-	phi_ = p.phi_;
-	theta_ = p.theta_;
-	distance_ = p.distance_;
+	_phi = p._phi;
+	_theta = p._theta;
+	_distance = p._distance;
 
 	return *this;
 }
 
 bool PolarPoint::operator>(const PolarPoint & p){
-	if(this->distance_ > p.distance_) 
+	if(this->_distance > p._distance) 
 		return true;
 	else
 		return false;
 }
 
 bool PolarPoint::operator<(const PolarPoint & p){
-	if(this->distance_ < p.distance_) 
+	if(this->_distance < p._distance) 
 		return true;
 	else
 		return false;

@@ -3,19 +3,9 @@
 #include ".\openglcontrol.h"
 #include "MeshOperation.h"
 
-#include <math.h>
-#include <random>
-
-//swap
-void swap(double &x,double &y)
-{
-	double temp = x;
-	x = y;
-	y = temp;
-}
-
-//Quick Sort of array and get the index of original order of array
-void qsort_getid(double array[],double id_array[], int left_id, int right_id)
+/*Quick Sort of array and get the index of original order of array*/
+//test: can be replaced by map
+void getSortedID(double array[],double id_array[], int left_id, int right_id)
 {
 	if(left_id >= right_id)
 		return;
@@ -32,34 +22,8 @@ void qsort_getid(double array[],double id_array[], int left_id, int right_id)
 	//swap(array,flag,left_id);
 	swap(array[flag],array[left_id]);
 	swap(id_array[flag],id_array[left_id]);
-	qsort_getid(array,id_array,left_id,flag-1);
-	qsort_getid(array,id_array,flag+1,right_id);
-}
-
-//according to distance vector sort phi and theta vectors
-bool qsortPolarCoordinate(int left_id, int right_id,
-						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector)
-{
-	if(left_id >= right_id)	return true;
-
-	int flag = left_id;
-	for(int i = left_id+1; i<=right_id; i++)
-	{
-		if(dist_vector.at(left_id)>dist_vector.at(i))
-		{
-			flag++;
-			swap(dist_vector.at(flag),dist_vector.at(i));
-			swap(phi_vector.at(flag),phi_vector.at(i));
-			swap(theta_vector.at(flag),theta_vector.at(i));
-		}
-	}
-
-	swap(dist_vector.at(flag),dist_vector.at(left_id));
-	swap(phi_vector.at(flag),phi_vector.at(left_id));
-	swap(theta_vector.at(flag),theta_vector.at(left_id));
-
-	qsortPolarCoordinate(left_id,flag-1,dist_vector,phi_vector,theta_vector);
-	qsortPolarCoordinate(flag+1,right_id,dist_vector,phi_vector,theta_vector);
+	getSortedID(array,id_array,left_id,flag-1);
+	getSortedID(array,id_array,flag+1,right_id);
 }
 
 void  GetPolarCoordinate(vector<Point> &grid_points,vector<PolarPoint> &grid_polar_points)
@@ -83,18 +47,6 @@ void  GetPolarCoordinate(vector<Point> &grid_points,vector<PolarPoint> &grid_pol
 		PolarPoint tmp_point(phi,theta,current_dist);
 		grid_polar_points.push_back(tmp_point);
 	}
-}
-
-
-//get the sum of a double vector
-double getVectorSum(vector<double> input_vector) 
-{
-	double sum = 0.0;
-	for(unsigned int i = 0;i<input_vector.size();i++)
-	{
-		sum += input_vector.at(i);
-	}
-	return sum;
 }
 
 /*Round*/

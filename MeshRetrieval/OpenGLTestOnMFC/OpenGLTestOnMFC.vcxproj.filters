@@ -39,6 +39,9 @@
     <ClCompile Include="point.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PolarPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenGLControl.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PolarPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

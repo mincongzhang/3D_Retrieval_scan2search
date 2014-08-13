@@ -2,18 +2,18 @@
 #define _POLARPOINT  
 
 class PolarPoint{
-	double phi_;
-	double theta_;
-	double distance_;
+	double _phi;
+	double _theta;
+	double _distance;
 
 public:
-	PolarPoint(){phi_=0.0;theta_=0.0;distance_=0.0;}; //constructor
+	PolarPoint(){_phi=0.0;_theta=0.0;_distance=0.0;}; //constructor
 	PolarPoint(double,double,double); //constructor
 	PolarPoint(const PolarPoint&); //initialisation from another point
 
-	double& phi() {return phi_;}
-	double& theta() {return theta_;}
-	double& distance() {return distance_;}
+	double& phi() {return _phi;}
+	double& theta() {return _theta;}
+	double& distance() {return _distance;}
 
 	PolarPoint & operator=(const PolarPoint&);//assignment
 	bool operator>(const PolarPoint &);//>

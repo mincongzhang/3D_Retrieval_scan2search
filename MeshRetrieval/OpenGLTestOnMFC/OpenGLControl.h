@@ -17,7 +17,7 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 extern  vector<MyMesh> meshQueue;
 extern int ROTATE_CONTROL;
 extern bool NOISE_CONTROL;
-extern bool LAPLACE_DENOISE_CONTROL;
+extern bool DENOISE_CONTROL;
 extern bool NORMALIZE_CONTROL;
 extern bool RASTERIZE_CONTROL;
 extern bool SPHARM_CONTROL;

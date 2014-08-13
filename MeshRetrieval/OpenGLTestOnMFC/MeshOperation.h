@@ -37,7 +37,7 @@ typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
 
 void RotateMesh(MyMesh &mesh);
 void AddNoise(double noise_standard_deviation,MyMesh &mesh);
-void LaplaceDenoise(MyMesh &mesh);
+void BilateralDenoise(MyMesh &mesh);
 void ChooseCandidate(int index);
 void NormalizeMesh(MyMesh &mesh);
 void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points);
