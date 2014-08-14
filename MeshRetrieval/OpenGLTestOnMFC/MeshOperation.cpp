@@ -391,12 +391,12 @@ void ComputeSpharm(vector<Point> &grid_points,string write_filename)
 /*batch transform*/
 void BatchTrans(void)
 {
-	int file_num = 4;
+	int file_num = 48;
 
-	for(unsigned int file_id=4;file_id<=file_num;file_id++)
+	for(unsigned int file_id=41;file_id<=file_num;file_id++)
 	{
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
-		string read_filename = "./MeshDatabase/data ("+id+").stl";
+		string read_filename = "./MeshDatabase/data ("+id+").obj";
 		string write_filename = "./MeshSHDatabase/SH"+id+".txt";
 
 		MyMesh mesh_to_transform;
