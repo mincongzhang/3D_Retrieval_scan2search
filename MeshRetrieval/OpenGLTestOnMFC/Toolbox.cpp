@@ -4,7 +4,7 @@
 #include "MeshOperation.h"
 
 /*Quick Sort of array and get the index of original order of array*/
-//test: can be replaced by map
+//test: can be replaced by map?
 void getSortedID(double array[],double id_array[], int left_id, int right_id)
 {
 	if(left_id >= right_id)
@@ -84,3 +84,42 @@ void FindMaxMin(MyMesh &mesh, double &x_max, double &y_max, double &z_max, doubl
 		if(mesh.point(v_it).data()[2]<z_min) z_min = mesh.point(v_it).data()[2];
 	}
 }
+
+/*get the sum of a double vector */
+/*replaced by build in function accumulate*/
+//double getVectorSum(vector<double> input_vector) 
+//{
+//	double sum = 0.0;
+//	for(unsigned int i = 0;i<input_vector.size();i++)
+//	{
+//		sum += input_vector.at(i);
+//	}
+//	return sum;
+//}
+
+/*according to distance vector sort phi and theta vectors*/
+/*replaced by PolarPoint class and STL sorting function*/
+//bool qsortPolarCoordinate(int left_id, int right_id,
+//						  vector<double> &dist_vector,vector<double> &phi_vector, vector<double> &theta_vector)
+//{
+//	if(left_id >= right_id)	return true;
+//
+//	int flag = left_id;
+//	for(int i = left_id+1; i<=right_id; i++)
+//	{
+//		  if(dist_vector.at(left_id)>dist_vector.at(i))
+//		{
+//			flag++;
+//			swap(dist_vector.at(flag),dist_vector.at(i));
+//			swap(phi_vector.at(flag),phi_vector.at(i));
+//			swap(theta_vector.at(flag),theta_vector.at(i));
+//		}
+//	}
+//
+//	swap(dist_vector.at(flag),dist_vector.at(left_id));
+//	swap(phi_vector.at(flag),phi_vector.at(left_id));
+//	swap(theta_vector.at(flag),theta_vector.at(left_id));
+//
+//	qsortPolarCoordinate(left_id,flag-1,dist_vector,phi_vector,theta_vector);
+//	qsortPolarCoordinate(flag+1,right_id,dist_vector,phi_vector,theta_vector);
+//}
