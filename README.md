@@ -12,7 +12,7 @@ kd-tree can be used to fast retrive in the database
 -make the center of mass of the model be at the point (R,R,R)  
 -scale so that the average distance from vertices to the center of mass is R/2  
 -(make all models in same scale and against outliers)  
-(2)Denoise(against scanned noise)  
+(2)Denoise  
 -use 3D bilateral filter to denoise  
 -(against scanned noise)  
 (3)Rasterize  
