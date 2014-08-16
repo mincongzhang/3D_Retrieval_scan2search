@@ -8,20 +8,20 @@ kd-tree can be used to fast retrive in the database
 
 ##Structure
 1. Pre-processing:
-Normlize
-Rasterize
-Denoise
+Normlize  
+Rasterize  
+Denoise  
 
 2. Descriptor:
-Spherical harmonics descriptor
+Spherical harmonics descriptor  
 
 3. Retrieve:
-quick-sort?/kd-tree?
-Show candidate(can be more) (clustering???)
+quick-sort?/kd-tree?  
+Show candidate(can be more) (clustering???)  
 
 4. Verification:
-Denoise-test: Bilateral filter
-Rotate-test: SH rotate invariant
+Denoise-test: Bilateral filter  
+Rotate-test: SH rotate invariant  
 
 
 
