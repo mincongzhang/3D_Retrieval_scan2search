@@ -6,6 +6,8 @@ Sometimes stack overflow problem occurs. Maybe try not to use array larger than 
 改为堆变量?或者实验BitSet  
 kd-tree can be used to fast retrive in the database
 
+SH测试效果不太好啊...再加一个distance histogram?
+
 ##Structure
 1. Pre-processing:  
 (1)Normalize  
