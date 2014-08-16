@@ -16,7 +16,7 @@ kd-tree can be used to fast retrive in the database
 (3)Rasterize  
 -rasterize in to a 2R*2R*2R voxel grid (normally choose R to be ~32)  
 
-2. Descriptor:
+2. Descriptor:  
 Spherical harmonics descriptor  
 
 3. Retrieve:
