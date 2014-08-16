@@ -8,6 +8,7 @@ Bilateral filter is used for denoising
 Sometimes stack overflow problem occurs. Maybe try not to use array larger than 100 elements.  
 溢出问题解决  
 改为堆变量?或者实验BitSet
+kd-tree can be used to fast retrive in the database
 
 ##Functions
 
