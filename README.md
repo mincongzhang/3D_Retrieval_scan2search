@@ -8,7 +8,7 @@ kd-tree can be used to fast retrive in the database
 
 ##Structure
 1. Pre-processing:  
-(1)Normlize  
+(1)Normalize  
 -make the center of mass of the model be at the point (R,R,R)  
 -scale so that the average distance from vertices to the center of mass is R/2  
 (2)Rasterize  
