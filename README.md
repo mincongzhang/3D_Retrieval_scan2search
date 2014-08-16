@@ -5,7 +5,8 @@ Spherical harmonics descriptor
 
 Bilateral filter is used for denoising
 
-Sometimes heap overflow problem occurs. Maybe try not to use array larger than 100 elements.
+Sometimes stack overflow problem occurs. Maybe try not to use array larger than 100 elements.
+改为堆变量?
 
 ##Functions
 
