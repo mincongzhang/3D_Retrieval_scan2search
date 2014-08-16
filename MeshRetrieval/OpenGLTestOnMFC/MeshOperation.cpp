@@ -111,6 +111,10 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 		temp_p.z() = round(point1.z()+v12.z()*double(n));
 
 		int grid_coordinate	= int(temp_p.x()*2*RADIUS*2*RADIUS + temp_p.y()*2*RADIUS + temp_p.z());
+
+		//discard points out of range
+		if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
+
 		if(grid[grid_coordinate]!=true)
 		{
 			grid[grid_coordinate] = true;
@@ -121,13 +125,16 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 	}
 
 	int grid_coordinate_p2 = int(point2.x()*2*RADIUS*2*RADIUS + point2.y()*2*RADIUS + point2.z());
-	if(grid[grid_coordinate_p2]!=true)
-	{
-		grid[grid_coordinate_p2] = true;
-		inter12.push_back(point2);
-		grid_points.push_back(point2);
-		n_points++;
-	} 
+	//make sure points in the range
+	if(grid_coordinate_p2<(2*RADIUS*2*RADIUS*2*RADIUS-1) && grid_coordinate_p2>0){
+		if(grid[grid_coordinate_p2]!=true)
+		{
+			grid[grid_coordinate_p2] = true;
+			inter12.push_back(point2);
+			grid_points.push_back(point2);
+			n_points++;
+		} 
+	}
 
 	return n_points;
 }
@@ -422,7 +429,7 @@ void RetrieveMesh(void)
 	currentSH = new double [MAX_R*MAX_L]();
 	databaseSH = new double [MAX_R*MAX_L]();
 	diffSH = new double [DATASIZE]();
-	
+
 
 	//get current model SH
 	string currentSH_filename = "./DemoSH/demo.txt";
