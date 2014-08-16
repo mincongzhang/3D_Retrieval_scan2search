@@ -22,7 +22,7 @@ kd-tree can be used to fast retrive in the database
 2. Descriptor:  
 Spherical harmonics descriptor  
 
-3. Retrieve:
+3. Retrieval:
 quick-sort?/kd-tree?  
 Show candidate(can be more) (clustering???)  
 
