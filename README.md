@@ -8,12 +8,12 @@ kd-tree can be used to fast retrive in the database
 
 ##Structure
 1. Pre-processing:  
-(1)Normalize  
+(1)Normalize(make all models in same scale and against outliers)  
 -make the center of mass of the model be at the point (R,R,R)  
 -scale so that the average distance from vertices to the center of mass is R/2  
-(2)Denoise  
+(2)Denoise(against scanned noise)  
 -use 3D bilateral filter to denoise  
-(3)Rasterize  
+(3)Rasterize(provide adequate granularity for discriminating shapes while filtering out high-freq noise)  
 -rasterize in to a 2R*2R*2R voxel grid (normally choose R to be ~32)  
 
 2. Descriptor:  
