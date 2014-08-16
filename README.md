@@ -1,6 +1,24 @@
 3D_Retrieval_scan2search
 ========================
 
+##Structure
+1. Pre-processing:
+Normlize
+Rasterize
+Denoise
+
+2. Descriptor:
+Spherical harmonics
+
+3. Retrieve:
+quick-sort?/kd-tree?
+Show candidate(can be more) (clustering???)
+
+4. Verify:
+Denoise-test: Bilateral filter
+Rotate-test: SH rotate invariant
+
+
 Spherical harmonics descriptor
 
 Bilateral filter is used for denoising
