@@ -14,7 +14,7 @@ kd-tree can be used to fast retrive in the database
 -(make all models in same scale and against outliers)  
 (2)Denoise(against scanned noise)  
 -use 3D bilateral filter to denoise  
--(against scanned noise)
+-(against scanned noise)  
 (3)Rasterize  
 -rasterize in to a 2R*2R*2R voxel grid (normally choose R to be ~32)  
 -(provide adequate granularity for discriminating shapes while filtering out high-freq noise)
