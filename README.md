@@ -13,20 +13,15 @@ Rasterize
 Denoise
 
 2. Descriptor:
-Spherical harmonics
+Spherical harmonics descriptor
 
 3. Retrieve:
 quick-sort?/kd-tree?
 Show candidate(can be more) (clustering???)
 
-4. Verify:
+4. Verification:
 Denoise-test: Bilateral filter
 Rotate-test: SH rotate invariant
-
-
-Spherical harmonics descriptor
-
-Bilateral filter is used for denoising
 
 
 
