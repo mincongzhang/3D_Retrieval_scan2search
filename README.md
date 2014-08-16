@@ -25,7 +25,7 @@ Rotate-test: SH rotate invariant
 
 
 
-##Functions
+##Spherical harmonics descriptor 
 
 Pseudo code for spherical harmonics:
 
