@@ -7,7 +7,7 @@ Sometimes stack overflow problem occurs. Maybe try not to use array larger than 
 kd-tree can be used to fast retrive in the database
 
 ##Structure
-1. Pre-processing:
+1. Pre-processing:  
 Normlize  
 Rasterize  
 Denoise  
