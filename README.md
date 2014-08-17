@@ -26,8 +26,7 @@ SH测试效果不太好啊...再加一个distance histogram?
 Spherical harmonics descriptor  
 
 3. Retrieval:
-quick-sort?/kd-tree?  
-Show candidate(can be more) (clustering???)  
+SH dot product
 
 4. Verification:
 Denoise-test: Bilateral filter  
