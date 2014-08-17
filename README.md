@@ -7,7 +7,7 @@ Sometimes stack overflow problem occurs. Maybe try not to use array larger than 
 kd-tree can be used to fast retrive in the database
 
 SH测试效果不太好啊...再加一个distance histogram?
-或者实验两个SH点乘...而不是相减
+实验dot product...感觉不行啊? 选candidate的时候还有奇怪的bug
 
 ##Structure
 1. Pre-processing:  
