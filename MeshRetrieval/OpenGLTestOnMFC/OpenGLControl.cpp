@@ -22,6 +22,7 @@ bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
 bool BATCH_CONTROL = false;
 bool RETRIEVE_CONTROL = false;
+bool POLYGON_CONTROL = false;
 
 //add noise variable
 double noise_standard_deviation = 0.01; 
@@ -339,7 +340,7 @@ void COpenGLControl::oglDrawScene(void)
 	}
 	//rotate mesh
 	if(ROTATE_CONTROL>0 && meshsize>=1)
-	//normalize current mesh
+		//normalize current mesh
 	{
 		RotateMesh(meshQueue.at(meshsize-1));
 	}
@@ -397,49 +398,61 @@ void COpenGLControl::oglDrawScene(void)
 		//draw mesh
 		if(grid_points.size()==0)
 		{
-			glEnable(GL_LIGHTING);
-			//change the colour for each mesh
-			switch (i) 
-			{
-			case 0:
-				glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
-				break;
-			case 1:
-				glColor3f(GLfloat(0.6), GLfloat(0.8), GLfloat(1.0));
-				break;
-			case 2:
-				glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
-				break;
-			case 3:
-				glColor3f(GLfloat(0.6), GLfloat(1.0), GLfloat(1.0));
-				break;
-			default:
-				glColor3f(GLfloat(0.5), GLfloat(0.5), GLfloat(0.5));
-			};
-
-			meshQueue.at(i).request_face_normals();
-			meshQueue.at(i).update_normals();
-
-			GLdouble norms[3]={0.0,0.0,0.0};
-			for(MyMesh::FaceIter f_it=meshQueue.at(i).faces_begin();f_it!=meshQueue.at(i).faces_end();++f_it)
-			{
-				for(int n=0;n<3;n++){
-					norms[n]=(GLdouble)*(meshQueue.at(i).normal(f_it).data()+n);
-				}
-				glNormal3dv(norms);
-
-				glPushMatrix();
-				glBegin(GL_POLYGON);
-				for(MyMesh::FaceVertexIter v_it=meshQueue.at(i).fv_iter(f_it);v_it;++v_it)
+			if(POLYGON_CONTROL){
+				glEnable(GL_LIGHTING);
+				//change the colour for each mesh
+				switch (i) 
 				{
+				case 0:
+					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+					break;
+				case 1:
+					glColor3f(GLfloat(0.6), GLfloat(0.8), GLfloat(1.0));
+					break;
+				case 2:
+					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+					break;
+				case 3:
+					glColor3f(GLfloat(0.6), GLfloat(1.0), GLfloat(1.0));
+					break;
+				default:
+					glColor3f(GLfloat(0.5), GLfloat(0.5), GLfloat(0.5));
+				};
+
+				meshQueue.at(i).request_face_normals();
+				meshQueue.at(i).update_normals();
+
+				GLdouble norms[3]={0.0,0.0,0.0};
+				for(MyMesh::FaceIter f_it=meshQueue.at(i).faces_begin();f_it!=meshQueue.at(i).faces_end();++f_it)
+				{
+					for(int n=0;n<3;n++){
+						norms[n]=(GLdouble)*(meshQueue.at(i).normal(f_it).data()+n);
+					}
+					glNormal3dv(norms);
+
+					glPushMatrix();
+					glBegin(GL_POLYGON);
+					for(MyMesh::FaceVertexIter v_it=meshQueue.at(i).fv_iter(f_it);v_it;++v_it)
+					{
+						glVertex3fv(meshQueue.at(i).point(v_it).data());
+					}
+					glEnd();
+					glPopMatrix();
+				}
+
+				//release the face normals
+				meshQueue.at(i).release_face_normals();
+			} //end if(POLYGON_CONTROL){
+			else
+			{
+				glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
+				glPointSize(1.0);
+				glBegin(GL_POINTS);
+				for (MyMesh::VertexIter v_it=meshQueue.at(i).vertices_begin(); v_it!=meshQueue.at(i).vertices_end(); ++v_it){ 
 					glVertex3fv(meshQueue.at(i).point(v_it).data());
 				}
 				glEnd();
-				glPopMatrix();
 			}
-
-			//release the face normals
-			meshQueue.at(i).release_face_normals();
 		}
 		//draw rasterized grid
 		else

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <random>
 #include <string>
+#include <algorithm>
 
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_blas.h>
@@ -20,6 +21,8 @@ using namespace std; // make std:: accessible
 
 const int MAX_R = 32;
 const int MAX_L = 32;
+const int DATASIZE = 60;
+const int RADIUS = 32;
 double candidate_index_array[DATASIZE] = {}; 
 
 /*rotate mesh according to centre of mass*/
@@ -96,7 +99,7 @@ void AddNoise(double noise_standard_deviation,MyMesh &mesh)
 	NOISE_CONTROL = false;
 }
 
-int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],vector<Point> &grid_points)
+int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool * grid,vector<Point> &grid_points)
 {
 	Vector v12 = point2-point1;
 	double len12 = v12.norm();
@@ -115,9 +118,9 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 		//discard points out of range
 		if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
 
-		if(grid[grid_coordinate]!=true)
+		if(*(grid+grid_coordinate)!=true)
 		{
-			grid[grid_coordinate] = true;
+			*(grid+grid_coordinate) = true;
 			inter12.push_back(temp_p);
 			grid_points.push_back(temp_p);
 			n_points++;
@@ -127,9 +130,9 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool grid[],ve
 	int grid_coordinate_p2 = int(point2.x()*2*RADIUS*2*RADIUS + point2.y()*2*RADIUS + point2.z());
 	//make sure points in the range
 	if(grid_coordinate_p2<(2*RADIUS*2*RADIUS*2*RADIUS-1) && grid_coordinate_p2>0){
-		if(grid[grid_coordinate_p2]!=true)
+		if(*(grid+grid_coordinate_p2)!=true)
 		{
-			grid[grid_coordinate_p2] = true;
+			*(grid+grid_coordinate_p2) = true;
 			inter12.push_back(point2);
 			grid_points.push_back(point2);
 			n_points++;
@@ -260,9 +263,9 @@ void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points)
 			if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
 
 			//if not registered
-			if(grid[grid_coordinate]!=true)
+			if(*(grid+grid_coordinate)!=true)
 			{
-				grid[grid_coordinate] = true;
+				*(grid+grid_coordinate) = true;
 				grid_points.push_back(temp_face_point);
 			}
 		}
@@ -398,9 +401,9 @@ void ComputeSpharm(vector<Point> &grid_points,string write_filename)
 /*batch transform*/
 void BatchTrans(void)
 {
-	int file_num = 48;
+	int file_num = 60;
 
-	for(unsigned int file_id=41;file_id<=file_num;file_id++)
+	for(unsigned int file_id=51;file_id<=file_num;file_id++)
 	{
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
 		string read_filename = "./MeshDatabase/data ("+id+").obj";
@@ -456,13 +459,14 @@ void RetrieveMesh(void)
 		for(int idx_r = 0; idx_r < MAX_R; idx_r++){
 			for(int idx_l = 0; idx_l < MAX_L; idx_l++){
 				databaseSH_file >> databaseSH[idx_r*MAX_R+idx_l];
-				diffSH[file_id-1] += abs(databaseSH[idx_r*MAX_R+idx_l]-currentSH[idx_r*MAX_R+idx_l]);
+				diffSH[file_id-1] = databaseSH[idx_r*MAX_R+idx_l]*currentSH[idx_r*MAX_R+idx_l];
 			}
 		}
 		databaseSH_file.close();
 	}
 
 	getSortedID(diffSH,candidate_index_array,0,DATASIZE-1);
+	reverse(candidate_index_array,candidate_index_array+DATASIZE);
 
 	delete [] currentSH;
 	delete [] databaseSH;
@@ -474,9 +478,15 @@ void RetrieveMesh(void)
 void ChooseCandidate(int index)
 {
 	int candidate_id= candidate_index_array[index-1];
+
+	//decide the suffix of the data
+	string suffix;
+	if(candidate_id>40)	suffix = ").obj";
+	else				suffix = ").stl";
+
 	//number to string
 	string candidate_id_s = static_cast<ostringstream*>( &(ostringstream() << candidate_id) )->str();
-	string candidate_filname = "./MeshDatabase/data ("+candidate_id_s+").stl";
+	string candidate_filname = "./MeshDatabase/data ("+candidate_id_s+suffix;
 
 	//load candidate mesh 
 	MyMesh candidate_mesh;

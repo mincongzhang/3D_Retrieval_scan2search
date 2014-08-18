@@ -80,6 +80,8 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(Rotate_X, &CMeshRetrievalMFCDlg::OnBnClickedX)
 	ON_BN_CLICKED(Rotate_Y, &CMeshRetrievalMFCDlg::OnBnClickedY)
 	ON_BN_CLICKED(Rotate_Z, &CMeshRetrievalMFCDlg::OnBnClickedZ)
+	ON_BN_CLICKED(IDC_RADIO1, &CMeshRetrievalMFCDlg::OnBnClickedRadio1)
+	ON_BN_CLICKED(IDC_RADIO2, &CMeshRetrievalMFCDlg::OnBnClickedRadio2)
 END_MESSAGE_MAP()
 
 
@@ -332,4 +334,16 @@ void CMeshRetrievalMFCDlg::OnBnClickedY()
 void CMeshRetrievalMFCDlg::OnBnClickedZ()
 {
 	ROTATE_CONTROL = 3;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRadio1()
+{
+	POLYGON_CONTROL = false;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRadio2()
+{
+	POLYGON_CONTROL = true;
 }

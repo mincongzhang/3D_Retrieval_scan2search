@@ -21,9 +21,6 @@ using namespace std;
 #include <OpenMesh/Core/Mesh/Status.hh>
 #include <OpenMesh/Core/IO/exporter/ExporterT.hh>
 
-#define DATASIZE 30
-#define RADIUS 32
-
 struct MyTraits : public OpenMesh::DefaultTraits
 {
 	VertexAttributes(OpenMesh::Attributes::Status);

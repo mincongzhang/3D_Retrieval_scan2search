@@ -23,7 +23,7 @@ extern bool RASTERIZE_CONTROL;
 extern bool SPHARM_CONTROL;
 extern bool BATCH_CONTROL;
 extern bool RETRIEVE_CONTROL;
-
+extern bool POLYGON_CONTROL;
 
 class COpenGLControl : public CWnd
 {
