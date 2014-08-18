@@ -25,7 +25,8 @@ SH测试效果不太好啊...再加一个distance histogram?
 2. Descriptor:  
 Spherical harmonics descriptor  
 
-3. Retrieval:  
+3. Retrieval: 
+database
 SH dot product
 
 4. Verification:
