@@ -10,10 +10,10 @@ SH测试效果不太好啊...再加一个distance histogram?
 (1)Normalize  
 -make the center of mass of the model be at the point (R,R,R)  
 -scale so that the average distance from vertices to the center of mass is R/2  
--(make all models in same scale and against outliers)  
+-(scale invariance and against outliers)  
 (2)Denoise  
 -use 3D bilateral filter to denoise  
--(against scanned noise)  
+-(scanned noise invariance)  
 (3)Rasterize  
 -rasterize in to a 2R*2R*2R voxel grid (normally choose R to be ~32)  
 -(provide adequate granularity for discriminating shapes while filtering out high-freq noise)
