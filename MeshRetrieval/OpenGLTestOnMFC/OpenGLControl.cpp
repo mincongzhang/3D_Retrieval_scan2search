@@ -20,6 +20,7 @@ bool DENOISE_CONTROL = false;
 bool NORMALIZE_CONTROL = true;
 bool RASTERIZE_CONTROL = false;
 bool SPHARM_CONTROL = false;
+bool DISTHIST_CONTROL = false;
 bool BATCH_CONTROL = false;
 bool RETRIEVE_CONTROL = false;
 bool POLYGON_CONTROL = false;
@@ -359,6 +360,12 @@ void COpenGLControl::oglDrawScene(void)
 	{
 		string write_filename = "./DemoSH/demo.txt";
 		ComputeSpharm(grid_points,write_filename);
+	}
+	//compute distance histogram
+	if(DISTHIST_CONTROL)
+	{
+		string write_filename = "./DemoDH/demo.txt";
+		ComputeDistHist(grid_points,write_filename);
 	}
 
 	//batch transform

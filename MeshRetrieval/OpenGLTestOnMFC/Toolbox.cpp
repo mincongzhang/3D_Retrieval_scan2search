@@ -4,7 +4,6 @@
 #include "MeshOperation.h"
 
 /*Quick Sort of array and get the index of original order of array*/
-//test: can be replaced by map?
 void getSortedID(double array[],double id_array[], int left_id, int right_id)
 {
 	if(left_id >= right_id)

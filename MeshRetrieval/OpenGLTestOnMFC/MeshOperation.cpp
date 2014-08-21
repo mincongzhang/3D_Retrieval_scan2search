@@ -23,6 +23,7 @@ const int MAX_R = 32;
 const int MAX_L = 32;
 const int DATASIZE = 60;
 const int RADIUS = 32;
+const int MAX_DIST = 111;		//ceil(sqrt(3*(64^2)))
 double candidate_index_array[DATASIZE] = {}; 
 
 /*rotate mesh according to centre of mass*/
@@ -160,6 +161,24 @@ void WriteSH(string &write_filename,double SH_descriptor[])
 				myfile << SH_descriptor[idx_r*MAX_R+idx_l]<< " ";
 			}
 			myfile << "\n";
+		}
+		myfile.close();
+	}
+}
+
+/*write the output DH*/
+void WriteDH(string &write_filename,int DistHist[])
+{
+	// open file
+	ofstream myfile;
+	myfile.open(write_filename);
+	//write file header
+	if (myfile.is_open())
+	{
+		//write DH
+		for(unsigned int it=0;it<MAX_DIST;it++)
+		{
+			myfile<<DistHist[it]<< "\n";
 		}
 		myfile.close();
 	}
@@ -318,7 +337,7 @@ void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points)
 	centroid_after.y()/=double(grid_points.size());
 	centroid_after.z()/=double(grid_points.size());
 
-	//move grid to the origin and get distance vector
+	//move grid to the origin
 	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
 	{
 		grid_points.at(p_it).x() -= centroid_after.x();
@@ -398,16 +417,62 @@ void ComputeSpharm(vector<Point> &grid_points,string write_filename)
 	SPHARM_CONTROL = false;
 }
 
+/*compute distance histogram*/
+void ComputeDistHist(vector<Point> &grid_points,string write_filename)
+{
+	//initial DistHist
+	int * DistHist;
+	DistHist = new int [MAX_DIST]();
+
+	//get centroid
+	Point centroid(0.0,0.0,0.0);
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		centroid.x()+=grid_points.at(p_it).x();
+		centroid.y()+=grid_points.at(p_it).y();
+		centroid.z()+=grid_points.at(p_it).z();
+
+	}
+	centroid.x()/=double(grid_points.size());
+	centroid.y()/=double(grid_points.size());
+	centroid.z()/=double(grid_points.size());
+
+	//move grid to the origin and get distance vector
+	double x_dist,y_dist,z_dist;
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		x_dist = grid_points.at(p_it).x() - centroid.x();
+		y_dist = grid_points.at(p_it).y() - centroid.y();
+		z_dist = grid_points.at(p_it).z() - centroid.z();
+		int distance = int(round(sqrt(pow(x_dist,2.0)+pow(y_dist,2.0)+pow(z_dist,2.0))));
+		DistHist[distance]+=1;
+	}
+
+	/*write out the data*/
+	WriteDH(write_filename,DistHist);
+
+	delete [] DistHist;
+
+	DISTHIST_CONTROL = false;
+}
+
 /*batch transform*/
 void BatchTrans(void)
 {
-	int file_num = 60;
+	//SH transform
+	int file_num = 24;
 
-	for(unsigned int file_id=51;file_id<=file_num;file_id++)
+	for(unsigned int file_id=24;file_id<=file_num;file_id++)
 	{
+		//decide the suffix of the data
+		string suffix;
+		if(file_id>40)	suffix = ").obj";
+		else			suffix = ").stl";
+
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
-		string read_filename = "./MeshDatabase/data ("+id+").obj";
-		string write_filename = "./MeshSHDatabase/SH"+id+".txt";
+		string read_filename = "./MeshDatabase/data ("+id+suffix;
+		string write_SH_filename = "./MeshSHDatabase/SH"+id+".txt";
+		string write_DH_filename = "./MeshDHDatabase/DH"+id+".txt";
 
 		MyMesh mesh_to_transform;
 		OpenMesh::IO::read_mesh(mesh_to_transform, read_filename);
@@ -416,7 +481,8 @@ void BatchTrans(void)
 
 		NormalizeMesh(mesh_to_transform);
 		RasterizeMesh(mesh_to_transform,grid_points_to_transform);
-		ComputeSpharm(grid_points_to_transform,write_filename);
+		ComputeSpharm(grid_points_to_transform,write_SH_filename);
+		ComputeDistHist(grid_points_to_transform,write_DH_filename);
 
 	}
 
@@ -426,26 +492,43 @@ void BatchTrans(void)
 /*retrieve mesh*/
 void RetrieveMesh(void)
 {
+	/*spherical harmonics*/
 	double *currentSH;
 	double *databaseSH;
 	double *diffSH;
 	currentSH = new double [MAX_R*MAX_L]();
 	databaseSH = new double [MAX_R*MAX_L]();
 	diffSH = new double [DATASIZE]();
-
+	/*distance histogram*/
+	double *currentDH;
+	double *databaseDH;
+	double *diffDH;
+	currentDH = new double [MAX_DIST]();
+	databaseDH = new double [MAX_DIST]();
+	diffDH = new double [DATASIZE]();
 
 	//get current model SH
 	string currentSH_filename = "./DemoSH/demo.txt";
 	ifstream currentSH_file(currentSH_filename);
+	//get current model DH
+	string currentDH_filename = "./DemoDH/demo.txt";
+	ifstream currentDH_file(currentDH_filename);
 
+	//get current descriptors
 	for(int idx_r = 0; idx_r < MAX_R; idx_r++){
 		for(int idx_l = 0; idx_l < MAX_L; idx_l++){
 			currentSH_file >> currentSH[idx_r*MAX_R+idx_l];
 		}
 	}
 	currentSH_file.close();
+	for(int it_d = 0; it_d < MAX_DIST; it_d++){
+		currentDH_file >> currentDH[it_d];
+	}
+	currentDH_file.close();
 
 	//get database model SH
+	double max_diffSH = 0.0;
+	double max_diffDH = 0.0;
 	for(int file_id=1;file_id<=DATASIZE;file_id++)
 	{
 		//assign candidate index
@@ -455,29 +538,52 @@ void RetrieveMesh(void)
 		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
 		string databaseSH_filename = "./MeshSHDatabase/SH"+id+".txt";
 		ifstream databaseSH_file(databaseSH_filename);
-
 		for(int idx_r = 0; idx_r < MAX_R; idx_r++){
 			for(int idx_l = 0; idx_l < MAX_L; idx_l++){
 				databaseSH_file >> databaseSH[idx_r*MAX_R+idx_l];
-				diffSH[file_id-1] = databaseSH[idx_r*MAX_R+idx_l]*currentSH[idx_r*MAX_R+idx_l];
+				diffSH[file_id-1] += abs(databaseSH[idx_r*MAX_R+idx_l]-currentSH[idx_r*MAX_R+idx_l]);
 			}
 		}
+		if(diffSH[file_id-1]>max_diffSH) max_diffSH = diffSH[file_id-1]; 
 		databaseSH_file.close();
+
+		//get DH
+		string databaseDH_filename = "./MeshDHDatabase/DH"+id+".txt";
+		ifstream databaseDH_file(databaseDH_filename);
+		for(int it_d = 0; it_d < MAX_DIST; it_d++){
+			databaseDH_file >> databaseDH[it_d];
+			diffDH[file_id-1] += abs(databaseDH[it_d]-currentDH[it_d]);
+		}
+		if(diffDH[file_id-1]>max_diffDH) max_diffDH = diffDH[file_id-1]; 
+		databaseDH_file.close();
 	}
 
-	getSortedID(diffSH,candidate_index_array,0,DATASIZE-1);
-	reverse(candidate_index_array,candidate_index_array+DATASIZE);
+	//normalize diffDH and diffSH, get final diff
+	double * final_diff;
+	final_diff = new double [DATASIZE];
+	for(int file_id=1;file_id<=DATASIZE;file_id++)
+	{
+		diffDH[file_id-1]/=max_diffDH;
+		diffSH[file_id-1]/=max_diffSH;
+		final_diff[file_id-1] = diffDH[file_id-1]*diffSH[file_id-1]; 
+	}
 
+	getSortedID(final_diff,candidate_index_array,0,DATASIZE-1);
+   
 	delete [] currentSH;
 	delete [] databaseSH;
 	delete [] diffSH;
+	delete [] currentDH;
+	delete [] databaseDH;
+	delete [] diffDH;
+	delete [] final_diff;
 
 	RETRIEVE_CONTROL = false;
 }
 
 void ChooseCandidate(int index)
 {
-	int candidate_id= candidate_index_array[index-1];
+	int candidate_id = candidate_index_array[index-1];
 
 	//decide the suffix of the data
 	string suffix;

@@ -21,6 +21,7 @@ extern bool DENOISE_CONTROL;
 extern bool NORMALIZE_CONTROL;
 extern bool RASTERIZE_CONTROL;
 extern bool SPHARM_CONTROL;
+extern bool DISTHIST_CONTROL;
 extern bool BATCH_CONTROL;
 extern bool RETRIEVE_CONTROL;
 extern bool POLYGON_CONTROL;

@@ -96,32 +96,36 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
 END
 
-IDD_MeshRetrievalMFC_DIALOG DIALOGEX 0, 0, 551, 367
+IDD_MeshRetrievalMFC_DIALOG DIALOGEX 0, 0, 551, 375
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "MeshRetrieval"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_PIC_OPENGL,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,24,17,503,272
-    PUSHBUTTON      "LoadMesh",Load,30,297,57,14
-    LTEXT           "Left mouse button: Rotate      Mid mouse button: Zoom in/out Right mouse button: Translate",IDC_STATIC,442,305,99,28
-    PUSHBUTTON      "AddNoise",Noise,95,298,57,14
-    PUSHBUTTON      "Normalize",Normalize,30,330,57,14
-    CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,261,312,53,10
-    CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,261,329,53,10
-    CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,314,312,53,10
-    CONTROL         "Candidate4",CANDIDATE4,"Button",BS_AUTORADIOBUTTON,314,329,53,10
-    CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,367,312,53,10
-    CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,367,329,53,10
-    GROUPBOX        "Candidate",IDC_STATIC,250,296,173,55
-    PUSHBUTTON      "Spharm",Spharm,162,330,59,14
-    PUSHBUTTON      "Rasterize",Rasterize,95,330,57,14
-    PUSHBUTTON      "BatchTransform",BatchTransform,30,345,57,15
-    PUSHBUTTON      "Denoise",Denoise,162,298,60,14
-    PUSHBUTTON      "Retrieve",Retrieve,162,345,59,14
-    PUSHBUTTON      "Rotate_X",Rotate_X,30,314,57,14
-    PUSHBUTTON      "Rotate_Y",Rotate_Y,95,314,57,14
-    PUSHBUTTON      "Rotate_Z",Rotate_Z,162,314,60,14
+    PUSHBUTTON      "LoadMesh",Load,33,302,57,14
+    LTEXT           "Left mouse button: Rotate      Mid mouse button: Zoom in/out Right mouse button: Translate",IDC_STATIC,425,311,99,28
+    PUSHBUTTON      "AddNoise",Noise,98,302,57,14
+    PUSHBUTTON      "Normalize",Normalize,33,335,57,14
+    CONTROL         "Candidate1",CANDIDATE1,"Button",BS_AUTORADIOBUTTON,249,313,53,10
+    CONTROL         "Candidate2",CANDIDATE2,"Button",BS_AUTORADIOBUTTON,249,330,53,10
+    CONTROL         "Candidate3",CANDIDATE3,"Button",BS_AUTORADIOBUTTON,302,313,53,10
+    CONTROL         "Candidate4",CANDIDATE4,"Button",BS_AUTORADIOBUTTON,302,330,53,10
+    CONTROL         "Candidate5",CANDIDATE5,"Button",BS_AUTORADIOBUTTON,355,313,53,10
+    CONTROL         "Candidate6",CANDIDATE6,"Button",BS_AUTORADIOBUTTON,355,330,53,10
+    GROUPBOX        "Candidate",IDC_STATIC,238,300,173,48
+    PUSHBUTTON      "Spharm",Spharm,33,351,57,14
+    PUSHBUTTON      "Rasterize",Rasterize,98,335,57,14
+    PUSHBUTTON      "BatchTransform",BatchTransform,163,335,57,15
+    PUSHBUTTON      "Denoise",Denoise,163,302,57,14
+    PUSHBUTTON      "Retrieve",Retrieve,163,352,57,14
+    PUSHBUTTON      "Rotate_X",Rotate_X,33,319,57,14
+    PUSHBUTTON      "Rotate_Y",Rotate_Y,98,319,57,14
+    PUSHBUTTON      "Rotate_Z",Rotate_Z,163,319,57,14
+    GROUPBOX        "View",IDC_STATIC,238,346,173,22
+    CONTROL         "PointCloud",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,268,355,61,10
+    CONTROL         "Polygon",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,345,355,51,10
+    PUSHBUTTON      "DistHist",DistHist,98,352,57,14
 END
 
 
@@ -183,11 +187,11 @@ BEGIN
     IDD_MeshRetrievalMFC_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 544
+        RIGHTMARGIN, 542
         VERTGUIDE, 24
         VERTGUIDE, 527
         TOPMARGIN, 7
-        BOTTOMMARGIN, 360
+        BOTTOMMARGIN, 368
         HORZGUIDE, 17
         HORZGUIDE, 289
     END

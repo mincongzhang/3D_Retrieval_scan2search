@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
 	ON_BN_CLICKED(Rotate_Z, &CMeshRetrievalMFCDlg::OnBnClickedZ)
 	ON_BN_CLICKED(IDC_RADIO1, &CMeshRetrievalMFCDlg::OnBnClickedRadio1)
 	ON_BN_CLICKED(IDC_RADIO2, &CMeshRetrievalMFCDlg::OnBnClickedRadio2)
+	ON_BN_CLICKED(DistHist, &CMeshRetrievalMFCDlg::OnBnClickedDisthist)
 END_MESSAGE_MAP()
 
 
@@ -346,4 +347,10 @@ void CMeshRetrievalMFCDlg::OnBnClickedRadio1()
 void CMeshRetrievalMFCDlg::OnBnClickedRadio2()
 {
 	POLYGON_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedDisthist()
+{
+	DISTHIST_CONTROL = true;
 }

@@ -39,5 +39,6 @@ void ChooseCandidate(int index);
 void NormalizeMesh(MyMesh &mesh);
 void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points);
 void ComputeSpharm(vector<Point> &grid_points,string write_filename);
+void ComputeDistHist(vector<Point> &grid_points,string write_filename);
 void BatchTrans(void);
 void RetrieveMesh(void);
