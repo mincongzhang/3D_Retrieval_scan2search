@@ -3,7 +3,9 @@
 
 kd-tree can be used to fast retrive in the database
 
-SH测试效果不太好啊...再加一个distance histogram?
+distance histogram added
+
+https://www.youtube.com/watch?v=eXQ3OQfv2UU
 
 ##Structure
 1. Pre-processing:  
