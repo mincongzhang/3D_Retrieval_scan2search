@@ -1,7 +1,8 @@
-3D_Retrieval_scan2search
+3D Shape Retrieval "Scan to search"
 ========================
 
-Demo: https://www.youtube.com/watch?v=eXQ3OQfv2UU
+[Video Demo](https://www.youtube.com/watch?v=eXQ3OQfv2UU)
+
 
 ##Structure
 1. Pre-processing:  
