@@ -1,10 +1,6 @@
 3D_Retrieval_scan2search
 ========================
 
-kd-tree can be used to fast retrive in the database
-
-distance histogram added
-
 Demo: https://www.youtube.com/watch?v=eXQ3OQfv2UU
 
 ##Structure
@@ -66,8 +62,10 @@ The Legendre polynomial P(n,x) can be defined by:
 3. input a model in the database, rotated
 4. input a scanned model 
 
-##notes
-computing SH very slow: precompute?   
+##Further improvement
+1. kd-tree can be used to fast retrive in the database
+
+2. Spherical Harmonics transform speed up
 (1)divide and concour  http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
 (2)FFT to fourier then SH:http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method  
 (3)face based? http://liris.cnrs.fr/Documents/Liris-2276.pdf  
