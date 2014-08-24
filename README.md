@@ -3,6 +3,7 @@
 
 [Video Demo](https://www.youtube.com/watch?v=eXQ3OQfv2UU)
 
+![Demo](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/overview.jpg)
 
 ##Structure
 1. Pre-processing:  
