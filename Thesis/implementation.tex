@@ -1,0 +1,15 @@
+
+
+Equations can be inserted either within the text as $x=\phi/2$, or preferably, as
+numbered equations where
+
+\begin{equation} \label{myEqName}
+ p(\mathbf{Z}_{k}|\mathcal{T}_{k},\mathbf{e}) = \prod_{i\in S_{k}}
+G_{z_{i,k}}[\mu_{\mathcal{T}_{k}(i)},\phi_{\mathcal{T}_{k}(i)}],
+\end{equation}
+
+and the equation still receives proper punctuation because equations are just normal parts of sentences.
+
+You can reference the above equations like this:  Equation~\ref{myEqName}, or (\ref{myEqName}) for short.  You can also reference sections:  Section~\ref{sectionExample}. Notice that in the .tex file, one can precede \texttt{$\backslash$ref} with a tilde ($\sim$). Using a tilde instead of a space forces a small space to happen there, and essentially glues the previous word to the label being referenced. This keeps a line-break from interrupting your reference like this: Equation\\ \ref{myEqName}. 
+
+

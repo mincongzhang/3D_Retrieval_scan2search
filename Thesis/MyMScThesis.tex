@@ -1,0 +1,182 @@
+\documentclass{ucl_thesis}
+
+%twoside for double page printing
+\usepackage{enumerate}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+\usepackage{listings}
+\usepackage{amsmath}
+% Uncomment this to activate the TikZ library, which is useful for fancy block-diagrams.
+%    \usepackage{tikz}
+%    \usetikzlibrary{positioning,arrows,shapes.misc}
+\usepackage{multirow}
+
+%\numberwithin{algorithm}{chapter}
+%\usepackage{epsf}
+\usepackage{fancyvrb}
+
+% Uncomment this package to enable internal-linking:
+%\usepackage{hyperref}
+
+
+\title{``Scan to search''\\
+        A 3D retrieval system}
+
+\author{Mincong Zhang}
+\def \supervisor {Dr Seena Rejal(3DI); Dr Niloy Mitra (UCL)}
+
+\date{September 2014}
+
+
+%Malcolm added some custom commands here - you can make your own!
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\figref}[1]{(Fig. \ref{#1})}
+
+% See this one in use further down:
+\def\etal{{et~al.}}
+
+% I also like these, but didn't have occasion to use them below:
+\def\ie{{\it i.e.,\ }}
+\def\etc{{\it etc.,\ }}
+\def\eg{{\it e.g.,\ }}
+\def\vs{{\it vs.\ }}
+
+
+%\renewcommand{\baselinestretch}{1.5}
+%\renewcommand{\bibname}{References}
+
+
+
+
+\begin{document}
+\bibliographystyle{abbrv}
+\maketitle
+\numberwithin{algorithm}{chapter}
+\setcounter{page}{1}
+\pagenumbering{roman}
+\pagestyle{plain}
+
+% Notice how the star "*" is used throughout LaTex to modify the normal behavior. For example, \section* instead of \section 
+% tells LaTex NOT to number this section.
+
+
+\newpage
+\section*{Abstract}
+%abstract content
+\input{abstract.tex}
+
+
+\newpage
+\section*{Acknowledgements}
+\input{acknowledgements.tex}
+
+
+%\setcounter{tocdepth}{2}
+\tableofcontents
+\listoffigures
+%\listoftables
+\listofalgorithms
+\newpage
+
+%\clearpage
+%
+%\begin{center}
+%\textbf{To whomever}
+%\end{center}
+
+
+
+
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\pagestyle{plain}
+
+\chapter{Introduction}
+\label{background}
+\input{introduction.tex}
+
+\chapter{Background}
+\input{background.tex}
+
+\chapter{Analysis and Design}
+\input{analysis&design.tex}
+
+\chapter{Implementation}
+\label{chp:impl}
+\input{implementation.tex}
+
+
+
+
+
+\chapter{Evaluation}
+\label{chp:eval}
+%\input{evaluation.tex}
+
+
+\section{Figures} \label{sectionExample}
+
+Figure~\ref{ExampleEstNoiseCovar}, is an example of a figure with a legend.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\linewidth]{exampleEstNoiseCovar}
+\caption{This is the figure caption. Notice the figure looks good even when magnified because it is a vector-graphic, and not rasterized.} \label{ExampleEstNoiseCovar}
+\end{figure}
+
+
+\textbf{Old and New Instructions} These instructions are partly ``old'' because instead of .eps, we usually put pdf or png figures in our documents these days. However, they're still useful because exporting of Matlab figures directly to pdf, when using the Student License version of Matlab, results in an undesirable watermark. So my advice is to prepare your raster images as .png's, prepare your vector graphics as .pdf's in Inkscape or even Office (with the MS plugin that exports to .pdf), and follow the following slightly roundabout process to get Matlab figures into .pdf form.
+\begin{enumerate}
+  \item Make the figure in Matlab.
+  \item Do \texttt{print -depsc2} to generate an .eps.
+  \item Open the .eps in Ghostview (GSview) and ``Convert'' using the ``pdfwrite'' device to save a .pdf.
+\end{enumerate}
+
+
+
+
+\chapter{Conclusion}
+\label{chp:conc}
+%\input{conclusion.tex}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c|cc}   % The "|" bar puts a bar in the figure
+   \includegraphics[width=.30\columnwidth]{home.png} &  % The little "and" puts splits in the table
+   \includegraphics[width=.30\columnwidth]{home.png} &  
+   \includegraphics[width=.30\columnwidth]{home.png}\\
+   (A) & (B) & (C)
+\end{tabular}
+\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
+  \label{fig:SomeMoreFigs}
+\end{center}
+\end{figure}
+
+Figures need not be in \texttt{.pdf} format. For example, Figure~\ref{fig:SomeMoreFigs} pulls in $3$ copies of a \texttt{.png} file. Also, notice that the automatic-placement of figures will try to put each figure as close as possible to the first reference in the final document, regardless of figure-placement in the .tex.
+
+
+
+\addcontentsline{toc}{chapter}{Appendices}
+
+\cleardoublepage
+\appendix
+\chapter{Theoretical Background}
+\label{chp:theory}
+%\input{theory.tex}
+
+\chapter{Lisp Primer}
+\label{cha:lisp-primer}
+%\input{lisp-primer.tex}
+
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliography{Thesis}
+\end{document} 

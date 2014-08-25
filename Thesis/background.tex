@@ -1,0 +1,88 @@
+Background
+
+You should provide enough background to the reader for them to understand what the project is all about. For example:
+ 
+
+    What the reader needs to know in order to understand the rest of the report. Examiners like to know that you have done some background research and that you know what else has been done in the field (where relevant). Try to include some references.
+    Related work (if you know of any)
+    What problem are you solving?
+    Why are you solving it?
+    How does this relate to other work in this area?
+    What work does it build on?
+
+ 
+
+For 'research-style' projects - ones in which a computational technique (for example neural networks, genetic algorithms, finite element analysis, ray tracing) is used to explore or extend the properties of a mathematical model, or to make predictions of some kind - it may be a good idea to split this chapter into two shorter ones, one covering the computational technique itself and one the area of application.
+ 
+
+The Examiners are just as interested in the process you went through in performing your project work as the results you finally produced. So, make sure your reports concentrate on why you made the particular choices and decisions that you did. We are looking for reasoned arguments and for critical assessment. This is especially so where design, implementation and engineering decisions have been made not just on technical merit but under pressure of non-functional requirements and external influences.
+
+
+\section{The area of 3D retrieval}
+With the development of 3D construction techniques, such as new multimedia softwares, interactive tools and 3D scanners, the number of available 3D models on the Internet is increasing. This development in 3D field makes the challenge change from construction to retrieval. Many domains such as entertainment, medicine, education, and industry field have a growing demand of 3D models, it is much efficient for them to find and reuse a 3D model rather than construct a model which may already exist. Therefore, many kinds of 3D retrieval engines are developed.
+
+Different engines are applied different methods for retrieval. A basic approach to retrieve data is keyword-based retrieval. However, this simple approach often fails in some situation. For example, if a 3D model is named as ``1.stl'', both the system and the user can never know its content. Besides, even with keywords, it is difficult to describe a 3D data properly because of the ambiguity in language. Therefore, content-based 3D retrieval engines are developed and have been used. If the user has an original 3D model and want to find other similar 3D models, the shape-based retrieval system will be helpful~\cite{Funkhouser:2003:SEM:588272.588279}; but if the user has no data to describe what he/she wants to search, and just has an idea about what kind of model does he/she want, sketch-based 3D retrieval will be better~\cite{CGF:CGF12200}. 
+
+In the retrieval algorithm, certain feature representing the model is called as descriptor. By extracting one or multiple of these descriptors from two models, matching algorithm can be carried out and determine whether the two data are similar. With reference 3D models (or sketch data), there are many approaches to match them to the candidate models in the database. 
+
+For sketch-based retrieval, Igarashi~\etal~\cite{Igarashi:2007:TSI:1281500.1281532} and Zeleznik~\etal~\cite{Zeleznik:2007:SIS:1281500.1281530} develop approaches on 3D sketch based retrieval; T. Funkhouser~\etal~\cite{Funkhouser:2003:SEM:588272.588279} provide a solution on 2D sketch based retrieval; Xie~\etal~\cite{CGF:CGF12200} provides a solution on retrieval about 2D projection of 3D model. For shape-based 3D retrieval, S. Belongie~\etal~\cite{belongie2001matching}~\cite{belongie2002shape} try to use 3D histogram as descriptors to measure the similarity between models with different shapes; Kazhdan~\etal~\cite{kazhdan2003rotation} use spherical harmonics to describe shapes and match models; Sundar~\etal~\cite{sundar2003skeleton} use skeleton-based descriptors to measure topological similarity between 3D models. 
+
+With certain retrieval method, the search engine can be built. Many universities and research institutions have developed their 3D retrieval engines, such as the 3D model search engine at the Princeton University~\cite{shilane2004princeton}~\cite{min2003early}, the 3D model retrieval system at the National Taiwan University~\cite{shen20033d}, and the Purdue University~\cite{iyer2005engineering}. Besides, database and benchmarks are required, for process the search engine as well as testing the search algorithm. The first benchmarks for 3D mesh models is created by Princeton University~\cite{shilane2004princeton}. There are 1, 814 models in the Princeton Shape Benchmark, where half of them are training data and the other half are testing data. In the 3D database of the Purdue University, there are 1,391 models~\cite{iyer2005engineering}.
+
+In manufacturing field, many common parts of components has already been designed, and their 3D models have been created. These models have many applications in industrial design and manufacturing. Thus there is no need for some manufactories to recreate these models again - reusing standard parts can lead to reduced production costs. Additionally, another situation is that, customers want to find a manufacturing supplier, who can provide certain types of components, they have to look through a list of all kinds of manufacturing components, and choose the right type as well as its suppliers. Or the customer have to be in a meeting with many suppliers, discussing which supplier can produce or provide the certain manufacturing components. It is time-consuming and inefficient, and the customer may miss some suppliers due to the limitation of geography or nationality. 
+
+The company 3DI wants to connect customers and suppliers of manufacturing components through a 3D retrieval system. And this project tries to help 3DI to implement a prototype of shape-based retrieval system, which provides a ``scan to search'' solution. The issue that this system try to solve is, when there is no 3D model data of a component, sketch-based searching cannot provide instant accurate result, and the customer has already had real world sample components, the ``scan to search'' system can provide certain good matching result. The user can scan a object and reconstruct its 3D model, and this system takes the scanned point clouds of manufacturing components as queries, and search for 3D models with similar shape. This is similar to content-based similar image retrieval engine provided by Google. 
+
+To implement this system, there are mainly three parts need to be considered. First is to get the scanned 3D models. An App called ``123D Catch'' will be used. This App can convert a loop of images of an object into a 3D model. Converting from 2D images to 3D model is a challenging topic and it requires lots of efforts to do, and this project is to finish a retrieval system, thus the development of scanning to 3D data will be skipped. Besides, in the early stage, the scanned version of 3D data will be simulated by adding appropriate level of noise. Secondly, models in the database are essencial. Since this retrieval system is for searching  manufacturing components, common 3D database is not suitable for testing. Therefore, besides with  Princeton Shape Benchmark~\cite{shilane2004princeton}, many other industrial and manufacturing components are collected from the Internet.
+
+The most important thing for this system is to choose appropriate descriptors. However, before computing descriptors for the scanned 3D model, the noise from scanning should be reduced. Therefore bilateral mesh denoising algorithm~\cite{fleishman2003bilateral} is firstly implemented to remove scanning noise. Considering the input data, even after denoising, they contain unstable shape structure. Besides, the point cloud may lack some important data structures, such as the faces, edges, normal for each vertex information. Due to the unstable structure and remaining scanning noise, some describtors for shape representing are not suitable, such as the medial axis based descriptors~\cite{kim2001graph} and dihedral angles based descriptors~\cite{gal2009iwires}. These descriptors are sensitive to noise. Besides, skeleton based descriptors~\cite{sundar2003skeleton} is also not suitable. These descriptors would be better for retriving models with similar topological information. For example, humanoid models with a torso and arms and legs, but have different postures. Additionally, since the scanned model cannot be guaranteed to align properly, describtors should also have rotational invariance property. Therefore, 3D histogram by S. Belongie~\etal~\cite{belongie2002shape}, which is not rotational invariant, cannot be used. Finally, two suitable descriptors can meet the requirements: lightfield descriptors~\cite{shen20033d} and spherical harmonics descriptors~\cite{Funkhouser:2003:SEM:588272.588279}. These two descriptors are both rotational invariant, but spherical harmonics descriptors are more insensitive to noise. Therefore, spherical harmonics descriptors are chosen in this ``scan to search'' retrieval system. 
+
+\section{Computational technique}
+\begin{enumerate}
+\item Spherical harmonics
+
+In mathematics, spherical harmonics are the angular portion of a set of solutions to Laplace's equation. In computer vision and 3D computer graphics, spherical harmonics are widely used in many topics including lighting (ambient occlusion, global illumination, etc.) and representing the feature of 3D shapes.
+
+The normalized spherical harmonics function can be represented as 
+\begin{equation} \label{spherical_harmonics}
+    Y_\ell^m( \theta , \varphi ) = (-1)^m \sqrt{{(2\ell+1)\over 4\pi}{(\ell-m)!\over (\ell+m)!}} \, P_\ell^m ( \cos{\theta} ) \, e^{i m \varphi } 
+\end{equation}
+
+where $Y_\ell^m\,\!$ is the spherical harmonics function for $\ell\,\!$ and $m\,\!$. $P_\ell^m\,\!$ is the associated Legendre polynomials. $P_\ell^m\,\!$ can be expressed as 
+\begin{equation} \label{legendre}
+P_\ell^m(x) = (1 - x^2)^{|m|/2}\ \frac{d^{|m|}}{dx^{|m|}}P_\ell(x)\, 
+\end{equation}
+
+And $P_\ell(x)\,\!$ is Legendre polynomials on level $\ell\,\!$, which can be represented as Rodrigues' formula:
+\begin{equation} \label{rodrigues}
+P_\ell(x) = {1 \over 2^\ell \ell!} {d^\ell\over dx^\ell }(x^2 - 1)^l 
+\end{equation}
+
+
+\item Rotation invariant
+
+Spherical harmonics transformation can be applied to any function in spherical coordinates $f(\theta,\varphi)$, and decomposed it as the sum of its harmonics:
+\begin{equation} \label{sphericalfunction}
+f(\theta,\varphi)=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}a_{lm}Y_{l}^{m}(\theta,\varphi)
+\end{equation}
+
+where $a_{lm}$ is the coefficients in each frequency that can uniquely represent the spherical function $f(\theta,\varphi)$. 
+
+Let $R()$ denote the rotation, the rotated spherical function is
+\begin{equation} \label{rotatedfunction}
+R(f(\theta,\varphi))=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}=R(a_{lm})Y_{l}^{m}(\theta,\varphi)
+\end{equation}
+
+Thus if we compute the $L_{2}$-$norm$ for each coefficient, the energies of a spherical function in each frequency can be acquired,
+\begin{equation} \label{l2norm}
+\sum_{m=-l}^{m=l}|a_{ml}|^{2}=\sum_{m=-l}^{m=l}|R(a_{ml})|^{2}
+\end{equation}
+The energies do not change if the function is rotated, and thus the results are rotational invariant. Therefore for a 3D model with vertices in polar coordinates, spherical harmonics transformation can be carried out and the results are unique descriptors that can represent the shape. 
+
+---
+However, interior rotation cannot be detected. 
+error of spherical harmonics
+distance histogram assistance
+---
+
+\end{enumerate}

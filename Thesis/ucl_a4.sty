@@ -1,0 +1,47 @@
+%%
+%% This is file `ucl_a4.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% ucl_a4.dst 
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% You are *not* allowed to modify this file.
+%% 
+%% You are *not* allowed to distribute this file.
+%% For distribution of the original source see the terms
+%% for copying and modification in the file ucl_a4.dst.
+%% 
+%%  A LaTeX2e package to use A4 paper.
+%%
+%%  Copyright (c) 1996, Russel Winder.
+%%
+\def \fileversion{v1.2}
+\def \filedate{1996/08/01}
+\def \docdate{\filedate}
+\ifx \documentclass \undefined
+    \wlog{LaTeX Package `UCL A4' \fileversion\space<\filedate>}
+\else
+    \NeedsTeXFormat{LaTeX2e}
+    \ProvidesPackage{ucl_a4}[\filedate\space\fileversion\space UCL A4 based page layout]
+\fi
+\setlength \paperheight {297mm}%  842pt almost exactly.
+\setlength \paperwidth  {210mm}%  595pt plus a very small fraction.
+\setlength \textheight {709\p@}%  250mm almost exactly.
+\setlength \textwidth  {465\p@}%  164mm almost exactly.
+\setlength \hoffset {-60\p@}
+\setlength \voffset {-60\p@}
+\setlength \oddsidemargin {60\p@}
+\if@twoside
+    \setlength \evensidemargin {46\p@}
+\else
+    \setlength \evensidemargin {60\p@}
+\fi
+\setlength \marginparwidth {30\p@}
+\endinput
+%%
+%% End of file `ucl_a4.sty'.
