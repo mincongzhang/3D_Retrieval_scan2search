@@ -27,9 +27,9 @@ SH and DH database
 Retrieval with same weight (with 0.5 on SH and DH respectively)
 
 4. Verification:
-Denoise-test: Bilateral filter  
-Rotate-test: SH/DH rotate invariant  
-Scan-to-search-test
+Denoise test: Bilateral filter  
+Rotate test: SH/DH rotate invariance test
+Scan-to-search test: input scanned model
 
 
 ##Spherical harmonics descriptor 
@@ -71,11 +71,16 @@ When implementing the bilateral filter I find that it is really slow when I try 
 
 ##Further improvement
 1. kd-tree can be used to fast retrive in the database
+ 
+2. rasterization algorithm updates
+(idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)
 
-2. Spherical Harmonics transform speed up
+3. Spherical Harmonics transform speed up  
 (1)divide and concour  http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
-(2)FFT to fourier then SH:http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method  
-(3)face based? http://liris.cnrs.fr/Documents/Liris-2276.pdf  
+(2)FFT to fourier then SH:  
+http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method
+(3)face based?:  
+http://liris.cnrs.fr/Documents/Liris-2276.pdf  
 
 ##Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
