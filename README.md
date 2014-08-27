@@ -48,13 +48,16 @@ O(n) solution:
 
 Pseudo code for spherical harmonics:
 
+    //SH is spherical harmonics descriptor 
     sort vertex according to radius
     for each frequency l (idx_l)
-        for each rasterized vertex in one radius region
-            calculate F_lr = F(idx_l,idx_r);
-        get sum of F_lr in one radius ragion = a_ml
-        spherical harmonics descriptor SH(idx_l,idx_r) += abs(a_ml)^2;
-    SH = sqrt(SH);
+        for each rasterized vertex in one radius range r (idx_r)
+            calculate F_lr = F(l,r)
+        end
+        a_ml = sum of F_lr in one radius ragion
+        SH(l,r) += abs(a_ml)^2    
+    end
+    SH = sqrt(SH)
         
 *where F_lr is the following equation, l is m in the equation
 ![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical harmonics.jpg)    
