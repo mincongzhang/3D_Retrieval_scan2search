@@ -76,11 +76,12 @@ When implementing the bilateral filter I find that it is really slow when I try 
 (idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)
 
 3. Spherical Harmonics transform speed up  
-(1)divide and concour  http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
+(1)divide and concour  
+http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
 (2)FFT to fourier then SH:  
-http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method
+http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method  
 (3)face based?:  
-http://liris.cnrs.fr/Documents/Liris-2276.pdf  
+http://liris.cnrs.fr/Documents/Liris-2276.pdf   
 
 ##Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
