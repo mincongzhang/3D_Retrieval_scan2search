@@ -13,3 +13,146 @@ and the equation still receives proper punctuation because equations are just no
 You can reference the above equations like this:  Equation~\ref{myEqName}, or (\ref{myEqName}) for short.  You can also reference sections:  Section~\ref{sectionExample}. Notice that in the .tex file, one can precede \texttt{$\backslash$ref} with a tilde ($\sim$). Using a tilde instead of a space forces a small space to happen there, and essentially glues the previous word to the label being referenced. This keeps a line-break from interrupting your reference like this: Equation\\ \ref{myEqName}. 
 
 
+
+
+Since this retrieval system is designed as a loosely coupled system, every basic module can be controlled by its relevant function, and be tested and verified independently. These basic function modules are: load 3D model, add noise, denoise, rotate model, normalize model, rasterize model, compute spherical harmonics, compute distance histogram, batch transformation to generate database, retrieve model, show candidates model after retrieval and show point-cloud/polygon. 
+
+\section{Noise and Rotation Simulations}
+
+Besides with the function to load 3D models of multiple formats, simulators for noise and rotation are the first important modules to implement. These simulators can help to verify the rotational invariant property of the descriptors, as well as robustness to random noise in the early stage.
+
+Gaussian noise is used for noise simulation. The default standard deviation for Gaussian noise in this module is 0.01. That is for one click on the button ``AddNoise'', the noise with 0.01 standard deviation will be generated and added for every vertex in the 3D model. This function is for simulating scanned noise, the noise intensity can be controlled by the times of click. 
+
+The other function is to rotate the input 3D model. Following Equation~\ref{rotationmatrix_x}, Equation~\ref{rotationmatrix_y} and Equation~\ref{rotationmatrix_z}, basic rotations are applied to the input 3D model to test rotational invariant property. These three basic rotations are controlled by three button ``Rotate\_X'', ``Rotate\_Y'' and ``Rotate\_Z'' respectively. 
+
+\begin{equation} \label{rotationmatrix_x}
+  \mathcal{R}_x(\theta_x)=
+  \begin{bmatrix}
+    1 & 0 & 0 \\
+    0 &  \cos{\theta_x} &  -\sin{\theta_x} \\
+    0 &  \sin{\theta_x} & \cos{\theta_x}
+  \end{bmatrix}
+\end{equation}
+
+\begin{equation} \label{rotationmatrix_y}
+  \mathcal{R}_y(\theta_y)=
+  \begin{bmatrix}
+    \cos{\theta_y} & 0 & \sin{\theta_y} \\
+    0 & 1 & 0 \\
+     -\sin{\theta_y} & 0 & \cos{\theta_y}
+  \end{bmatrix} 
+\end{equation}
+
+\begin{equation} \label{rotationmatrix_z}
+  \mathcal{R}_z(\theta_z)=
+  \begin{bmatrix} 
+    \cos{\theta_z} &   -\sin{\theta_z} & 0 \\
+    \sin{\theta_z} & \cos{\theta_z} & 0 \\
+    0 & 0 & 1 
+  \end{bmatrix}
+\end{equation}
+
+\section{Denoise}
+
+Fleishman~\etal~\cite{fleishman2003bilateral} have proposed a bilateral filter in 3D mesh for denoising. For each vertex in the 3D model, the bilateral filter takes the projections of neighbours onto its normal, as well as the distance to its neighbours into account for smoothing. Therefore it is able to preserve edges while smooth fluctuations for each vertex. 
+
+Let $\bm{\mathrm{u}}=(x,y,z)$ denote one vertex in the mesh, $N(\bm{\mathrm{u}})$ denote the neighbours of $\bm{\mathrm{u}}$. The bilateral filter can be expressed as
+\begin{equation} \label{bilaterialfilter}
+I^\text{filtered}(\bm{\mathrm{u}}) = \frac{1}{W} \sum_{\bm{\mathrm{p}} \in N(\bm{\mathrm{u}})} I(\bm{\mathrm{p}})W_c(\|\bm{\mathrm{p}}-\bm{\mathrm{u}}\|)W_s(\|I(\bm{\mathrm{p}})-I(\bm{\mathrm{u}})\|),
+\end{equation}
+
+where the normalization term
+\begin{equation} \label{normalizer}
+W = \sum_{\bm{\mathrm{p}} \in N(\bm{\mathrm{u}})}W_c(\|\bm{\mathrm{p}}-\bm{\mathrm{u}}\|)W_s(\|I(\bm{\mathrm{p}})-I(\bm{\mathrm{u}})\|)
+\end{equation}.
+
+$W_c$ is the spatial kernel for smoothing differences in distances, and it is a Gaussian function with parameter $\sigma_c$: $W_c=e^{-\frac{x^2}{2 \sigma_c^2}}$, where $\sigma_c$ depends on the average distance of the vertices. Its default value is 0.05. $W_s$ is the range kernel for smoothing differences in the projections of neighbours onto the vertex's normal. $W_s$ is also a Gaussian function with parameter $\sigma_s$: $W_s=e^{-\frac{x^2}{2 \sigma_s^2}}$, where $\sigma_s$ can be computed as the standard deviation of the projections of neighbours onto the vertex's normal. 
+
+The core part of the bilateral filter denoising function is demonstrated in the code below:
+%bilateral filter
+\begin{lstlisting}[xleftmargin=1em]
+//sigma_c depends on the distance of the points
+double sigma_c = 0.05; 
+//Calculate sigma_s
+mean_height /= neighbour_num;
+for(int i=0;i<neighbour_num;i++)
+{
+	sigma_s +=  pow((height.at(i)-mean_height),2);
+}
+sigma_s = sqrt(sigma_s);
+
+//Bilateral Mesh Denoising
+double sum = 0;
+double normalizer = 0;
+double t,Wc,Ws;
+
+for(int i=0;i<neighbour_num;i++)
+{
+	//get distance
+	t = distVector.at(i);
+	//get Wc, Ws, sum, normalizer
+	Wc = exp(-t*t/(2*sigma_c*sigma_c));
+	Ws = exp(-height.at(i)*height.at(i)/(2*sigma_s*sigma_s));
+	sum += (Wc*Ws)*height.at(i);
+	normalizer += Wc*Ws;
+}
+
+//assign back to original mesh
+for(int d=0;d<dim;d++){
+	//new_v = v-n*(sum/normalizer)
+	*(mesh.point(it).data()+d) +=-(*(mesh.normal(it).data()+d))*float(sum/normalizer);
+}
+\end{lstlisting}
+
+When implementing the bilateral filter, it is critical to find the one-ring neighbours for each vertex. However, using the OpenMesh member function and ``VertexVertexIter'' iterator for one-ring neighbours is not efficient. It is caused by the data structure of mesh elements (vertices, half-edges, faces). Because the vertex in the mesh is stored as list, for each vertex it has a slow traversal through the list. The complexity for one-ring neighbours is $O(n^2)$. 
+
+Therefore a kd-tree is built to get several nearest neighbours. And some outliers are filtered out, so that to approximately get the one-ring neighbours for further denoising. To build the kd-tree, all the vertices need to be traversed. Its complexity is $O(n)$. To find nearest neighbours, the complexity is $O(nlog(n))$. Thus With the kd-tree the complexity can be reduced to $O(n)+O(nlog(n))$.
+
+To filter out the outliers, the maximum distance between the neighbours and the vertex is acquired. Then a threshold is set according to the maximum distance. If the distance of the neighbour vertex exceeds the threshold, this neighbour vertex will be rejected. The following code shows the implementation:
+
+%nearest neighbour
+\begin{lstlisting}[xleftmargin=1em]
+/*find nearest neighbour with kd-tree */
+	kdTree->annkSearch(		// search
+		Pt,					// query point
+		neighbour_num,      // number of near neighbors
+		nnIdx,				// nearest neighbors (returned)
+		dists,				// distance (returned)
+		eps);				// error bound
+
+	//radius = max(dist)
+	for (int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)>radius)	radius = *(dists+i); 
+	}
+	radius /= 0.9; //reject outliers
+
+	for(int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)<radius)
+		{
+			ANNpoint current_neighbour;
+			MyMesh::Point  neighbourPt;
+			current_neighbour = annAllocPt(dim);
+
+			current_neighbour = meshArray[*(nnIdx+i)];
+			neighbourPt.data()[0] = double(current_neighbour[0]);
+			neighbourPt.data()[1] = double(current_neighbour[1]);
+			neighbourPt.data()[2] = double(current_neighbour[2]);
+			neighbours.push_back(neighbourPt);
+			distVector.push_back(*(dists+i));
+		}
+	}
+\end{lstlisting}
+
+Lastly, the bilateral filter of 3D mesh may cause mesh shrinkage. This can be overcame by the next module: normalization. 
+
+\section{Normalization and Rasterization}
+Code for rasterization
+\section{Spherical Harmonics}
+Code
+
+\section{Distance Histogram}
+Code
+\section{Retrieval}
+Code?

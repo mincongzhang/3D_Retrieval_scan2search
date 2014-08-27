@@ -1,23 +1,3 @@
-Background
-
-You should provide enough background to the reader for them to understand what the project is all about. For example:
- 
-
-    What the reader needs to know in order to understand the rest of the report. Examiners like to know that you have done some background research and that you know what else has been done in the field (where relevant). Try to include some references.
-    Related work (if you know of any)
-    What problem are you solving?
-    Why are you solving it?
-    How does this relate to other work in this area?
-    What work does it build on?
-
- 
-
-For 'research-style' projects - ones in which a computational technique (for example neural networks, genetic algorithms, finite element analysis, ray tracing) is used to explore or extend the properties of a mathematical model, or to make predictions of some kind - it may be a good idea to split this chapter into two shorter ones, one covering the computational technique itself and one the area of application.
- 
-
-The Examiners are just as interested in the process you went through in performing your project work as the results you finally produced. So, make sure your reports concentrate on why you made the particular choices and decisions that you did. We are looking for reasoned arguments and for critical assessment. This is especially so where design, implementation and engineering decisions have been made not just on technical merit but under pressure of non-functional requirements and external influences.
-
-
 \section{The area of 3D retrieval}
 With the development of 3D construction techniques, such as new multimedia softwares, interactive tools and 3D scanners, the number of available 3D models on the Internet is increasing. This development in 3D field makes the challenge change from construction to retrieval. Many domains such as entertainment, medicine, education, and industry field have a growing demand of 3D models, it is much efficient for them to find and reuse a 3D model rather than construct a model which may already exist. Therefore, many kinds of 3D retrieval engines are developed.
 
@@ -45,37 +25,36 @@ In mathematics, spherical harmonics are the angular portion of a set of solution
 
 The normalized spherical harmonics function can be represented as 
 \begin{equation} \label{spherical_harmonics}
-    Y_\ell^m( \theta , \varphi ) = (-1)^m \sqrt{{(2\ell+1)\over 4\pi}{(\ell-m)!\over (\ell+m)!}} \, P_\ell^m ( \cos{\theta} ) \, e^{i m \varphi } 
+    Y_\ell^m( \theta , \varphi ) = (-1)^m \sqrt{{(2\ell+1)\over 4\pi}{(\ell-m)!\over (\ell+m)!}} \, P_\ell^m ( \cos{\theta} ) \, e^{i m \varphi },
 \end{equation}
 
 where $Y_\ell^m\,\!$ is the spherical harmonics function for $\ell\,\!$ and $m\,\!$. $P_\ell^m\,\!$ is the associated Legendre polynomials. $P_\ell^m\,\!$ can be expressed as 
 \begin{equation} \label{legendre}
-P_\ell^m(x) = (1 - x^2)^{|m|/2}\ \frac{d^{|m|}}{dx^{|m|}}P_\ell(x)\, 
+P_\ell^m(x) = (1 - x^2)^{|m|/2}\ \frac{d^{|m|}}{dx^{|m|}}P_\ell(x)\, .
 \end{equation}
 
-And $P_\ell(x)\,\!$ is Legendre polynomials on level $\ell\,\!$, which can be represented as Rodrigues' formula:
+$P_\ell(x)\,\!$ is Legendre polynomials on level $\ell\,\!$, which can be represented as Rodrigues' formula:
 \begin{equation} \label{rodrigues}
-P_\ell(x) = {1 \over 2^\ell \ell!} {d^\ell\over dx^\ell }(x^2 - 1)^l 
+P_\ell(x) = {1 \over 2^\ell \ell!} {d^\ell\over dx^\ell }(x^2 - 1)^l.
 \end{equation}
-
 
 \item Rotation invariant
 
 Spherical harmonics transformation can be applied to any function in spherical coordinates $f(\theta,\varphi)$, and decomposed it as the sum of its harmonics:
 \begin{equation} \label{sphericalfunction}
-f(\theta,\varphi)=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}a_{lm}Y_{l}^{m}(\theta,\varphi)
+f(\theta,\varphi)=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}a_{lm}Y_{l}^{m}(\theta,\varphi),
 \end{equation}
 
 where $a_{lm}$ is the coefficients in each frequency that can uniquely represent the spherical function $f(\theta,\varphi)$. 
 
 Let $R()$ denote the rotation, the rotated spherical function is
 \begin{equation} \label{rotatedfunction}
-R(f(\theta,\varphi))=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}=R(a_{lm})Y_{l}^{m}(\theta,\varphi)
+R(f(\theta,\varphi))=\sum_{l=0}^{\infty}\sum_{m=-l}^{m=l}=R(a_{lm})Y_{l}^{m}(\theta,\varphi).
 \end{equation}
 
-Thus if we compute the $L_{2}$-$norm$ for each coefficient, the energies of a spherical function in each frequency can be acquired,
+Thus if we compute the $L_{2}$-$norm$ for each coefficient, the energies of a spherical function in each frequency can be acquired as
 \begin{equation} \label{l2norm}
-\sum_{m=-l}^{m=l}|a_{ml}|^{2}=\sum_{m=-l}^{m=l}|R(a_{ml})|^{2}
+\sum_{m=-l}^{m=l}|a_{ml}|^{2}=\sum_{m=-l}^{m=l}|R(a_{ml})|^{2}.
 \end{equation}
 The energies do not change if the function is rotated, and thus the results are rotational invariant. Therefore for a 3D model with vertices in polar coordinates, spherical harmonics transformation can be carried out and the results are unique descriptors that can represent the shape. 
 

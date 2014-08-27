@@ -1,6 +1,19 @@
-\documentclass{ucl_thesis}
+\documentclass[12pt]{ucl_thesis}
+
+%for code demo
+\usepackage{listings,multicol}
+\lstset{  
+language={[Visual]C++},
+breaklines=true, 
+numbers=left,
+basicstyle=\footnotesize, 
+numberstyle=\tiny, 
+frame=single,  
+tabsize=4,     
+}
 
 %twoside for double page printing
+\usepackage{bm}
 \usepackage{enumerate}
 \usepackage{graphics}
 \usepackage{graphicx}
@@ -10,7 +23,7 @@
 \usepackage{algorithmic}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
-\usepackage{listings}
+%\usepackage{listings}
 \usepackage{amsmath}
 % Uncomment this to activate the TikZ library, which is useful for fancy block-diagrams.
 %    \usepackage{tikz}
@@ -22,7 +35,7 @@
 \usepackage{fancyvrb}
 
 % Uncomment this package to enable internal-linking:
-%\usepackage{hyperref}
+\usepackage{hyperref}
 
 
 \title{``Scan to search''\\
@@ -69,12 +82,12 @@
 \newpage
 \section*{Abstract}
 %abstract content
-\input{abstract.tex}
+%\input{abstract.tex}
 
 
 \newpage
 \section*{Acknowledgements}
-\input{acknowledgements.tex}
+%\input{acknowledgements.tex}
 
 
 %\setcounter{tocdepth}{2}
@@ -100,13 +113,13 @@
 
 \chapter{Introduction}
 \label{background}
-\input{introduction.tex}
+%\input{introduction.tex}
 
 \chapter{Background}
 \input{background.tex}
 
 \chapter{Analysis and Design}
-\input{analysis&design.tex}
+%\input{analysis&design.tex}
 
 \chapter{Implementation}
 \label{chp:impl}
