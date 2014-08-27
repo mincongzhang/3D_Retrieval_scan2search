@@ -19,16 +19,17 @@
 -(provide adequate granularity for discriminating shapes while filtering out high-freq noise)
 
 2. Descriptor:  
-Spherical harmonics descriptor  
+Spherical harmonics descriptors(SH)  
+Distance histogram descriptors(DH)  
 
 3. Retrieval: 
-database
-SH dot product
+SH and DH database  
+Retrieval with same weight (with 0.5 on SH and DH respectively)
 
 4. Verification:
 Denoise-test: Bilateral filter  
-Rotate-test: SH rotate invariant  
-
+Rotate-test: SH/DH rotate invariant  
+Scan-to-search-test
 
 
 ##Spherical harmonics descriptor 
