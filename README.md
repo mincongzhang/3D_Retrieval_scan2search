@@ -50,8 +50,8 @@ Pseudo code for spherical harmonics:
 
     //SH is spherical harmonics descriptor 
     sort vertex according to radius
-    for each frequency l (idx_l)
-        for each rasterized vertex in one radius range r (idx_r)
+    for each frequency l
+        for each rasterized vertex in one radius range r 
             calculate F_lr = F(l,r)
         end
         a_ml = sum of F_lr in one radius ragion
