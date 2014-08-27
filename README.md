@@ -31,6 +31,18 @@ Denoise test: Bilateral filter
 Rotate test: SH/DH rotate invariance test
 Scan-to-search test: input scanned model
 
+##Rasterization
+O(n) solution:
+
+    /* fill voxel grid and get rasterized points in O(n) */
+    bitmap = new bitmap(2R*2R*2R)               //temporary bitmap
+    for each voxel to be filled
+        if(bitmap(voxel.x,voxel.y,voxel.z))==0  //has not been filled or registered
+            bitmap(voxel.x,voxel.y,voxel.z)=1
+            grid_point.push_back(voxel)
+        end
+    end
+    delete bitmap;
 
 ##Spherical harmonics descriptor 
 
