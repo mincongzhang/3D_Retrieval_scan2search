@@ -103,6 +103,12 @@ http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-s
 (3)face based?:  
 http://liris.cnrs.fr/Documents/Liris-2276.pdf   
 
+4. New descriptors
+
+<!--
+3D histogram: 3D histogram因为受rotation影响, 不妨以最大的bin为基准对齐?校准?
+--> 
+
 ##Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
 http://blog.sciencenet.cn/blog-548663-715825.html  
