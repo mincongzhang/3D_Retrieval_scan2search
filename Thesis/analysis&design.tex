@@ -10,17 +10,17 @@ Apart from the main retrieval steps, in the early stage, verification of the alg
 
 \begin{enumerate}[1)]
 \item Input a model from the database; try to find exact the same model
-\item Input a model from the database; apply rotation and try to find the model with same/similar shape
+\item Input a model from the database; rotate the model and try to find the model with the same or similar shape
 \item Input a model from the database; add noise/denoise and try to find the model with same/similar shape
 \item Input a scanned model; denoise and try to find the model with same/similar shape
 \item Increase the size of the database, and then input a scanned model; denoise and try to find the model with same/similar shape
 \end{enumerate}
 
-The first step is to verify the matching algorithm has no error. The result is expected to show the model which is exact the same as the input model from the model database. The second step is to verify the rotational invariant of the descriptors. The best result is finding out exact the same model from the database. However, due to the protential error of coefficients in rotation as well as rasterization, if the system shows similar shape, it can be still decided as robust. The third step is to verify the noise resistant property of the system. Because the denoise module as well as the rasterization step cannot perfectly avoid the influence of the noise, the system can be decided as robust if the result shows same or similar shapes. After all these steps, the scanned model can be input to retrieve and test whether the matching algorithms works. The last step is to verify the system's robustness to large database, where the large number of descriptors may influence to the accuracy. 
+The first step is to verify the matching algorithm has no error. The result is expected to show the model which is exact the same as the input model from the model database. The second step is to verify the rotation invariant of the descriptors. The best result is finding out exact the same model from the database. However, due to the protential error of coefficients in rotation as well as rasterization, if the system shows similar shape, it can be still decided as robust. The third step is to verify the noise resistant property of the system. Because the denoise module as well as the rasterization step cannot perfectly avoid the influence of the noise, the system can be decided as robust if the result shows same or similar shapes. After all these steps, the scanned model can be input to retrieve and test whether the matching algorithms works. The last step is to verify the system's robustness to large database, where the large number of descriptors may influence to the accuracy. 
 
 \section{System design}
 
-The flow chart for the pre-processing is in Figure~\ref{scan2search_preprocessing}. It can be noticed that the simulators for rotation and noise are added. In the early stage, in order to verify the rotational invariant property of the descriptors, as well as robustness to random noise, these simulators are essential. But in the final testing of ``scan to search'', these simulators should not be applied to the scanned model. Besides, the judgement step that whether the model is noisy, and the further denoising step depend on the user. 
+The flow chart for the pre-processing is in Figure~\ref{scan2search_preprocessing}. It can be noticed that the simulators for rotation and noise are added. In the early stage, in order to verify the rotational invariance property of the descriptors, as well as robustness to random noise, these simulators are essential. But in the final testing of ``scan to search'', these simulators should not be applied to the scanned model. Besides, the judgement step that whether the model is noisy, and the further denoising step depend on the user. 
 
 \begin{figure}[h]
 \centering
@@ -69,6 +69,6 @@ Therefore, another simpler distance histogram  descriptors are added. The matchi
 \caption{Output of the final design} \label{output_finaldesign}
 \end{figure}
 
-The verification also worths mentioning. The initial design only has the spherical harmonics descriptors. And spherical harmonics transformation is difficult to understand and implemented. At first the transformation is implemented incorrectly, nevertheless the descriptors can be computed. And even step one of verification passes the test. That is because the incorrect descriptors show some features, to some extent. However, the rotational invariant test does not pass, due to the wrong transformation. Thus the spherical harmonics transformation is reimplemented and tested. 
+The verification also worths mentioning. The initial design only has the spherical harmonics descriptors. And spherical harmonics transformation is difficult to understand and implemented. At first the transformation is implemented incorrectly, nevertheless the descriptors can be computed. And even step one of verification passes the test. That is because the incorrect descriptors show some features, to some extent. However, the rotational invariance test does not pass, due to the wrong transformation. Thus the spherical harmonics transformation is reimplemented and tested. 
 
 Additionally, after trying larger database with size 60, the output shows the weakness and inaccuracy of single type of descriptors. Therefore another distance histogram matching algorithm is added. All these indicate every verification step is important and needs to be well designed.
