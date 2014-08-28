@@ -88,8 +88,12 @@ When implementing the bilateral filter I find that it is really slow when I try 
 1. kd-tree can be used to fast retrive in the database
  
 2. rasterization algorithm updates  
-(idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)
+
+<!--
+(idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)  
 (solution: 选出第一个点, 将其按顺序和之后的点俩俩组合成三角形再填充,能保证整个面都填满)
+-->
+
 
 3. Spherical Harmonics transform speed up  
 (1)divide and concour  
