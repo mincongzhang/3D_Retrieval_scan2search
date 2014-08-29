@@ -92,12 +92,15 @@ When implementing the bilateral filter I find that it is really slow when I try 
 <!--
 (idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)  
 (solution: 选出第一个点, 将其按顺序和之后的点俩俩组合成三角形再填充,能保证整个面都填满)
+
+
+<!--
+distance histogram normalization
+devide by the total voxels number
+:已修改, 但是对10号data有个异常值很奇怪
 -->
 
-3. distance histogram normalization
-devide by the total voxels number
-
-4. Spherical Harmonics transform speed up  
+3. Spherical Harmonics transform speed up  
 (1)divide and concour  
 http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
 (2)FFT to fourier then SH:  
@@ -105,9 +108,15 @@ http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-s
 (3)face based?:  
 http://liris.cnrs.fr/Documents/Liris-2276.pdf   
 
-5. New descriptors
+<!--
+按照paper"A 3D search engine"里, 它的频率上限就设到了R/2=16, 所以可以速度快一些
+不改变原有框架的情况下把频率上限调低一些能快很多, 因为高频循环量非常大
+-->
+
+4. New descriptors
 
 <!--
+新想法
 3D histogram: 3D histogram因为受rotation影响, 不妨以最大的bin为基准对齐?校准?
 --> 
 
