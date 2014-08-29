@@ -87,6 +87,8 @@ When implementing the bilateral filter I find that it is really slow when I try 
 ##Further improvement
 1. kd-tree can be used to fast retrive in the database
  
+2. clustering
+ 
 2. rasterization algorithm updates  
 
 <!--
