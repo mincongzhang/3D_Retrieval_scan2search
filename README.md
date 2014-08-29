@@ -98,6 +98,12 @@ When implementing the bilateral filter I find that it is really slow when I try 
 distance histogram normalization
 devide by the total voxels number
 :已修改, 但是对10号data有个异常值很奇怪
+
+发现spherical harmonics不normal的话, 
+scanned的SH会明显大很多, 但总体趋势差不多,
+是不是normalize后会更好一些?
+值得一试(如果3DI公司给我offer的话才干)
+
 -->
 
 3. Spherical Harmonics transform speed up  
