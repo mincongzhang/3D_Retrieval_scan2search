@@ -105,7 +105,6 @@ devide by the total voxels number
 scanned的SH会明显大很多, 但总体趋势差不多,
 是不是normalize后会更好一些?
 值得一试(如果3DI公司给我offer的话才干)
-
 -->
 
 4. Spherical Harmonics transform speed up  
