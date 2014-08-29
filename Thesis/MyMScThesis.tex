@@ -84,14 +84,14 @@ tabsize=4,
 
 \newpage
 \section*{Acknowledgements}
-%\input{acknowledgements.tex}
+\input{acknowledgements.tex}
 
 
 %\setcounter{tocdepth}{2}
 \tableofcontents
 \listoffigures
 %\listoftables
-\listofalgorithms
+%\listofalgorithms
 \newpage
 
 %\clearpage
@@ -99,9 +99,6 @@ tabsize=4,
 %\begin{center}
 %\textbf{To whomever}
 %\end{center}
-
-
-
 
 
 \setcounter{page}{1}
@@ -117,6 +114,7 @@ tabsize=4,
 \input{background.tex}
 
 \chapter{Analysis and Design}
+\label{chp:analysis&design}
 \input{analysis&design.tex}
 
 \chapter{Implementation}
@@ -124,38 +122,14 @@ tabsize=4,
 \input{implementation.tex}
 
 
+\chapter{Testing and Results}
+\label{chp:test&results}
+\input{testandresults.tex}
 
 
-
-\chapter{Evaluation}
-\label{chp:eval}
-%\input{evaluation.tex}
-
-
-\section{Figures} \label{sectionExample}
-
-Figure~\ref{ExampleEstNoiseCovar}, is an example of a figure with a legend.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\linewidth]{exampleEstNoiseCovar}
-\caption{This is the figure caption. Notice the figure looks good even when magnified because it is a vector-graphic, and not rasterized.} \label{ExampleEstNoiseCovar}
-\end{figure}
-
-
-\textbf{Old and New Instructions} These instructions are partly ``old'' because instead of .eps, we usually put pdf or png figures in our documents these days. However, they're still useful because exporting of Matlab figures directly to pdf, when using the Student License version of Matlab, results in an undesirable watermark. So my advice is to prepare your raster images as .png's, prepare your vector graphics as .pdf's in Inkscape or even Office (with the MS plugin that exports to .pdf), and follow the following slightly roundabout process to get Matlab figures into .pdf form.
-\begin{enumerate}
-  \item Make the figure in Matlab.
-  \item Do \texttt{print -depsc2} to generate an .eps.
-  \item Open the .eps in Ghostview (GSview) and ``Convert'' using the ``pdfwrite'' device to save a .pdf.
-\end{enumerate}
-
-
-
-
-\chapter{Conclusion}
+\chapter{Conclusions, Evaluation and Further Work}
 \label{chp:conc}
-%\input{conclusion.tex}
+\input{conclusion.tex}
 
 \begin{figure}
 \begin{center}

@@ -246,7 +246,7 @@ But the frequency $l$ goes to infinite. It is not able to implement. So it is re
 f_r(\theta,\varphi)=\sum_{l=0}^{32}\sum_{m=-l}^{m=l}a_{lm}Y_{l}^{m}(\theta,\varphi).
 \end{equation}
 
-Details of spherical harmonics decomposition can be seen in Section~\ref{computational_techniques} Computational Techniques of Chapter~\ref{background} Background. For each frequency $l$ and each radius range $r$, the energy can be computed as the $L_{2}$-$norm$ of $a_{lm}$. Let $E_{lr}$ denote the energy in frequency $l$ and radius $r$, we have
+Details of spherical harmonics decomposition can be seen in Section~\ref{computational_techniques}. For each frequency $l$ and each radius range $r$, the energy can be computed as the $L_{2}$-$norm$ of $a_{lm}$. Let $E_{lr}$ denote the energy in frequency $l$ and radius $r$, we have
 \begin{equation}
 E_{lr}=\sum_{m=-l}^{m=l}\|a_{ml}\|^{2}.
 \end{equation}
@@ -334,4 +334,10 @@ As for the distance histogram descriptors, they are simpler and are used to corr
 distribution of distances from vertices to the center of mass is acquired. This distribution is just the distance histogram descriptors.  
 
 \section{Retrieval}
+
+If it is the first time to use the retrieval system, the database for the descriptors should be created. There will be two databases for the retrieval system: one is storing all the 3D models; the other is for storing the relevant descriptors of the models. For creating the descriptors database, a batch descriptors transformation module needs to be implemented. Every model in the model database will be put into the system, and with the pre-processing steps as well as the spherical harmonics/distance histogram computation, the descriptors database can be generated.
+
+With the descriptors for the input model prepared, the similarities between the input model and models in the database are computed. The similarity is simply the Euclidean distance between two descriptors. Since there are two descriptors (spherical harmonics and distance histogram), the result similarities for each of the descriptors will be normalized and combined with weights, which is normally set as 0.5. That is to say, normally the two descriptors are considered to have same weight on the final similarity. After retrieval, six candidate models with high similarities will be demonstrated.  The user can choose to show polygon models or models in point clouds. The latter type can be shown efficiently on the screen, because it does not need shading computation for each surface.  
+
+
 
