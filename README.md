@@ -89,7 +89,7 @@ When implementing the bilateral filter I find that it is really slow when I try 
  
 2. database clustering
  
-2. rasterization algorithm updates  
+3. rasterization algorithm updates  
 
 <!--
 (idea: 目前的就对每一个面填充3个点,但是有可能有些面有4个点, 所以会出现空出一个三角形的情况)  
@@ -108,7 +108,7 @@ scanned的SH会明显大很多, 但总体趋势差不多,
 
 -->
 
-3. Spherical Harmonics transform speed up  
+4. Spherical Harmonics transform speed up  
 (1)divide and concour  
 http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
 (2)FFT to fourier then SH:  
@@ -121,7 +121,7 @@ http://liris.cnrs.fr/Documents/Liris-2276.pdf
 不改变原有框架的情况下把频率上限调低一些能快很多, 因为高频循环量非常大
 -->
 
-4. New descriptors
+5. New descriptors
 
 <!--
 新想法
