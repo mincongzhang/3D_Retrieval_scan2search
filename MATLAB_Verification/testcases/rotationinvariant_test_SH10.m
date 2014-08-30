@@ -1,6 +1,9 @@
 clc
 clear
 close all
+clc
+clear
+close all
 
 input = [0.56419 0.750403 0.660522 0.911273 1.34284 1.50121 1.34837 1.305 1.65285 1.95048 1.8992 1.70324 1.84558 2.21515 2.33643 2.14315 2.0558 2.35662 2.63985 2.5734 2.35395 2.45887 2.81079 2.93 2.72624 2.61385 2.88901 3.17099 3.10471 2.87211 2.95047 0.0621628 
 2.25676 2.44332 1.42213 1.76903 1.95221 1.78768 2.18511 3.1298 3.22037 3.22354 3.52132 3.54031 4.41476 4.63621 4.677 5.68094 5.03376 3.09151 3.65267 4.86399 4.61605 4.36635 6.02914 6.32874 5.15124 5.98927 6.68356 6.17421 5.6615 5.44711 6.29439 0.58132 
@@ -72,10 +75,20 @@ database_data = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 ];
 
 
-subplot(121),
-bar3(input);view([90,-30,60]);set(gcf,'renderer','zbuffer'); %set(gca, 'ZLim', [0.0 600000.0]);
-title('Spherical Harmonics Descriptors of The Rotated Model'); xlabel('Frequency'); ylabel('Radius');zlabel('Energy');
-subplot(122),
-bar3(database_data);view([90,-30,60]);set(gcf,'renderer','zbuffer');  %set(gca, 'ZLim', [0.0 600000.0]);
-title('Spherical Harmonics Descriptors of The Origin Model'); xlabel('Frequency'); ylabel('Radius');zlabel('Energy');
+
+figure,
+bar3(input);view([90,-30,60]);set(gcf,'renderer','zbuffer');  set(gca, 'YLim', [0.0 32.0]);
+set (gcf,'Position',[400,200,350,262], 'color','w')
+% title('Spherical Harmonics Descriptors of The Rotated Model'); 
+xlabel('Frequency'); ylabel('Radius'); zlabel('Energy');
+x1=xlabel('Frequency');
+set(x1,'Rotation',-60);
+
+figure,
+bar3(database_data);view([90,-30,60]);set(gcf,'renderer','zbuffer'); set(gca, 'YLim', [0.0 32.0]);
+set (gcf,'Position',[400,200,350,262], 'color','w')
+% title('Spherical Harmonics Descriptors of The Origin Model'); 
+xlabel('Frequency'); ylabel('Radius');zlabel('Energy');
+x1=xlabel('Frequency');
+set(x1,'Rotation',-60);
 

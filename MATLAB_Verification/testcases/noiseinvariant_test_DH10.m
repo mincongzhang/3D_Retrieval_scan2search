@@ -3,36 +3,36 @@ clear
 close all
 
 input = [0
-0.000405647
-0.00113581
-0.00243388
-0.0047055
-0.00657147
-0.00689599
-0.0128996
-0.0109525
-0.000567905
-0.000243388
-0.0563849
-0.215398
-0.131592
-0.0462437
-0.0548434
-0.0654714
-0.0454324
-0.0498134
-0.048921
-0.0348045
-0.0443777
-0.0129807
-0.0107902
-0.0152523
-0.0155768
-0.0241765
-0.0654714
-0.0148467
-0.000811293
-0
+8.72144e-005
+0.00130822
+0.00252922
+0.00392465
+0.00505843
+0.00750044
+0.00470958
+0.003663
+0.00287807
+0.00270365
+0.0210187
+0.260684
+0.119309
+0.0457003
+0.0432583
+0.0537241
+0.0532008
+0.0558172
+0.0475318
+0.0411652
+0.0368045
+0.0130822
+0.0113379
+0.0162219
+0.0300017
+0.0428223
+0.0448282
+0.0225013
+0.00645386
+0.000174429
 0
 0
 0
@@ -231,12 +231,12 @@ database_data = [0
 
 
 figure,
-bar(input);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer'); %set(gca, 'ZLim', [0.0 600000.0]);
+bar(input);set(gca, 'XLim', [0.0 35.0]);set(gca, 'YLim', [0.0 0.265]);%view([90,-30,60]);set(gcf,'renderer','zbuffer'); %set(gca, 'ZLim', [0.0 600000.0]);
 set (gcf,'Position',[400,200,350,262], 'color','w')
 %title('Distance Histogram Descriptors of The Rotated Model'); 
 xlabel('Distance'); ylabel('Frequency');
 figure,
-bar(database_data);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer');  %set(gca, 'ZLim', [0.0 600000.0]);
+bar(database_data);set(gca, 'XLim', [0.0 35.0]);set(gca, 'YLim', [0.0 0.265]);%view([90,-30,60]);set(gcf,'renderer','zbuffer');  %set(gca, 'ZLim', [0.0 600000.0]);
 set (gcf,'Position',[400,200,350,262], 'color','w')
 %title('Distance Histogram Descriptors of The Origin Model'); 
 xlabel('Distance'); ylabel('Frequency');

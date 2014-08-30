@@ -3,34 +3,34 @@ clear
 close all
 
 input = [0
-3
-13
-30
-61
-80
-265
-126
-87
-103
-162
-281
-333
-236
-327
-481
-650
-590
-431
-517
-367
-387
-444
-272
-246
-219
-152
-79
-9
+0.000431593
+0.00187023
+0.00431593
+0.00877572
+0.0115091
+0.038124
+0.0181269
+0.0125162
+0.014818
+0.023306
+0.0404258
+0.0479068
+0.0339519
+0.0470436
+0.0691987
+0.0935117
+0.0848799
+0.0620055
+0.0743778
+0.0527982
+0.0556754
+0.0638757
+0.0391311
+0.0353906
+0.0315063
+0.0218674
+0.0113653
+0.00129478
 0
 0
 0
@@ -118,33 +118,33 @@ input = [0
 
 database_data = [0
 0
-13
-23
-55
-114
-200
-79
-79
-97
-158
-345
-194
-246
-258
-426
-550
-463
-375
-366
-354
-298
-365
-277
-231
-202
-139
-56
-7
+0.00217755
+0.0038526
+0.00921273
+0.0190955
+0.0335008
+0.0132328
+0.0132328
+0.0162479
+0.0264657
+0.0577889
+0.0324958
+0.041206
+0.0432161
+0.0713568
+0.0921273
+0.0775544
+0.0628141
+0.0613065
+0.0592965
+0.0499162
+0.061139
+0.0463987
+0.0386935
+0.0338358
+0.0232831
+0.00938023
+0.00117253
 0
 0
 0
@@ -230,10 +230,13 @@ database_data = [0
 ];
 
 
-subplot(121),
-bar(input);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer'); 
-title('Distance Histogram Descriptors of The Rotated Model'); xlabel('Distance'); ylabel('Frequency');
-subplot(122),
-bar(database_data);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer'); 
-title('Distance Histogram Descriptors of The Origin Model'); xlabel('Distance'); ylabel('Frequency');
-
+figure,
+bar(input);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer'); %set(gca, 'ZLim', [0.0 600000.0]);
+set (gcf,'Position',[400,200,350,262], 'color','w')
+%title('Distance Histogram Descriptors of The Rotated Model'); 
+xlabel('Distance'); ylabel('Frequency');
+figure,
+bar(database_data);set(gca, 'XLim', [0.0 35.0]);%view([90,-30,60]);set(gcf,'renderer','zbuffer');  %set(gca, 'ZLim', [0.0 600000.0]);
+set (gcf,'Position',[400,200,350,262], 'color','w')
+%title('Distance Histogram Descriptors of The Origin Model'); 
+xlabel('Distance'); ylabel('Frequency');
