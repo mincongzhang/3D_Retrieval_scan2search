@@ -112,7 +112,7 @@ scanned的SH会明显大很多, 但总体趋势差不多,
 http://www.ams.org/journals/mcom/2002-71-238/S0025-5718-01-01386-2/  
 (2)FFT to fourier then SH:  
 http://connection.ebscohost.com/c/articles/67655125/3d-objects-retrieval-using-spherical-harmonics-feature-vector-method  
-(3)face based?:  
+(3)O(n) solution for spherical harmonics:  
 http://liris.cnrs.fr/Documents/Liris-2276.pdf   
 
 <!--
