@@ -1,0 +1,35 @@
+\section{Conclusion}
+
+In summary, this project build a 3D retrieval system which provides a ``scan to search'' solution for manufacturing components. A 3D bilateral filter is applied to reduce the scanning noise. Two types of rotation invariant shape descriptors are combined to describe the shape feature of 3D models. A series of tests indicate that the spherical harmonics shape descriptors can describe the shape feature of the model in detail. However, spherical harmonics may be affected by the sampling error in rasterization of the model. Therefore, the second descriptors distance histogram is used to roughly describe the shape feature again, so that to compensate the protential error of spherical harmonics. 
+
+\section{Evaluation}
+
+From all the tests, the results indicate that the performance of the matching algorithms (two descriptors: spherical harmonics and distance histogram) is satisfactory. Models with similar shapes can be found when the input model is noisy and rotated. In the final ``scan to search'' test, the matched models also have similar shape features with the input scanned model. Additionally, almost no models with irrelevant shape are retrieved. 
+
+However, since the spherical harmonics decomposition has $O(n^3)$ computational complexity for cut-off frequency $n$, it is time-comsuming to transform a model with a large amount of voxels (the average transformation time is 30 seconds). Also the spherical harmonics tend to have numerical errors in some circumstances (e.g. a model with unusual shape). Thus the distance histogram descriptors are introduced to compensate these errors. 
+
+Besides, both type of the descriptors (spherical harmonics and distance histogram) have a same drawback. According to their features and properties, they cannot detect interior rotation of a model. 
+
+\section{Future works}
+
+This system can still be improved in many aspects. The following are some topics that worth further investigation.
+
+\begin{enumerate}
+\item A fast way to compute spherical harmonics: 
+
+Current spherical harmonics decomposition is time-comsuming. A solution is to reduce the cut-off frequency from 32 to 16. However, such approach is just a palliative. A fast way to compute spherical harmonics should be investigated and applied to the system. For example, M. Mousa~\etal~\cite{mousa2006direct} provides a fast and accurate technique for computing spherical
+harmonics.
+
+\item Clustering datasets in the database for fast retrieval and precise presentation of results:
+
+The database can be clustered into small subsets of data with similar shape feature. For example, a subset contains models with cylinder-like shape is built. If the input model is detected as cylinder-like shape, the system can quickly compute its similarity with subsets and find the subset with cylinder-like shape feature. In this way, the retrieval speed is accelerated. Moreover, the presentation of the candidate models would be more accurate, because more weights can be added to the models in the matched subset. This can also help to avoid irrelevant matching results. 
+
+\item Accelerate the matching speed in a sizable 3D database: 
+
+Currently this system compute similarity of the query model with all the models in the database. It would be useful to build a high dimensional kd-tree for fast retrieval in a sizable database. 
+
+\item New descriptors:
+
+As it is mentioned in the Evanluation section (Section~\ref{sec:results_rotationinvarianttest}), current two types of descriptors (spherical harmonics and distance histogram) cannot detect interior rotation of a model. Thus a new type of descriptors can be created, which has rotation invariant property and will not lost information of interior rotation. 
+
+\end{enumerate}

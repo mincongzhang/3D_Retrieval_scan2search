@@ -1,31 +1,11 @@
-\section{Figures} \label{sectionExample}
-
-Figure~\ref{ExampleEstNoiseCovar}, is an example of a figure with a legend.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\linewidth]{exampleEstNoiseCovar}
-\caption{This is the figure caption. Notice the figure looks good even when magnified because it is a vector-graphic, and not rasterized.} \label{ExampleEstNoiseCovar}
-\end{figure}
-
-
-\textbf{Old and New Instructions} These instructions are partly ``old'' because instead of .eps, we usually put pdf or png figures in our documents these days. However, they're still useful because exporting of Matlab figures directly to pdf, when using the Student License version of Matlab, results in an undesirable watermark. So my advice is to prepare your raster images as .png's, prepare your vector graphics as .pdf's in Inkscape or even Office (with the MS plugin that exports to .pdf), and follow the following slightly roundabout process to get Matlab figures into .pdf form.
-\begin{enumerate}
-  \item Make the figure in Matlab.
-  \item Do \texttt{print -depsc2} to generate an .eps.
-  \item Open the .eps in Ghostview (GSview) and ``Convert'' using the ``pdfwrite'' device to save a .pdf.
-\end{enumerate}
-
-
-
 \section{Test plan} \label{sec:test}
 
 In the early stage, testing and verification of the algorithms and retrieval system are vital. While the retrieval system is completed, some test cases are also important to evaluate the performance of the system. A series of tests are carried out:
 
-\begin{enumerate}[1)]
+\begin{enumerate}[1.]
 \item Retrieval test
 \item Rotation invariant test
-\item Noise invariant test
+\item Noise resistant test
 \item ``Scan to search'' test
 \item Large database test
 \end{enumerate}
@@ -38,10 +18,9 @@ The third step is to test the denoising module and verify the noise resistant pr
 
 If the first three tests are passed, the pre-processing modules and the matching algorithm are considered to be correctly implemented. Afterwards, ``Scan to search'' test can be carried out. The scanned model is loaded and denoised. Then the model is queried in the system. The results will indicate how well the matching algorithm works. The last test is to verify the system's robustness to large database, where a large number of descriptors may have influence to the retrieval accuracy. 
 
-\section{Results} \label{sec:results}
+\section{Test results} \label{sec:results}
 
-\begin{enumerate}
-\item Retrieval test
+\subsection{Retrieval test} 
 
 The aim of this test is to make sure the retrieval system can operate successfully. As Figure~\ref{retrievaltest_UI} demonstrates, the test result indicates every module of the retrieval system is correctly implemented, and the models in the database can be retrieved. 
 
@@ -49,16 +28,16 @@ The aim of this test is to make sure the retrieval system can operate successful
 \begin{center}
 \begin{tabular}{cc}   % The "|" bar puts a bar in the figure
    \includegraphics[width=0.6\linewidth]{input_initialdesign}  \\
-   (a) \\
+   (a)\\
 \end{tabular}
    \includegraphics[width=1\linewidth]{output_finaldesign}  \\
-   (b)  \\
-\caption{Retrieval test: the input model is in (a) and the query results are in (b). The results indicate every module of the retrieval system is correctly implemented, and the models in the database can be retrieved successfully} 
+   (b)\\
+\caption{Retrieval test: (a) the input model. (b) the query result. The result indicates every module of the retrieval system is correctly implemented, and the models in the database can be retrieved successfully.} 
   \label{retrievaltest_UI}
 \end{center}
 \end{figure}
 
-\item Rotation invariant test
+\subsection{Rotation invariant test} \label{sec:results_rotationinvarianttest}
 
 There are two test cases in this test. The first is to input a rotated model with a cylinder-like shape and search. The input and output are demonstrated in Figure~\ref{noiseinvarianttest_UI1}.  It can be noitced that the first candidate model (with the highest similarity) has exactly the same shape as the input model. Two types of descriptors of the rotated model and the matched model are　analised and plotted(Figure~\ref{rotationinvarianttest_analysis1}). Comparing with the rotated model and the origin model, their spherical harmonics descriptors have almost the same feature in 2D, and their distance histogram descriptors have almost the same feature in 1D. Thus the rotation invariant property of the two descriptors is verified.
 
@@ -70,7 +49,7 @@ There are two test cases in this test. The first is to input a rotated model wit
 \end{tabular}
    \includegraphics[width=1\linewidth]{output_rotationinvariant_test10}  \\
    (b)  \\
-\caption{Rotation invariant test 1: the input model is in (a) and the query results are in (b). It can be noitced that the first candidate model has the same shape as the input model.} 
+\caption{Rotation invariant test 1: (a) the input model (rotated). (b) the query result. It can be noitced that the first candidate model has the same shape as the input model.} 
   \label{noiseinvarianttest_UI1}
 \end{center}
 \end{figure}
@@ -100,7 +79,7 @@ In the second test, a flat model is rotated and queried. This is to test the rob
 \end{tabular}
    \includegraphics[width=1\linewidth]{output_rotationinvariant_test32}  \\
    (b)  \\
-\caption{Rotation invariant test 2: the input model is in (a) and the query results are in (b). It can be noitced that the first candidate model has the same shape as the input model.} 
+\caption{Rotation invariant test 2: (a) the input model (rotated). (b) the query result. It can be noitced that the first candidate model has the same shape as the input model.} 
   \label{noiseinvarianttest_UI2}
 \end{center}
 \end{figure}
@@ -121,11 +100,9 @@ With the assistance of (c), whose statistical feature almost have no difference 
 \end{center}
 \end{figure}
 
+\subsection{Noise resistant test}
 
-\item Noise invariant test
-
-INPUT UI
-OUTPUT UI
+Some noise is generated by the noise generator and added to the model (Figure~\ref{noiseinvarianttest_UI} (a)). Then the denoising function is called(Figure~\ref{noiseinvarianttest_UI} (b)). With the bilateral filter, the sharp edges of the model are kept while the other parts are smoothed. And the query result shows candidate models (Figure~\ref{noiseinvarianttest_UI} (c)). The first candidate model (with the highest similarity) has the same shape as the input model. The descriptors of the denoised model and the matched model are　analised and plotted(Figure~\ref{noiseinvarianttest_analysis}). Comparing with the noisy model and the origin model, two types of the shape descriptors have similar features but only some slightly changes. And therefore the noise resistant property of this system is verified. 
 
 \begin{figure}
 \begin{center}
@@ -136,32 +113,29 @@ OUTPUT UI
 \end{tabular}
    \includegraphics[width=1\linewidth]{output_noiseinvariant_test10}  \\
    (c)  \\
-\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
+\caption{Noise resistant test: (a) the input model (noise added). (b) the input model (denoised). (c) the query result. It can be noitced that the first candidate model has the same shape as the input model.} 
   \label{noiseinvarianttest_UI}
 \end{center}
 \end{figure}
-
-SH  DH   vs SH DH
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}   % The "|" bar puts a bar in the figure
    \includegraphics[width=0.45\linewidth]{noiseinvariant_test_SH10_denoise} & 
    \includegraphics[width=0.45\linewidth]{noiseinvariant_test_SH10_origin}  \\
-   (a)denoise & (b)origin                                                     \\
+   (a) Spherical harmonics (noisy model) & (b) Spherical harmonics (origin model)\\
    \includegraphics[width=0.45\linewidth]{noiseinvariant_test_DH10_denoise} &
    \includegraphics[width=0.45\linewidth]{noiseinvariant_test_DH10_origin}  \\
-   (c)denoise & (d) origin                                                    \\
+   (c) Distance histogram (noisy model) & (d) Distance histogram (origin model)\\
 \end{tabular}
-\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
+\caption{Analysis of the noise resistant test: Comparing with (a) and (b), (c) and (d), two types of the shape descriptors have similar features but only some slightly changes. Therefore the noise resistant property of this system is verified. } 
   \label{noiseinvarianttest_analysis}
 \end{center}
 \end{figure}
 
+\subsection{``Scan to search'' test}
 
-``Scan to search'' test 
-INPUT UI
-OUTPUT UI
+A scanned ``engine'' model is created and loaded. As the Figure~\ref{scantosearchtest_UI} (a) shows, the model is not aligned with the axises and has some scanned noise. After searching, the output is in Figure~\ref{scantosearchtest_UI} (b). Models that have similar shapes with the scanned ``engine'' model are found. Also the two types of shape descriptors are plotted in Figure~\ref{scantosearchtest_analysis}. 
 
 \begin{figure}
 \begin{center}
@@ -170,35 +144,31 @@ OUTPUT UI
    (a) \\
 \end{tabular}
    \includegraphics[width=1\linewidth]{output_scantosearch_test}  \\
-   (b)  \\
-\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
+   (b) \\
+\caption{``Scan to search'' test: (a) the input model (scanned model). (b) the query result. Models with similar shapes are found. } 
   \label{scantosearchtest_UI}
 \end{center}
 \end{figure}
-
-
-SH  DH   vs   SH DH
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}   % The "|" bar puts a bar in the figure
    \includegraphics[width=0.45\linewidth]{scantosearch_test_SH_scanned} & 
    \includegraphics[width=0.45\linewidth]{scantosearch_test_SH_matched}  \\
-   (a)denoise & (b)origin                                                     \\
+   (a) Spherical harmonics (scanned model) & (b) Spherical harmonics (matched model)\\
    \includegraphics[width=0.45\linewidth]{scantosearch_test_DH_scanned} &
    \includegraphics[width=0.45\linewidth]{scantosearch_test_DH_matched}  \\
-   (c)denoise & (d) origin                                                    \\
+   (c) Distance histogram (scanned model) & (d) Distance histogram (matched model)\\
 \end{tabular}
-\caption{Another figure caption. These should be meaningful and somewhat self-contained.} 
+\caption{Analysis of the ``Scan to search'' test: (a) and (c) are the descriptors of the scanned ``engine'' model. (b) and (d) are the descriptors of the model in the database with the highest similarity. } 
   \label{scantosearchtest_analysis}
 \end{center}
 \end{figure}
 
-Large database test
-NO FIGURES
-In the initial design, there is only one spherical harmonics descriptors. And a single type of descriptors may have its weakness. Due to some unknown errors in the descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics transformation), there are sometimes some irrelevant matches. This is analysed in Section~\ref{sec:thefinaldesign}.  Also as test result suggests, another type of descriptors (distance histogram) is added for assistance. 
+\subsection{Large database test}
 
-\end{enumerate}
+After testing the whole functions of the system, the database is expanded from 30 models size to 60 models size. This is to make sure there is no protential risk when the database is large. With the initial design, there is only one spherical harmonics descriptors. And a single type of descriptors may have its weakness. Due to some unknown errors in the descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics decomposition. See the rotation invariant test 2 in Section~\ref{sec:results_rotationinvarianttest}), there are sometimes some irrelevant matches. This is also analysed in Section~\ref{sec:thefinaldesign}.  Therefore, another type of descriptors (distance histogram) is added for assistance and compensating the error caused by spherical harmonics. 
+
 
 %example for subfigure
 %\begin{figure}
