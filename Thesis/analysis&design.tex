@@ -2,13 +2,13 @@
 
 To implement the ``scan to search'' 3D retrieval system, the most important part is the computation of spherical harmonics. But before that,several pre-processing steps are required. 
 
-Firstly, the scanned noise should be reduced. Therefore before any other processing, the 3D model needs to be put into an appropriate denoising module. Secondly, normalization and rasterization of the model are essential. Normalization can make sure the final matching algorithm will not be affected by the scale of the model. Besides, the influence of outliers will also be reduced. Moreover, rasterization can filter out high frequency noise, and meanwhile keep the granularity of the 3D shape. 
+Firstly, the scanning noise should be reduced. Therefore before any other processing, the 3D model needs to be put into an appropriate denoising module. Secondly, normalization and rasterization of the model are essential. Normalization can make sure the final matching algorithm will not be affected by the scale of the model. Besides, the influence of outliers will also be reduced. Moreover, rasterization can filter out high frequency noise, and meanwhile keep the granularity of the 3D shape. 
 
 Afterwards, the main retrieval steps can be carried out. Spherical harmonics transformation and distance histogram are able to compute for the pre-processed model. At the first time to use this system, the descriptors' database should be initialized. Following these steps(normalization, rasterization and computation of descriptors), the descriptors' database is able to be generated. And the system is ready for retrieval. To overcome the protential inaccuracy of the results, the system will show six candidates model with high similarities to the input model.
 
 Apart from implementing the main retrieval steps, in the early stage, verification of the algorithms is vital. When the retrieval system is completed, some test cases are also important to evaluate the performance of the system. There are several steps to verify the system: 
 
-\begin{enumerate}[1)]
+\begin{enumerate}[1.]
 \item Input a model from the model database; try to find exact the same model
 \item Input a model from the model database; rotate the model and try to find the model with the same or similar shape
 \item Input a model from the model database; add noise/denoise and try to find the model with same/similar shape
@@ -18,7 +18,7 @@ Apart from implementing the main retrieval steps, in the early stage, verificati
 
 In the early stage, testing and verification of the algorithms are vital. While the retrieval system is completed, some test cases are also important to evaluate the performance of the system. There are several test cases: 
 
-\begin{enumerate}[1)]
+\begin{enumerate}[1.]
 \item Retrieval test
 \item Rotation invariant test
 \item Noise resistant test
@@ -34,7 +34,7 @@ The flowchart for the pre-processing is in Figure~\ref{scan2search_preprocessing
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.5\linewidth]{scan2search_preprocessing}
+\includegraphics[width=0.8\linewidth]{scan2search_preprocessing}
 \caption{Pre-processing of the input model} \label{scan2search_preprocessing}
 \end{figure}
 
@@ -43,7 +43,7 @@ descriptors. Besides, since there are two descriptors (spherical harmonics and d
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.4\linewidth]{scan2search_main}
+\includegraphics[width=1\linewidth]{scan2search_main}
 \caption{Retrieval process} \label{scan2search_main}
 \end{figure}
 

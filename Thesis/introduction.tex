@@ -1,80 +1,42 @@
 
-Introduction
-First and foremost, you should write about the most interesting or important parts of your project. Devote most space and time to this. For example:
+%Introduction
+%First and foremost, you should write about the most interesting or important parts of your project. Devote most space and time to this. For example:
 
  
 
-    What design choices did you have along the way, and why did you make the choices you made?
-    What was the most difficult part of the project?
-    Why was it difficult?
-    How did you overcome the difficulties?
-    Did you discover anything novel?
-    What did you learn?
+%    What design choices did you have along the way, and why did you make the choices you made?
+%    What was the most difficult part of the project?
+%    Why was it difficult?
+%    How did you overcome the difficulties?
+%    Did you discover anything novel?
+%    What did you learn?
 
 
-Set the scene and problem statement/specification. Provide the motivation for reading this report. Introduce the structure of report (what you will cover in which chapters). 
+%Set the scene and problem statement/specification. Provide the motivation for reading this report. Introduce the structure of report (what you will cover in which chapters). 
 
 
----
-The field of study, the research question, the hypothesis (if any) or, more generally, the research question that is to be investigated. It should also include a summary of the contents and main arguments in the dissertation.
----
+%How to write introduction: 
+% http://www.ldeo.columbia.edu/~martins/sen_sem/thesis_org.html
+\section{Introduction of the project}
 
+With the development of 3D construction techniques, the number of available 3D models on the Internet is increasing. This makes the challenges change from construction to retrieval. A basic approach to retrieve data is keyword-based retrieval. However, this simple approach often fails for 3D data. Therefore, content-based 3D retrieval engines are developed and have been used. 3D retrieval engines can be used in many domains such as entertainment, medicine, education, and industry field. These domains have a growing demand of 3D models, it is much efficient for them to find and reuse a 3D model rather than construct a model which may already exist. 
 
-\section{Design choices}
-1. Content-based 3D retrieval
+This project tries to help the company 3DI to implement a prototype of shape-based retrieval system, which provides a ``scan to search'' solution. The company 3DI wants to connect customers and suppliers of manufacturing components through a 3D retrieval system. The user can scan a object and reconstruct its 3D model, and this system takes the scanned point clouds of manufacturing components as queries, and search for 3D models with similar shape. This is similar to content-based similar image retrieval engine provided by Google. 
 
--sketch
+However, how to choose an appropriate method to describe the 3D data and retrieval become a question. Researchers have designed lots of algorithms to describe the 3D content. In these algorithms, descriptors are the data that can representing certain features of the model. By extracting one or multiple of these descriptors from two models, matching algorithm can be carried out and determine whether the two data are similar. For different purposes different types of 3D retrieval engines are developed. For example, the shape-based retrieval engines use a 3D data as query to find models with similar shapes. While the sketch-based 3D retrieval engines can help people who has no reference model but an idea, to draw sketches and search. Another retrieval engines may extract metadata from 3D models and used as a matching feature. The details of these matching algorithms are discussed in Chapter~\ref{background} Section~\ref{sec:3dretrieval} and Section~\ref{sec:retrievalalgorithms}. 
 
--shape
+For this project, it is important to choose an appropriate type of descriptors to describe the query model. Since the query model is reconstructed by scanning, it contains scanning noise, which may have influence to the matching algorithm in retrieval. Also, the scanned model cannot be guaranteed to align with the axises properly, i.e., the model may be rotated to any direction. Therefore, the descriptors should have rotation invariant property. After investigating the algorithms for describing and matching 3D models, a suitable descriptors is chosen for this project - the spherical harmonics shape descriptors~\cite{kazhdan2003rotation}. Comparing with other descriptors, the spherical harmonics descriptors are rotation invariant and insensitive to noise. Therefore, spherical harmonics descriptors are chosen in this ``scan to search'' retrieval system. Chapter~\ref{background} Section~\ref{sec:designchoice} shows the details of this design choice. Chapter~\ref{background} Section~\ref{computational_techniques} discusses the computational techniques of the spherical harmonics and its rotation invariant property. 
 
+With the chosen descriptors, the next step is to design the system. Before computing descriptors, a denoising module is implemented. Although the spherical harmonics are resistant to noise to some extent, the denoising module is used if the scanned model contains high level of noise. Then comes the pre-processing. Pre-processing steps includes rasterization and normalization. Afterwards, descriptors are able to compute. To overcome the protential inaccuracy of the results, the system will show six candidates model with high similarities to the input model. The detailed analysis and design are in Chapter~\ref{chp:analysis&design}. Chapter~\ref{chp:impl} provides the implementation details of the system. 
 
-2. shape-based 3D retrieval
+The system will not be complete without testing. Chapter~\ref{chp:analysis&design} also discusses how to carry out several tests in every stage of implementation. For example, rotation invariant test is to verify the correct implementation of the descriptors' computation. ``Scan to search'' test is to verify the system can work with real scanned models. An interesting discovery from the tests is that the spherical harmonics tend to have numerical errors in some circumstances (e.g. a model with unusual shape). Thus another simpler descriptors distance histogram are added for assistance and compensate these errors. The analysis details are in Chapter~\ref{chp:test&results} and Chapter~\ref{chp:conc}. The final results analysis and conclusion are also in Chapter~\ref{chp:test&results} and Chapter~\ref{chp:conc}. In summary, with single spherical harmonics the retrieval results sometimes have irrelevant matches. But with the assistance of a new descriptors, the ``scan to search'' 3D retrieval system works very well. 
 
--skeleton
+\section{Discussion of challenging parts}
 
--3D histogram
+During the implementation, there are some interesting (or challenging) parts worth discussing. The first part is try to make the pre-processing efficient. And the rasterization step can be explored. Rasterization is to sample the 3D model into a voxel grid. However, to rasterize, a $2R\times2R\times2R$ voxel grid is created, where $R$ is normally set as 32. So the size of the voxel grid is $2R\times2R\times2R = 262144$, which may occupy a huge memory space. So it is necessary to find a method, which can both save memory and compress the computational complexity. 
 
--medial axis
+The idea is to save each voxel information in bit, so that to use minimum memory space. One approach is to create a temporary bitmap (bitset or boolean array in C++) of length $2R\times2R\times2R$ to record whether a voxel is filled. Each element of this bitmap can only show 1 or 0 (true or false), so that the whole bitmap will not occupy any redundant space. While in one traversal($O(n)$) of surfaces of the model, the voxel grid will be filled and the grid vertices should be stored. The implementation details are in Chapter~\ref{chp:impl}. 
 
--lightfield
+The second challenging part is to understand and implement spherical harmonics decomposition. At first the transformation is implemented incorrectly, and the rotational invariance test does not pass, due to the wrong spherical harmonics decomposition. After reimplementing and testing, the final decomposition shows rotation invariant property and thus the spherical harmonics are correctly implemented.  Actually the spherical harmonics are like Fourier transform in 3D, whose coefficients show the feature of the decomposed function in space. And the energy ($L_{2}$-$norm$) of these coefficients can be used to represent the 3D shape information. Chapter~\ref{background} Section~\ref{computational_techniques} discusses these computational techniques.
 
--spherical harmonics
-
-
-3. Spherical harmonics
-
--rotational invariant
-
--noise resistant
-
-
-
-\section{Most difficult parts}
-
-1.efficient pre-processing
-
--memory use
-
--bitmap in rasterization
-
-
-2.understand and implement spherical harmonics
-
--Cartisian coordinates to polar coordinates and sort according to distance to center of mass
-
--spherical harmonics
-
--legendre polynomias
-
-
-\section{structure of report}
-
--background
-
--analysis and design
-
--implementation
-
--evaluation
-
-
+Besides, spherical harmonics decomposition is time-comsuming. However, due to the time limitation of this project, a fast spherical harmonics decomposition has not been investigated. This method is saved for the furture work of Chapter~\ref{chp:conc}.
