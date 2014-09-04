@@ -4,7 +4,7 @@ To implement the ``scan to search'' 3D retrieval system, the most important part
 
 Firstly, the scanning noise should be reduced. Therefore before any other processing, the 3D model needs to be put into an appropriate denoising module. Secondly, normalization and rasterization of the model are essential. Normalization can make sure the final matching algorithm will not be affected by the scale of the model. Besides, the influence of outliers will also be reduced. Moreover, rasterization can filter out high frequency noise, and meanwhile keep the granularity of the 3D shape. 
 
-Afterwards, the main retrieval steps can be carried out. Spherical harmonics transformation and distance histogram are able to compute for the pre-processed model. At the first time to use this system, the descriptors' database should be initialized. Following these steps(normalization, rasterization and computation of descriptors), the descriptors' database is able to be generated. And the system is ready for retrieval. To overcome the protential inaccuracy of the results, the system will show six candidates model with high similarities to the input model.
+Afterwards, the main retrieval steps can be carried out. Spherical harmonics transformation and distance histogram are able to compute for the pre-processed model. At the first time to use this system, the descriptors' database should be initialized. Following these steps(normalization, rasterization and computation of descriptors), the descriptors' database is able to be generated. And the system is ready for retrieval. To overcome the potential inaccuracy of the results, the system will show six candidates model with high similarities to the input model.
 
 Apart from implementing the main retrieval steps, in the early stage, verification of the algorithms is vital. When the retrieval system is completed, some test cases are also important to evaluate the performance of the system. There are several steps to verify the system: 
 
@@ -26,11 +26,11 @@ In the early stage, testing and verification of the algorithms are vital. While 
 \item Large database test
 \end{enumerate}
 
-The first step is to verify the matching algorithm has no error. The query result is expected to show the model which is exact the same as the input model from the model database. The second step is to verify the rotation invariant of the descriptors. The best result is finding out exact the same model from the database. However, due to the protential error of coefficients in rotation as well as rasterization, if the system shows similar shape, it can be still decided as robust. The third step is to verify the noise resistant property of the system. Because the denoise module as well as the rasterization step cannot perfectly eliminate the noise, the system can be decided as robust if the result shows same or similar shapes. After all these steps, the scanned model can be input to retrieve and test how well the matching algorithm works. The last step is to verify the system's robustness to large database, where a large number of descriptors may have influence to the retrieval accuracy. 
+The first step is to verify the matching algorithm has no error. The query result is expected to show the model which is exact the same as the input model from the model database. The second step is to verify the rotation invariant of the descriptors. The best result is finding out exact the same model from the database. However, due to the potential error of coefficients in rotation as well as rasterization, if the system shows similar shape, it can be still decided as robust. The third step is to verify the noise resistant property of the system. Because the denoise module as well as the rasterization step cannot perfectly eliminate the noise, the system can be decided as robust if the result shows same or similar shapes. After all these steps, the scanned model can be input to retrieve and test how well the matching algorithm works. The last step is to verify the system's robustness to large database, where a large number of descriptors may have influence to the retrieval accuracy. 
 
 \section{System design}
 
-The flowchart for the pre-processing is in Figure~\ref{scan2search_preprocessing}. It can be noticed that the simulators for rotation and noise are added. In the early stage, in order to verify the rotational invariance property of the descriptors, as well as robustness to random noise, these simulators are essential. But in the final testing of ``scan to search'', these simulators should not be applied to the scanned model. Besides, the judgement step that whether the model is noisy, and the further denoising step depend on the user. 
+The flowchart for the pre-processing is in Figure~\ref{scan2search_preprocessing}. It can be noticed that the simulators for rotation and noise are added. In the early stage, in order to verify the rotational invariance property of the descriptors, as well as robustness to random noise, these simulators are essential. But in the final testing of ``scan to search'', these simulators should not be applied to the scanned model. Besides, the judgment step that whether the model is noisy, and the further denoising step depend on the user. 
 
 \begin{figure}[h]
 \centering
@@ -47,7 +47,7 @@ descriptors. Besides, since there are two descriptors (spherical harmonics and d
 \caption{Retrieval process} \label{scan2search_main}
 \end{figure}
 
-The final user interface for the retrieval system is shown in Figure~\ref{UI}. It can be noticed that each processing step is controlled by relevant button. This design allows manual operations so that to observe the intermediate changes and output on each step. In this way, protential errors can be noticed and avoided. After finishing the testing, the user can choose automatically processing and retrieve.
+The final user interface for the retrieval system is shown in Figure~\ref{UI}. It can be noticed that each processing step is controlled by relevant button. This design allows manual operations so that to observe the intermediate changes and output on each step. In this way, potential errors can be noticed and avoided. After finishing the testing, the user can choose automatically processing and retrieve.
 
 \begin{figure}[h]
 \centering
@@ -57,7 +57,7 @@ The final user interface for the retrieval system is shown in Figure~\ref{UI}. I
 
 \section{The final design} \label{sec:thefinaldesign}
 
-At the begining, there is only one spherical harmonics descriptors applied in the system. However, due to some unknown error in the final descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics transformation), there are sometimes some outliers in the output candidate models, whose shapes are not similar to the input data. For example, with the input model(Figure~\ref{input_initialdesign}), the retrieval result shows six candidates in Figure~\ref{output_initialdesign}. It can be observed that some outlier candidates with unsimilar shapes are demonstrated. 
+At the beginning, there is only one spherical harmonics descriptors applied in the system. However, due to some unknown error in the final descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics transformation), there are sometimes some outliers in the output candidate models, whose shapes are not similar to the input data. For example, with the input model(Figure~\ref{input_initialdesign}), the retrieval result shows six candidates in Figure~\ref{output_initialdesign}. It can be observed that some outlier candidates with unsimilar shapes are demonstrated. 
 
 
 \begin{figure}[h]

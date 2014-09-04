@@ -1,0 +1,42 @@
+\section{Programming environment}
+
+This ``scan to search'' 3D retrieval system is written in Microsoft Visual C++. The user interface is built with MFC dialog. Several libraries are used for computing: 
+
+\begin{enumerate}[1.]
+\item OpenMesh (for handling 3D models)
+\item OpenGL (for rendering 3D models)
+\item ANN (for building kd-tree in the 3D bilateral filter)
+\item GSL (for computing the associated Legendre polynomials in spherical harmonics decomposition)
+\end{enumerate}
+
+\section{Code}
+
+
+\begin{enumerate}[1.]
+\item MeshOperation (.h/.cpp) include the key functions for the retrieval system
+    \begin{enumerate}[(1)]
+    \item RotateMesh: rotates the model
+    \item AddNoise: adds random noise to the model
+    \item NormalizeMesh: normalizes the model
+    \item RasterizeMesh: rasterizes the model into voxels 
+    \item ComputeSpharm: computes the spherical harmonics descriptors
+    \item ComputeDistHist: computes the distance histogram descriptors
+    \item BatchTrans: batch transforms the models in the database to descriptors and save them into descriptors database
+    \item RetrieveMesh: compares the similarity between current descriptors with all the descriptors in the database
+    \item BilateralDenoise: uses bilateral filter for 3D denoising 
+    \end{enumerate}
+\item OpenGLControl (.h/.cpp) has the whole structure of the system. It links the button calls from the user interface to relevant function. 
+\item MeshRetrievalMFCDlg (.h/.cpp) manages the user interface, including the window for demonstrating the 3D model and all the buttons. 
+\end{enumerate}
+
+\section{Data files}
+
+There are five folders for storing the data:
+
+\begin{enumerate}[1.]
+\item ``DemoSH'': has the spherical harmonics descriptors of the loaded model. 
+\item ``DemoDH'': has the distance histogram descriptors of the loaded model.
+\item ``MeshDatabase'': has the 3D models (.stl and .obj format) database 
+\item ``MeshSHDatabase'': has the spherical harmonics database
+\item ``MeshDHDatabase'': has the distance histogram database
+\end{enumerate}
