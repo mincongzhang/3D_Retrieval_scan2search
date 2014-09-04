@@ -43,7 +43,9 @@ Additionally, more ``Scan to search'' query tests are carried out. A manufacturi
 
 \subsection{Large database test}
 
-After testing the whole functions of the system, the database is expanded from 30 models size to 60 models size. This is to make sure there is no potential risk when the database is large. With the initial design, there is only one spherical harmonics descriptors. And a single type of descriptors may have its weakness. Due to some unknown errors in the descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics decomposition. See the rotation invariant test 2 in Section~\ref{sec:results_rotationinvarianttest}), there are sometimes some irrelevant matches. This is also analysed in Section~\ref{sec:thefinaldesign}.  Therefore, another type of descriptors (distance histogram) is added for assistance and compensating the error caused by spherical harmonics. 
+After testing the whole functions of the system, the database is expanded from 30 models size to 60 models size. This is to make sure there is no potential risk when the database is large. With the initial design, there is only one spherical harmonics descriptors. And a single type of descriptors may have its weakness. Due to some unknown errors in the descriptors (maybe it is the rasterization error or sampling error in the spherical harmonics decomposition. See the rotation invariant test 2 in Section~\ref{sec:results_rotationinvarianttest}), there are sometimes some irrelevant matches. This is also analysed in Section~\ref{sec:thefinaldesign}.  Therefore, another type of descriptors (distance histogram) is added for assistance and compensating the error caused by spherical harmonics. The previous test results are all based on the new database of size 60. 
+
+Figure~\ref{scantosearchtest_component_scanning} demonstrates  all the models in the database. 
 
 \section{Evaluation}
 
@@ -258,6 +260,13 @@ With the assistance of (c), whose statistical feature almost have no difference 
   \label{scantosearchtest_pi_UI}
 \end{center}
 \end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{database_models}
+\caption{Demonstration of the dabase} \label{database_models}
+\end{figure}
+
 %example for subfigure
 %\begin{figure}
 %    \begin{subfigure}[b]{.45\linewidth}

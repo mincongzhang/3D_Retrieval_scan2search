@@ -1,6 +1,6 @@
 #pragma once
 #include "afxwin.h"
-#include "point.h"
+#include "Point.h"
 #include "PolarPoint.h"
 
 #undef min

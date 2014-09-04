@@ -72,7 +72,8 @@ At the beginning, there is only one spherical harmonics descriptors applied in t
 \caption{Output of the initial design} \label{output_initialdesign}
 \end{figure}
 
-Therefore, another simpler distance histogram  descriptors are added. The matching results combine the similarities computed by distance histogram and spherical harmonics, and reduce matching errors. Figure~\ref{output_finaldesign} demonstrates the results of the final design with the same input model. 
+Therefore, another simpler distance histogram  descriptors are added. The matching results combine the similarities computed by distance histogram and spherical harmonics, and reduce matching errors. Figure~\ref{output_finaldesign} demonstrates the results of the final design with the same input model.
+
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\linewidth]{output_finaldesign}
@@ -82,5 +83,4 @@ Therefore, another simpler distance histogram  descriptors are added. The matchi
 The verification also worths mentioning. Well designed tests can verify the correctness of the system design and implementation, also they can help to avoid potential risks for further implementation. 
 
 The initial design only has the spherical harmonics descriptors. And spherical harmonics transformation is difficult to implemented. At first the transformation is implemented incorrectly, nevertheless the descriptors can be computed. And even test one ``Retrieval test'' passes. That is because the incorrect descriptors show some features, to some extent. However, the rotational invariance test does not pass, due to the wrong spherical harmonics decomposition. Thus the spherical harmonics decomposition is reimplemented and tested. 
-
-Additionally, after trying larger database with size 60, the output shows the weakness and inaccuracy of single type of descriptors. Therefore another distance histogram matching algorithm is added for assistance.
+Additionally, after enlarging the database to size 60, the output shows the weakness and inaccuracy of single type of descriptors. Therefore another distance histogram matching algorithm is added for assistance.

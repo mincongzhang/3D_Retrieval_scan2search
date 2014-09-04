@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "point.h"
-#include "vector.h"
+#include "Point.h"
+#include "Vector.h"
 
 Point::Point(float x, float y, float z)
 //constructor

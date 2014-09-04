@@ -2,7 +2,7 @@
 #include "OpenGLControl.h"
 #include ".\openglcontrol.h"
 #include "MeshOperation.h"
-#include "point.h"
+#include "Point.h"
 
 #include <math.h>
 #include <stdio.h>

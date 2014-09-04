@@ -120,7 +120,7 @@
     <ClCompile Include="OpenGLControl.cpp" />
     <ClCompile Include="MeshRetrievalMFC.cpp" />
     <ClCompile Include="MeshRetrievalMFCDlg.cpp" />
-    <ClCompile Include="point.cpp" />
+    <ClCompile Include="Point.cpp" />
     <ClCompile Include="PolarPoint.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -128,20 +128,20 @@
     </ClCompile>
     <ClCompile Include="MeshOperation.cpp" />
     <ClCompile Include="Toolbox.cpp" />
-    <ClCompile Include="vector.cpp" />
+    <ClCompile Include="Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OpenGLControl.h" />
     <ClInclude Include="MeshRetrievalMFC.h" />
     <ClInclude Include="MeshRetrievalMFCDlg.h" />
-    <ClInclude Include="point.h" />
+    <ClInclude Include="Point.h" />
     <ClInclude Include="PolarPoint.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="MeshOperation.h" />
     <ClInclude Include="Toolbox.h" />
-    <ClInclude Include="vector.h" />
+    <ClInclude Include="Vector.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\MeshRetrievalMFC.ico" />

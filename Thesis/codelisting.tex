@@ -1,0 +1,1849 @@
+\begin{enumerate}[1.]
+\item MeshOperation.h
+
+\begin{lstlisting}[xleftmargin=0em]
+#pragma once
+#include "afxwin.h"
+#include "OpenGLControl.h"
+#include "Toolbox.h"
+
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+//#include <stdlib.h>
+using namespace std;
+
+#undef min
+#undef max
+#include <OpenMesh/Core/IO/MeshIO.hh>
+#include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
+#include <OpenMesh/Core/System/config.h>
+#include <OpenMesh/Core/Mesh/Status.hh>
+#include <OpenMesh/Core/IO/exporter/ExporterT.hh>
+
+struct MyTraits : public OpenMesh::DefaultTraits
+{
+	VertexAttributes(OpenMesh::Attributes::Status);
+	FaceAttributes(OpenMesh::Attributes::Status);
+	EdgeAttributes(OpenMesh::Attributes::Status);
+};
+
+using namespace std;
+
+typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
+
+void RotateMesh(MyMesh &mesh);
+void AddNoise(double noise_standard_deviation,MyMesh &mesh);
+void BilateralDenoise(MyMesh &mesh);
+void ChooseCandidate(int index);
+void NormalizeMesh(MyMesh &mesh);
+void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points);
+void ComputeSpharm(vector<Point> &grid_points,string write_filename);
+void ComputeDistHist(vector<Point> &grid_points,string write_filename);
+void BatchTrans(void);
+void RetrieveMesh(void);
+\end{lstlisting}
+
+\item MeshOperation.cpp
+
+\begin{lstlisting}[xleftmargin=0em]
+#include "stdafx.h"
+#include "MeshOperation.h"
+#include "PolarPoint.h"
+#include "Point.h"
+#include "Vector.h"
+
+#include <math.h>
+#include <cmath>
+#include <stdio.h>
+#include <random>
+#include <string>
+#include <algorithm>
+
+#include <gsl/gsl_sf_legendre.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
+#include <ANN/ANN.h>
+
+
+using namespace std; // make std:: accessible
+
+const int MAX_R = 32;
+const int MAX_L = 32;
+const int DATASIZE = 60;
+const int RADIUS = 32;
+const int MAX_DIST = 111;		//ceil(sqrt(3*(64^2)))
+double candidate_index_array[DATASIZE] = {}; 
+
+/*rotate mesh according to centre of mass*/
+void RotateMesh(MyMesh &mesh)
+{
+	Point centroid(0.0,0.0,0.0);
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{
+		centroid.x() += mesh.point(it).data()[0];
+		centroid.y() += mesh.point(it).data()[1];
+		centroid.z() += mesh.point(it).data()[2];
+	}
+	centroid.x()/=float(mesh.n_vertices());
+	centroid.y()/=float(mesh.n_vertices());
+	centroid.z()/=float(mesh.n_vertices());
+
+	double rotate_angle = M_PI/20.0;
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{
+		switch(ROTATE_CONTROL){
+		case 1:	
+			{
+				double y = mesh.point(it).data()[1] - centroid.y();
+				double z = mesh.point(it).data()[2] - centroid.z();
+
+				*(mesh.point(it).data()+1) = y*cos(rotate_angle)-z*sin(rotate_angle) + centroid.y();
+				*(mesh.point(it).data()+2) = y*sin(rotate_angle)+z*cos(rotate_angle) + centroid.z();
+			}
+			break;
+		case 2:
+			{
+				double x = mesh.point(it).data()[0] - centroid.x();
+				double z = mesh.point(it).data()[2] - centroid.z();
+
+				*(mesh.point(it).data()+0) = x*cos(rotate_angle)-z*sin(rotate_angle) + centroid.x();
+				*(mesh.point(it).data()+2) = x*sin(rotate_angle)+z*cos(rotate_angle) + centroid.z();
+			} 
+			break;
+		case 3:
+			{
+				double x = mesh.point(it).data()[0] - centroid.x();
+				double y = mesh.point(it).data()[1] - centroid.y();
+
+				*(mesh.point(it).data()+0) = x*cos(rotate_angle)-y*sin(rotate_angle) + centroid.x();
+				*(mesh.point(it).data()+1) = x*sin(rotate_angle)+y*cos(rotate_angle) + centroid.y();
+			}
+			break;
+		}
+	}
+
+	ROTATE_CONTROL = 0;
+}
+
+/*Add random Gaussian Noise to verteices*/
+void AddNoise(double noise_standard_deviation,MyMesh &mesh)
+{
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution(0.0,noise_standard_deviation); //Gaussian distribution: mean value = 0.0
+
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{
+		double Pt[3] = {};
+		for (int d=0;d<3;d++)
+		{
+			Pt[d]=*(mesh.point(it).data()+d);
+			double randn = distribution(generator);
+			if ((randn>=-1.0)&&(randn<=1.0))//Gaussian distribution range [-1.0,1.0]							        
+			{
+				Pt[d]= Pt[d]*(1.0+randn);
+				*(mesh.point(it).data()+d)=float(Pt[d]);
+			}
+		}
+	}
+	NOISE_CONTROL = false;
+}
+
+int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool * grid,vector<Point> &grid_points)
+{
+	Vector v12 = point2-point1;
+	double len12 = v12.norm();
+	v12.normalise();
+
+	int n_points = 0;
+	for(unsigned int n=0;n<=floor(len12);n++)
+	{
+		Point temp_p;
+		temp_p.x() = round(point1.x()+v12.x()*double(n));
+		temp_p.y() = round(point1.y()+v12.y()*double(n));
+		temp_p.z() = round(point1.z()+v12.z()*double(n));
+
+		int grid_coordinate	= int(temp_p.x()*2*RADIUS*2*RADIUS + temp_p.y()*2*RADIUS + temp_p.z());
+
+		//discard outliers
+		if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
+
+		if(*(grid+grid_coordinate)!=true)
+		{
+			*(grid+grid_coordinate) = true;
+			inter12.push_back(temp_p);
+			grid_points.push_back(temp_p);
+			n_points++;
+		}
+	}
+
+	int grid_coordinate_p2 = int(point2.x()*2*RADIUS*2*RADIUS + point2.y()*2*RADIUS + point2.z());
+	//make sure points in the range
+	if(grid_coordinate_p2<(2*RADIUS*2*RADIUS*2*RADIUS-1) && grid_coordinate_p2>0){
+		if(*(grid+grid_coordinate_p2)!=true)
+		{
+			*(grid+grid_coordinate_p2) = true;
+			inter12.push_back(point2);
+			grid_points.push_back(point2);
+			n_points++;
+		} 
+	}
+
+	return n_points;
+}
+
+/*write the output SH*/
+void WriteSH(string &write_filename,double SH_descriptor[])
+{
+	// open file
+	ofstream myfile;
+	myfile.open(write_filename);
+	//write file header
+	if (myfile.is_open())
+	{
+		//write SH
+		//(idx_r-1)*MAX_L+idx_l
+		for(unsigned int idx_r=0;idx_r<MAX_R;idx_r++)
+		{
+			for(unsigned int idx_l=0;idx_l<MAX_L;idx_l++)
+			{
+				myfile << SH_descriptor[idx_r*MAX_R+idx_l]<< " ";
+			}
+			myfile << "\n";
+		}
+		myfile.close();
+	}
+}
+
+/*write the output DH*/
+void WriteDH(string &write_filename,double DistHist[])
+{
+	// open file
+	ofstream myfile;
+	myfile.open(write_filename);
+	//write file header
+	if (myfile.is_open())
+	{
+		//write DH
+		for(unsigned int it=0;it<MAX_DIST;it++)
+		{
+			myfile<<DistHist[it]<< "\n";
+		}
+		myfile.close();
+	}
+}
+
+/*normalize the model */
+void NormalizeMesh(MyMesh &mesh)
+{
+	double x_max,y_max,z_max,x_min,y_min,z_min;
+	FindMaxMin(mesh,x_max,y_max,z_max,x_min,y_min,z_min);
+
+	double distance_x = x_max - x_min;
+	double distance_y = y_max - y_min;
+	double distance_z = z_max - z_min;
+	double max_distance = distance_x;
+
+	if (distance_y > max_distance) max_distance = distance_y;
+	if (distance_z > max_distance) max_distance = distance_z;
+
+	/*normalize*/
+	//initial centroid
+	Point centroid(0.0,0.0,0.0);
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		//move to positive, normalize to 1 
+		double x_normalize = (mesh.point(v_it).data()[0] - x_min)/max_distance;
+		double y_normalize = (mesh.point(v_it).data()[1] - y_min)/max_distance;
+		double z_normalize = (mesh.point(v_it).data()[2] - z_min)/max_distance;
+
+		*(mesh.point(v_it).data()+0) = x_normalize;
+		*(mesh.point(v_it).data()+1) = y_normalize;
+		*(mesh.point(v_it).data()+2) = z_normalize;
+
+		//get centroid
+		centroid.x() += double(x_normalize);
+		centroid.y() += double(y_normalize);
+		centroid.z() += double(z_normalize);
+	}
+	centroid.x()/=double(mesh.n_vertices());
+	centroid.y()/=double(mesh.n_vertices());
+	centroid.z()/=double(mesh.n_vertices());
+
+	//get distance
+	float mean_dist = 0.0;
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		//get distance between vertex and origin
+		double current_dist = sqrt(pow(*(mesh.point(v_it).data()+0)-centroid.x(),2.0) 
+			+ pow(*(mesh.point(v_it).data()+1)-centroid.y(),2.0) + pow(*(mesh.point(v_it).data()+2)-centroid.z(),2.0));
+		mean_dist += current_dist;
+	}
+	mean_dist/=double(mesh.n_vertices());
+
+	//scale and make the average distance to center of mass is R/2
+	float scale_ratio = (double(RADIUS)/2.0)/mean_dist;
+	for (MyMesh::VertexIter v_it = mesh.vertices_begin();v_it!=mesh.vertices_end(); ++v_it)
+	{
+		*(mesh.point(v_it).data()+0) *= scale_ratio;
+		*(mesh.point(v_it).data()+1) *= scale_ratio;
+		*(mesh.point(v_it).data()+2) *= scale_ratio;
+
+		//scale back to range [0,1] for better viewing 
+		*(mesh.point(v_it).data()+0) /= double(2*RADIUS);
+		*(mesh.point(v_it).data()+1) /= double(2*RADIUS);
+		*(mesh.point(v_it).data()+2) /= double(2*RADIUS);
+	}
+
+	NORMALIZE_CONTROL = FALSE;
+}
+
+/*rasterize the model to 2R*2R*2R voxel grid*/
+void RasterizeMesh(MyMesh &mesh,vector<Point> &grid_points)
+{
+	//reserve space 
+	grid_points.reserve(10000);
+
+	//create grid 
+	int grid_size = 2*RADIUS*2*RADIUS*2*RADIUS;
+
+	bool *grid;
+	grid = new bool [grid_size];
+	memset(grid,false,grid_size*sizeof(bool));
+
+	for(MyMesh::FaceIter f_it=mesh.faces_begin();f_it!=mesh.faces_end();++f_it)
+	{
+		vector<Point> face_points;
+
+		for(MyMesh::FaceVertexIter v_it=mesh.fv_iter(f_it);v_it;++v_it)
+		{
+			Point temp_face_point;
+			//scale back from range [0,1] to [0,2R]
+			temp_face_point.x() = *(mesh.point(v_it).data()+0)*2*RADIUS;
+			temp_face_point.y() = *(mesh.point(v_it).data()+1)*2*RADIUS;
+			temp_face_point.z() = *(mesh.point(v_it).data()+2)*2*RADIUS;
+			face_points.push_back(temp_face_point);
+
+			//get grid coordinate
+			int grid_coordinate	= int(temp_face_point.x()*2*RADIUS*2*RADIUS + temp_face_point.y()*2*RADIUS + temp_face_point.z());
+
+			//discard points out of range
+			if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
+
+			//if not registered
+			if(*(grid+grid_coordinate)!=true)
+			{
+				*(grid+grid_coordinate) = true;
+				grid_points.push_back(temp_face_point);
+			}
+		}
+
+		//fill the edges for a triangle face
+		vector<Point> inter12,inter23,inter13;
+		int n_points12 = fillGridLine(face_points.at(0),face_points.at(1),inter12,grid,grid_points);
+		int n_points23 = fillGridLine(face_points.at(1),face_points.at(2),inter23,grid,grid_points);
+		int n_points13 = fillGridLine(face_points.at(0),face_points.at(2),inter13,grid,grid_points);
+
+		//fill in the face
+		if(n_points12>=n_points13 && n_points13>0)
+		{
+			for(unsigned int n=0;n<n_points13;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(n),temp_inter,grid,grid_points);
+			}
+			for(unsigned int n=n_points13;n<n_points12;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(inter13.size()-1),temp_inter,grid,grid_points);
+			}
+		} 
+		else if(n_points13>=n_points12 && n_points12>0)
+		{
+			for(unsigned int n=0;n<n_points12;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(n),inter13.at(n),temp_inter,grid,grid_points);
+			}
+			for(unsigned int n=n_points12;n<n_points13;n++)
+			{
+				vector<Point> temp_inter;
+				fillGridLine(inter12.at(inter12.size()-1),inter13.at(n),temp_inter,grid,grid_points);
+			}
+		}
+	}
+
+	//get centroid again
+	Point centroid_after(0.0,0.0,0.0);
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		centroid_after.x()+=grid_points.at(p_it).x();
+		centroid_after.y()+=grid_points.at(p_it).y();
+		centroid_after.z()+=grid_points.at(p_it).z();
+
+	}
+	centroid_after.x()/=double(grid_points.size());
+	centroid_after.y()/=double(grid_points.size());
+	centroid_after.z()/=double(grid_points.size());
+
+	//move grid to the origin
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		grid_points.at(p_it).x() -= centroid_after.x();
+		grid_points.at(p_it).y() -= centroid_after.y();
+		grid_points.at(p_it).z() -= centroid_after.z();
+	}
+
+	delete [] grid;
+
+	RASTERIZE_CONTROL = FALSE;
+}
+
+/*compute spherical harmonics*/
+void ComputeSpharm(vector<Point> &grid_points,string write_filename)
+{
+	vector<PolarPoint> grid_polar_points;
+	grid_polar_points.reserve(10000);
+	GetPolarCoordinate(grid_points,grid_polar_points);
+	sort(grid_polar_points.begin(),grid_polar_points.end());
+
+	if(grid_polar_points.size()==grid_points.size())
+	{
+		//begin
+		int idx_n = 0;
+		double *SH_descriptor;
+		SH_descriptor = new double [MAX_R*MAX_L]();
+
+		for(unsigned int idx_r = 1;idx_r<=RADIUS;idx_r++)
+		{
+			//for each frequency
+			for(int idx_l = 0;idx_l<MAX_L;idx_l++)
+			{
+				vector<double> 	a_ml_pow;
+				//traverse frequency range
+				for(int idx_m = -idx_l;idx_m<=idx_l;idx_m++)
+				{
+					vector<double> Yml_real,Yml_imag;
+					double NPml;
+
+					while(idx_n<=(grid_polar_points.size()-1) && grid_polar_points.at(idx_n).distance()<idx_r)
+					{
+						//initial Y_ml = N*P(m,l,cos(theta))*exp(i*m*phi)
+						//function gsl_sf_legendre_sphPlm returns value of N*P(m,l,cos(theta))
+						//cos(x) input should be a radian
+						//theta_vector and phi_vector are radians
+						PolarPoint current_p = grid_polar_points.at(idx_n);
+						if(idx_m>=0)
+						{
+							NPml = gsl_sf_legendre_sphPlm(idx_l,idx_m,cos(current_p.theta()));
+							Yml_real.push_back(NPml*cos(double(idx_m)*current_p.phi()));
+							Yml_imag.push_back(NPml*sin(double(idx_m)*current_p.phi()));
+						} else {
+							NPml = pow (-1.0,-idx_m)*gsl_sf_legendre_sphPlm(idx_l,-idx_m,cos(current_p.theta()));
+							Yml_real.push_back(NPml*cos(double(-idx_m)*current_p.phi()));
+							Yml_imag.push_back(NPml*sin(double(-idx_m)*current_p.phi()));
+						}
+						idx_n++;
+						if(idx_n==(grid_polar_points.size()-1)) break;
+					}//while(dist_vector.at(idx_n)<idx_r)
+
+					double 	a_ml_real,a_ml_imag;
+					a_ml_real=accumulate(Yml_real.begin(),Yml_real.end(),0.0);
+					a_ml_imag=accumulate(Yml_imag.begin(),Yml_imag.end(),0.0);
+					a_ml_pow.push_back(pow(a_ml_real,2.0)+pow(a_ml_imag,2.0));
+					if(idx_l!=MAX_L-1) idx_n-=Yml_real.size();
+				}//finish traversing frequency range
+				SH_descriptor[(idx_r-1)*MAX_R+idx_l] = sqrt(accumulate(a_ml_pow.begin(),a_ml_pow.end(),0.0));
+			}	//end of for(int idx_l = 0;idx_l<MAX_L;idx_l++)
+		}// for(unsigned int idx_r = 0;idx_r<RADIUS;idx_r++)
+
+		/*write out the data*/
+		WriteSH(write_filename,SH_descriptor);
+
+		delete [] SH_descriptor;
+	}//end of if(get_polar&&get_sorted)
+
+	SPHARM_CONTROL = false;
+}
+
+/*compute distance histogram*/
+void ComputeDistHist(vector<Point> &grid_points,string write_filename)
+{
+	//initial DistHist
+	double * DistHist;
+	DistHist = new double [MAX_DIST]();
+
+	//get centroid
+	Point centroid(0.0,0.0,0.0);
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		centroid.x()+=grid_points.at(p_it).x();
+		centroid.y()+=grid_points.at(p_it).y();
+		centroid.z()+=grid_points.at(p_it).z();
+
+	}
+	centroid.x()/=double(grid_points.size());
+	centroid.y()/=double(grid_points.size());
+	centroid.z()/=double(grid_points.size());
+
+	//move grid to the origin and get distance vector
+	double x_dist,y_dist,z_dist;
+	for(unsigned int p_it = 0;p_it<grid_points.size();p_it++)
+	{
+		x_dist = grid_points.at(p_it).x() - centroid.x();
+		y_dist = grid_points.at(p_it).y() - centroid.y();
+		z_dist = grid_points.at(p_it).z() - centroid.z();
+		int distance = int(round(sqrt(pow(x_dist,2.0)+pow(y_dist,2.0)+pow(z_dist,2.0))));
+		DistHist[distance]+=1.0;
+	}
+
+	//normalize histogram
+	double grid_size = double (grid_points.size());
+	for(unsigned int d_it=0;d_it<MAX_DIST;d_it++){
+		DistHist[d_it]/=grid_size;
+	}
+
+	/*write out the data*/
+	WriteDH(write_filename,DistHist);
+
+	delete [] DistHist;
+
+	DISTHIST_CONTROL = false;
+}
+
+/*batch transform*/
+void BatchTrans(void)
+{
+	//SH transform
+	int file_num = 60;
+
+	for(unsigned int file_id=1;file_id<=file_num;file_id++)
+	{
+		//decide the suffix of the data
+		string suffix;
+		if(file_id>40)	suffix = ").obj";
+		else			suffix = ").stl";
+
+		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
+		string read_filename = "./MeshDatabase/data ("+id+suffix;
+		string write_SH_filename = "./MeshSHDatabase/SH"+id+".txt";
+		string write_DH_filename = "./MeshDHDatabase/DH"+id+".txt";
+
+		MyMesh mesh_to_transform;
+		OpenMesh::IO::read_mesh(mesh_to_transform, read_filename);
+
+		vector<Point> grid_points_to_transform;
+
+		NormalizeMesh(mesh_to_transform);
+		RasterizeMesh(mesh_to_transform,grid_points_to_transform);
+		ComputeSpharm(grid_points_to_transform,write_SH_filename);
+		ComputeDistHist(grid_points_to_transform,write_DH_filename);
+	}
+
+	BATCH_CONTROL = false;
+}
+
+/*retrieve mesh*/
+void RetrieveMesh(void)
+{
+	/*spherical harmonics*/
+	double *currentSH;
+	double *databaseSH;
+	double *diffSH;
+	currentSH = new double [MAX_R*MAX_L]();
+	databaseSH = new double [MAX_R*MAX_L]();
+	diffSH = new double [DATASIZE]();
+	/*distance histogram*/
+	double *currentDH;
+	double *databaseDH;
+	double *diffDH;
+	currentDH = new double [MAX_DIST]();
+	databaseDH = new double [MAX_DIST]();
+	diffDH = new double [DATASIZE]();
+
+	//get current model SH
+	string currentSH_filename = "./DemoSH/demo.txt";
+	ifstream currentSH_file(currentSH_filename);
+	//get current model DH
+	string currentDH_filename = "./DemoDH/demo.txt";
+	ifstream currentDH_file(currentDH_filename);
+
+	//get current descriptors
+	for(int idx_r = 0; idx_r < MAX_R; idx_r++){
+		for(int idx_l = 0; idx_l < MAX_L; idx_l++){
+			currentSH_file >> currentSH[idx_r*MAX_R+idx_l];
+		}
+	}
+	currentSH_file.close();
+	for(int it_d = 0; it_d < MAX_DIST; it_d++){
+		currentDH_file >> currentDH[it_d];
+	}
+	currentDH_file.close();
+
+	//get database model SH
+	double max_diffSH = 0.0;
+	double max_diffDH = 0.0;
+	for(int file_id=1;file_id<=DATASIZE;file_id++)
+	{
+		//assign candidate index
+		candidate_index_array[file_id-1] = file_id;
+
+		//get SH
+		string id = static_cast<ostringstream*>( &(ostringstream() << file_id) )->str();
+		string databaseSH_filename = "./MeshSHDatabase/SH"+id+".txt";
+		ifstream databaseSH_file(databaseSH_filename);
+		for(int idx_r = 0; idx_r < MAX_R; idx_r++){
+			for(int idx_l = 0; idx_l < MAX_L; idx_l++){
+				databaseSH_file >> databaseSH[idx_r*MAX_R+idx_l];
+				diffSH[file_id-1] += abs(databaseSH[idx_r*MAX_R+idx_l]-currentSH[idx_r*MAX_R+idx_l]);
+			}
+		}
+		if(diffSH[file_id-1]>max_diffSH) max_diffSH = diffSH[file_id-1]; 
+		databaseSH_file.close();
+
+		//get DH
+		string databaseDH_filename = "./MeshDHDatabase/DH"+id+".txt";
+		ifstream databaseDH_file(databaseDH_filename);
+		for(int it_d = 0; it_d < MAX_DIST; it_d++){
+			databaseDH_file >> databaseDH[it_d];
+			diffDH[file_id-1] += abs(databaseDH[it_d]-currentDH[it_d]);
+		}
+		if(diffDH[file_id-1]>max_diffDH) max_diffDH = diffDH[file_id-1]; 
+		databaseDH_file.close();
+	}
+
+	//normalize diffDH and diffSH, get final diff
+	double * final_diff;
+	final_diff = new double [DATASIZE];
+	for(int file_id=1;file_id<=DATASIZE;file_id++)
+	{
+		diffDH[file_id-1]/=max_diffDH;
+		diffSH[file_id-1]/=max_diffSH;
+		final_diff[file_id-1] = diffDH[file_id-1]*diffSH[file_id-1]; 
+	}
+
+	getSortedID(final_diff,candidate_index_array,0,DATASIZE-1);
+   
+	delete [] currentSH;
+	delete [] databaseSH;
+	delete [] diffSH;
+	delete [] currentDH;
+	delete [] databaseDH;
+	delete [] diffDH;
+	delete [] final_diff;
+
+	RETRIEVE_CONTROL = false;
+}
+
+void ChooseCandidate(int index)
+{
+	int candidate_id = candidate_index_array[index-1];
+
+	//decide the suffix of the data
+	string suffix;
+	if(candidate_id>40)	suffix = ").obj";
+	else				suffix = ").stl";
+
+	//number to string
+	string candidate_id_s = static_cast<ostringstream*>( &(ostringstream() << candidate_id) )->str();
+	string candidate_filname = "./MeshDatabase/data ("+candidate_id_s+suffix;
+
+	//load candidate mesh 
+	MyMesh candidate_mesh;
+	OpenMesh::IO::read_mesh(candidate_mesh, candidate_filname);
+	meshQueue.clear();
+	meshQueue.push_back(candidate_mesh);
+
+	NORMALIZE_CONTROL = true;
+}
+
+
+/*Denoising*/
+//kd tree
+// Global variables
+//
+const int dim = 3;				// dimension
+double eps = 0.0;				// error bound
+istream* dataIn = NULL;		// input for data points
+istream* queryIn = NULL;	// input for query points
+
+void FindNeighbours(int neighbour_num,ANNkd_tree* kdTree,ANNpointArray meshArray,ANNpoint Pt,
+					std::vector<MyMesh::Point> &neighbours,vector<double> &distVector,double &radius)
+{
+	ANNidxArray		nnIdx;					// near neighbor indices
+	ANNdistArray	dists;					// near neighbor distances
+	nnIdx = new ANNidx[neighbour_num];		// allocate near neigh indices
+	dists = new ANNdist[neighbour_num];		// allocate near neighbor dists
+
+	kdTree->annkSearch(			// search
+		Pt,						// query point
+		neighbour_num,	        // number of near neighbors
+		nnIdx,					// nearest neighbors (returned)
+		dists,					// distance (returned)
+		eps);					// error bound
+    
+	//radius = max(dist)
+	for (int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)>radius)	radius = *(dists+i); 
+	}
+	radius /= 0.9; //reject outlying points 
+
+	for(int i=0;i<neighbour_num;i++)
+	{
+		if(*(dists+i)<radius)
+		{
+			ANNpoint current_neighbour;
+			MyMesh::Point  neighbourPt;
+			current_neighbour = annAllocPt(dim);
+
+			current_neighbour = meshArray[*(nnIdx+i)];
+			neighbourPt.data()[0] = double(current_neighbour[0]);
+			neighbourPt.data()[1] = double(current_neighbour[1]);
+			neighbourPt.data()[2] = double(current_neighbour[2]);
+			neighbours.push_back(neighbourPt);
+			distVector.push_back(*(dists+i));
+		}
+	}
+
+	delete [] nnIdx; 
+	delete [] dists;
+}
+
+/*Get normal vectors from OpenMesh library
+-> bilateral filter denoising of vertices*/
+void BilateralDenoise(MyMesh &mesh)
+{
+	/*ANN kd-tree find nearest point*/
+	ANNpointArray	meshArray;				// mesh points array
+	ANNpoint		Pt;						// point
+	ANNkd_tree*		kdTree;					// search structure
+
+	int PtNum = mesh.n_vertices();
+	meshArray = annAllocPts(PtNum, dim);
+	Pt = annAllocPt(dim);
+
+	//assign mesh points to ANN array
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{   
+		//Pt get the space of data array
+		double getPt[3] = {};
+
+		//Pt get the coordinates of mesh point
+		int index = it->idx();
+		Pt = meshArray[index];
+		for(int d = 0;d < dim; d++)
+		{
+			getPt[d] = *(mesh.point(it).data()+d);
+			Pt[d] = getPt[d];
+		}
+		//assign Pt coordinates to data array
+		meshArray[index] = Pt;
+	}
+
+	//build kd-tree
+	kdTree = new ANNkd_tree(	// build search structure
+		meshArray,				// the data points
+		PtNum,					// number of points
+		dim);					// dimension of space
+
+	/*Request vertex normal*/
+	// request vertex normals, so the mesh reader can use normal information
+	// if available
+	mesh.request_vertex_normals();
+
+	OpenMesh::IO::Options opt;
+
+	// If the file did not provide vertex normals, then calculate them
+	if ( !opt.check( OpenMesh::IO::Options::VertexNormal ) )
+	{
+		// we need face normals to update the vertex normals
+		mesh.request_face_normals();
+		// let the mesh update the normals
+		mesh.update_normals();
+
+		// dispose the face normals, as we don't need them anymore
+		mesh.release_face_normals();
+	}
+
+	/*Bilateral filtering*/
+	//initial parameters for denoising
+	double radius  = 0.0;
+	double sigma_c = 0.05; //depend on the distance of the points
+	double sigma_s = 0.0;
+	int neighbour_num = 12;
+
+	//get certain neighbour and denoise
+	for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+	{   
+		//Pt get the coordinates from mesh array
+		int index = it->idx();
+		Pt = meshArray[index];
+		std::vector<MyMesh::Point> neighbours;
+		vector<double> distVector;
+
+		//Find K(neighbours for normal calculation) nearest neighbours, 
+		//return neighbours,distVector,radius
+		FindNeighbours(neighbour_num,kdTree,meshArray,Pt,
+			neighbours,distVector,radius);
+
+		//get height from current vertex to tangent plane
+		//update neighbour number
+		neighbour_num = neighbours.size();
+		vector<double> height;
+		double mean_height = 0.0;
+		for(int i=0;i<neighbour_num;i++)
+		{
+			MyMesh::Point  current_neighbour;
+			current_neighbour = neighbours.at(i);
+
+			//get normal vector from normal mesh
+			double normal_vector[3]={};
+			normal_vector[0]= *mesh.normal(it).data();
+			normal_vector[1]= *(mesh.normal(it).data()+1);
+			normal_vector[2]= *(mesh.normal(it).data()+2);
+
+			//calculate height
+			height.push_back((Pt[0]-current_neighbour.data()[0])*normal_vector[0]+(Pt[1]-current_neighbour.data()[1])*normal_vector[1]+(Pt[2]-current_neighbour.data()[2])*normal_vector[2]);
+			mean_height += height.at(i);
+		}
+
+		//Calculate standard deviation(sigma_s)
+		mean_height /= neighbour_num;
+		for(int i=0;i<neighbour_num;i++)
+		{
+			sigma_s +=  pow((height.at(i)-mean_height),2);
+		}
+		sigma_s = sqrt(sigma_s);
+
+		//Bilateral Mesh Denoising
+		double sum = 0;
+		double normalizer = 0;
+		double t,Wc,Ws;
+
+		for(int i=0;i<neighbour_num;i++)
+		{
+			//get t
+			t = distVector.at(i);
+
+			//get Wc, Ws, sum, normalizer
+			Wc = exp(-t*t/(2*sigma_c*sigma_c));
+			Ws = exp(-height.at(i)*height.at(i)/(2*sigma_s*sigma_s));
+			sum += (Wc*Ws)*height.at(i);
+			normalizer += Wc*Ws;
+		}
+
+		//assign back to original mesh
+		for(int d=0;d<dim;d++){
+			//new_v = v-n*(sum/normalizer)
+			*(mesh.point(it).data()+d) += -(*(mesh.normal(it).data()+d))*float(sum/normalizer);
+		}
+
+	}// end of for (auto it = mesh.vertices_begin(); it != mesh.vertices_end(); ++it)
+
+	// clean kd-tree
+	delete kdTree;
+	annClose(); 
+
+
+	DENOISE_CONTROL = false;
+}
+\end{lstlisting}
+
+\item OpenGLControl.h
+
+\begin{lstlisting}[xleftmargin=0em]
+#pragma once
+#include "afxwin.h"
+
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <gl/glut.h>
+#include <vector>
+
+#undef min
+#undef max
+#include <OpenMesh/Core/IO/MeshIO.hh>
+#include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
+using namespace std;
+
+typedef OpenMesh::PolyMesh_ArrayKernelT<>  MyMesh;
+
+extern  vector<MyMesh> meshQueue;
+extern int ROTATE_CONTROL;
+extern bool NOISE_CONTROL;
+extern bool DENOISE_CONTROL;
+extern bool NORMALIZE_CONTROL;
+extern bool RASTERIZE_CONTROL;
+extern bool SPHARM_CONTROL;
+extern bool DISTHIST_CONTROL;
+extern bool BATCH_CONTROL;
+extern bool RETRIEVE_CONTROL;
+extern bool POLYGON_CONTROL;
+
+class COpenGLControl : public CWnd
+{
+public:
+	/******************/
+	/* Public Members */
+	/******************/
+	UINT_PTR m_unpTimer;
+	// View information variables
+	float	 m_fLastX;
+	float	 m_fLastY;
+	float	 m_fPosX;
+	float	 m_fPosY;
+	float	 m_fZoom;
+	float	 m_fRotX;
+	float	 m_fRotY;
+	bool	 m_bIsMaximized;
+
+private:
+	/*******************/
+	/* Private Members */
+	/*******************/
+	// Window information
+	CWnd  *hWnd;
+	HDC   hdc;			
+	HGLRC hrc;			
+	int   m_nPixelFormat;
+	CRect m_rect;
+	CRect m_oldWindow;
+	CRect m_originalRect;
+
+public:
+	COpenGLControl(void);
+	virtual ~COpenGLControl(void);
+
+	void oglCreate(CRect rect, CWnd *parent);
+	void oglInitialize(void);
+	void oglDrawScene(void);
+
+	// Added message classes:
+	afx_msg void OnPaint();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg	void OnDraw(CDC *pDC);
+	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+
+	DECLARE_MESSAGE_MAP()
+
+};
+\end{lstlisting}
+
+\item OpenGLControl.cpp
+
+\begin{lstlisting}[xleftmargin=0em]
+#include "stdafx.h"
+#include "OpenGLControl.h"
+#include ".\openglcontrol.h"
+#include "MeshOperation.h"
+#include "Point.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <gsl/gsl_matrix.h>
+
+// make std:: accessible
+using namespace std;
+
+//Queue for all meshes
+vector<MyMesh>  meshQueue;
+
+int ROTATE_CONTROL = 0;
+bool NOISE_CONTROL = false;
+bool DENOISE_CONTROL = false;
+bool NORMALIZE_CONTROL = true;
+bool RASTERIZE_CONTROL = false;
+bool SPHARM_CONTROL = false;
+bool DISTHIST_CONTROL = false;
+bool BATCH_CONTROL = false;
+bool RETRIEVE_CONTROL = false;
+bool POLYGON_CONTROL = false;
+
+//add noise variable
+double noise_standard_deviation = 0.01; 
+
+//retrieval variables
+vector<Point> grid_points;
+
+//shading parameters
+GLfloat mat_specular[]={1.0f, 0.0f, 1.0f, 1.0f};
+GLfloat mat_diffuse[]={0.8f, 0.8f, 0.8f, 1.0f};
+GLfloat mat_ambient[]={0.8f, 0.8f, 0.8f, 1.0f};
+GLfloat mat_shininess[]={80.0};
+
+//transform from screen coordination to OpenGL coordination
+GLint    viewport[4]; 
+GLdouble modelview[16]; 
+GLdouble projection[16]; 
+GLfloat  winX, winY, winZ; 
+GLdouble posX, posY, posZ;
+
+double theta_x = 0.0;
+double theta_y = 0.0;
+
+COpenGLControl::COpenGLControl(void)
+{
+	m_fPosX = 0.0f;						 // X position of model in camera view
+	m_fPosY = -0.1f;					 // Y position of model in camera view
+	m_fZoom = 1.0f;						 // Zoom on model in camera view
+	m_fRotX = 0.0f;						 // Rotation on model in camera view
+	m_fRotY	= 0.0f;						 // Rotation on model in camera view
+	m_bIsMaximized = false;
+}
+
+COpenGLControl::~COpenGLControl(void)
+{
+}
+
+BEGIN_MESSAGE_MAP(COpenGLControl, CWnd)
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_CREATE()
+	ON_WM_TIMER()
+	ON_WM_MOUSEMOVE()
+END_MESSAGE_MAP()
+
+void COpenGLControl::OnPaint()
+{
+	//CPaintDC dc(this); // device context for painting
+	ValidateRect(NULL);
+}
+
+void COpenGLControl::OnSize(UINT nType, int cx, int cy)
+{
+	CWnd::OnSize(nType, cx, cy);
+
+	if (0 >= cx || 0 >= cy || nType == SIZE_MINIMIZED) return;
+
+	// Map the OpenGL coordinates.
+	glViewport(0, 0, cx, cy);
+
+	// Projection view
+	glMatrixMode(GL_PROJECTION);
+
+	glLoadIdentity();
+
+	// Set our current view perspective
+	gluPerspective(35.0f, (float)cx / (float)cy, 0.01f, 2000.0f);
+
+	// Model view
+	glMatrixMode(GL_MODELVIEW);
+
+	switch (nType)
+	{
+		// If window resize token is "maximize"
+	case SIZE_MAXIMIZED:
+		{
+			// Get the current window rect
+			GetWindowRect(m_rect);
+
+			// Move the window accordingly
+			MoveWindow(6, 6, cx - 14, cy - 14);
+
+			// Get the new window rect
+			GetWindowRect(m_rect);
+
+			// Store our old window as the new rect
+			m_oldWindow = m_rect;
+
+			break;
+		}
+
+		// If window resize token is "restore"
+	case SIZE_RESTORED:
+		{
+			// If the window is currently maximized
+			if (m_bIsMaximized)
+			{
+				// Get the current window rect
+				GetWindowRect(m_rect);
+
+				// Move the window accordingly (to our stored old window)
+				MoveWindow(m_oldWindow.left, m_oldWindow.top - 18, m_originalRect.Width() - 4, m_originalRect.Height() - 4);
+
+				// Get the new window rect
+				GetWindowRect(m_rect);
+
+				// Store our old window as the new rect
+				m_oldWindow = m_rect;
+			}
+			break;
+		}
+	}
+}
+
+int COpenGLControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CWnd::OnCreate(lpCreateStruct) == -1) return -1;
+
+	oglInitialize();
+
+	return 0;
+}
+
+void COpenGLControl::OnDraw(CDC *pDC)
+{
+
+	// If the current view is perspective...
+	glLoadIdentity();
+	gluLookAt(0.0,0.0,2.0,0.0,0.0,0.0,0.0,1.0,0.0);
+	//glFrustum(-1, 1, -1, 1, 0.0, 40.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glTranslatef(0.0f, 0.0f, -m_fZoom);
+	glTranslatef(m_fPosX, m_fPosY, 0.0f);
+	glRotatef(m_fRotX, 1.0f, 0.0f, 0.0f);
+	glRotatef(m_fRotY, 0.0f, 1.0f, 0.0f);
+}
+
+void COpenGLControl::OnTimer(UINT nIDEvent)
+{
+	switch (nIDEvent)
+	{
+	case 1:
+		{
+			// Clear color and depth buffer bits
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+			// Draw OpenGL scene
+			oglDrawScene();
+
+			// Swap buffers
+			SwapBuffers(hdc);
+
+			break;
+		}
+
+	default:
+		break;
+	}
+
+	CWnd::OnTimer(nIDEvent);
+}
+
+void COpenGLControl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	int diffX = (int)(point.x - m_fLastX);
+	int diffY = (int)(point.y - m_fLastY);
+	m_fLastX  = (float)point.x;
+	m_fLastY  = (float)point.y;
+
+	// Left mouse button
+	if (nFlags & MK_LBUTTON)
+	{
+		m_fRotX += (float)0.5f * diffY;
+
+		if ((m_fRotX > 360.0f) || (m_fRotX < -360.0f))
+		{
+			m_fRotX = 0.0f;
+		}
+
+		m_fRotY += (float)0.5f * diffX;
+
+		if ((m_fRotY > 360.0f) || (m_fRotY < -360.0f))
+		{
+			m_fRotY = 0.0f;
+		}
+	}
+	// Middle mouse button
+	else if (nFlags & MK_MBUTTON)
+	{
+		m_fZoom -= (float)0.01f * diffY;
+	}
+	// Right mouse button
+	else if (nFlags & MK_RBUTTON)
+	{
+		m_fPosX += (float)0.0005f * diffX;
+		m_fPosY -= (float)0.0005f * diffY;
+	}
+
+	OnDraw(NULL);
+
+	CWnd::OnMouseMove(nFlags, point);
+}
+
+void COpenGLControl::oglCreate(CRect rect, CWnd *parent)
+{
+	CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW | CS_OWNDC, NULL, (HBRUSH)GetStockObject(BLACK_BRUSH), NULL);
+
+	CreateEx(0, className, "OpenGL", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, rect, parent, 0);
+
+	// Set initial variables' values
+	m_oldWindow	   = rect;
+	m_originalRect = rect;
+
+	hWnd = parent;
+}
+
+void COpenGLControl::oglInitialize(void)
+{
+	// Initial Setup:
+	//
+	static PIXELFORMATDESCRIPTOR pfd =
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),
+		1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_TYPE_RGBA,
+		32, // bit depth
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		16, // z-buffer depth
+		0, 0, 0, 0, 0, 0, 0,
+	};
+
+	// Get device context only once.
+	hdc = GetDC()->m_hDC;
+
+	// Pixel format.
+	m_nPixelFormat = ChoosePixelFormat(hdc, &pfd);
+	SetPixelFormat(hdc, m_nPixelFormat, &pfd);
+
+	// Create the OpenGL Rendering Context.
+	hrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, hrc);
+
+	// Basic Setup:
+	//
+	// Set color to use when clearing the background.
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearDepth(1.0f);
+	////////////////////////////////////////
+
+	GLfloat light_ambient1[]={0.0f, 0.0f, 0.0f, 1.0f};
+	GLfloat light_diffuse1[]={1.0, 1.0, 1.0, 1.0};
+	GLfloat light_specular1[]={0.8f, 0.8f, 0.8f, 1.0f};
+	GLfloat light_position1[]={11.0, 11.0, 11.0, 0.0};
+
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position1);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient1);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse1);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular1);
+	glEnable(GL_LIGHT0);
+
+	glMaterialfv(GL_FRONT,GL_AMBIENT,mat_ambient);
+	glMaterialfv(GL_FRONT,GL_DIFFUSE,mat_diffuse);
+	glMaterialfv(GL_FRONT,GL_SPECULAR,mat_specular);
+	glMaterialfv(GL_FRONT,GL_SHININESS,mat_shininess);
+
+	glEnable(GL_LIGHTING);
+
+	glShadeModel(GL_FLAT);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
+	///////////////////////////////////////
+	// Turn on backface culling
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
+
+	// Turn on depth testing
+
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	gluLookAt(0.0, 0.0, 2.0,  /* eye is at (0,0,1) */
+		0.0, 0.0, 0.0,        /* center is at (0,0,0) */
+		0.0, 1.0, 0.0);       /* up is in positive Y direction */
+
+	//load initial mesh 
+	string init_mesh_filname = "./MeshDatabase/data (10).stl";
+	MyMesh init_mesh;
+	OpenMesh::IO::read_mesh(init_mesh, init_mesh_filname);
+	meshQueue.push_back(init_mesh);
+
+	// Send draw request
+	OnDraw(NULL);
+}
+
+void COpenGLControl::oglDrawScene(void)
+{
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	unsigned int meshsize = meshQueue.size();
+
+	//add noise to current mesh
+	if(NOISE_CONTROL && meshsize>=1)
+	{
+		AddNoise(noise_standard_deviation,meshQueue.at(meshsize-1));
+	}
+	//denoise
+	if(DENOISE_CONTROL && meshsize>=1)
+	{
+		BilateralDenoise(meshQueue.at(meshsize-1));
+	}
+	//rotate mesh
+	if(ROTATE_CONTROL>0 && meshsize>=1)
+		//normalize current mesh
+	{
+		RotateMesh(meshQueue.at(meshsize-1));
+	}
+	if(NORMALIZE_CONTROL && meshsize>=1 )
+	{
+		NormalizeMesh(meshQueue.at(meshsize-1));
+	}
+	//rasterize current mesh
+	if(RASTERIZE_CONTROL&& meshsize>=1)
+	{
+		grid_points.clear();
+		RasterizeMesh(meshQueue.at(meshsize-1),grid_points);
+	}
+	//compute spherical harmonics
+	if(SPHARM_CONTROL)
+	{
+		string write_filename = "./DemoSH/demo.txt";
+		ComputeSpharm(grid_points,write_filename);
+	}
+	//compute distance histogram
+	if(DISTHIST_CONTROL)
+	{
+		string write_filename = "./DemoDH/demo.txt";
+		ComputeDistHist(grid_points,write_filename);
+	}
+
+	//batch transform
+	if(BATCH_CONTROL)
+	{
+		BatchTrans();
+	}
+	//retrieve
+	if(RETRIEVE_CONTROL)
+	{
+		RetrieveMesh();
+		grid_points.clear();
+	}
+
+	/*Draw Meshes*/
+	for (unsigned int i=0;i<meshsize;i++)
+	{
+		//x axis
+		glColor3f(GLfloat(1.0), GLfloat(0.0), GLfloat(0.0));
+		glBegin(GL_LINES);
+		glVertex3f(-1.0,0.0,0.0);
+		glVertex3f(1.0,0.0,0.0);
+		glEnd();
+		//y axis
+		glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(0.0));
+		glBegin(GL_LINES);
+		glVertex3f(0.0,-1.0,0.0);
+		glVertex3f(0.0,1.0,0.0);
+		glEnd();
+		//z axis
+		glColor3f(GLfloat(0.0), GLfloat(0.0), GLfloat(1.0));
+		glBegin(GL_LINES);
+		glVertex3f(0.0,0.0,-1.0);
+		glVertex3f(0.0,0.0,1.0);
+		glEnd();
+
+		//draw mesh
+		if(grid_points.size()==0)
+		{
+			if(POLYGON_CONTROL){
+				glEnable(GL_LIGHTING);
+				//change the colour for each mesh
+				switch (i) 
+				{
+				case 0:
+					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+					break;
+				case 1:
+					glColor3f(GLfloat(0.6), GLfloat(0.8), GLfloat(1.0));
+					break;
+				case 2:
+					glColor3f(GLfloat(1.0), GLfloat(1.0), GLfloat(1.0));
+					break;
+				case 3:
+					glColor3f(GLfloat(0.6), GLfloat(1.0), GLfloat(1.0));
+					break;
+				default:
+					glColor3f(GLfloat(0.5), GLfloat(0.5), GLfloat(0.5));
+				};
+
+				meshQueue.at(i).request_face_normals();
+				meshQueue.at(i).update_normals();
+
+				GLdouble norms[3]={0.0,0.0,0.0};
+				for(MyMesh::FaceIter f_it=meshQueue.at(i).faces_begin();f_it!=meshQueue.at(i).faces_end();++f_it)
+				{
+					for(int n=0;n<3;n++){
+						norms[n]=(GLdouble)*(meshQueue.at(i).normal(f_it).data()+n);
+					}
+					glNormal3dv(norms);
+
+					glPushMatrix();
+					glBegin(GL_POLYGON);
+					for(MyMesh::FaceVertexIter v_it=meshQueue.at(i).fv_iter(f_it);v_it;++v_it)
+					{
+						glVertex3fv(meshQueue.at(i).point(v_it).data());
+					}
+					glEnd();
+					glPopMatrix();
+				}
+
+				//release the face normals
+				meshQueue.at(i).release_face_normals();
+			} //end if(POLYGON_CONTROL){
+			else
+			{
+				glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
+				glPointSize(1.0);
+				glBegin(GL_POINTS);
+				for (MyMesh::VertexIter v_it=meshQueue.at(i).vertices_begin(); v_it!=meshQueue.at(i).vertices_end(); ++v_it){ 
+					glVertex3fv(meshQueue.at(i).point(v_it).data());
+				}
+				glEnd();
+			}
+		}
+		//draw rasterized grid
+		else
+		{
+			glColor3f(GLfloat(0.0), GLfloat(1.0), GLfloat(1.0));
+			glPointSize(2.0);
+			glBegin(GL_POINTS);
+			for(unsigned int grid_iter = 0 ;grid_iter<grid_points.size();grid_iter++){
+				glVertex3f(float(grid_points.at(grid_iter).x())/32.0,float(grid_points.at(grid_iter).y())/32.0,float(grid_points.at(grid_iter).z())/32.0);
+			}
+			glEnd();
+		}//end draw grid
+	}//end for (unsigned int i=0;i<meshsize;i++)
+}//end void COpenGLControl::oglDrawScene(void)
+
+
+\end{lstlisting}
+
+\item MeshRetrievalMFCDlg.h
+
+\begin{lstlisting}[xleftmargin=0em]
+// MeshRetrievalMFCDlg.h : header file
+//
+
+#pragma once
+
+#include "OpenGLControl.h"
+#include "MeshOperation.h"
+
+// CMeshRetrievalMFCDlg dialog
+class CMeshRetrievalMFCDlg : public CDialog
+{
+	// Construction
+public:
+	CMeshRetrievalMFCDlg(CWnd* pParent = NULL);	// standard constructor
+
+	COpenGLControl m_oglWindow;
+
+	// Dialog Data
+	enum { IDD = IDD_MeshRetrievalMFC_DIALOG };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+
+
+	// Implementation
+protected:
+	HICON m_hIcon;
+
+	// Generated message map functions
+	virtual BOOL OnInitDialog();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnPaint();
+	afx_msg HCURSOR OnQueryDragIcon();
+
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedLoad();
+	afx_msg void OnBnClickedNoise();
+	afx_msg void OnBnClickedNormalize();
+	afx_msg void OnBnClickedSketch();
+	afx_msg void OnBnClickedSpharm();
+	afx_msg void OnBnClickedCandidate1();
+	afx_msg void OnBnClickedCandidate2();
+	afx_msg void OnBnClickedCandidate3();
+	afx_msg void OnBnClickedCandidate4();
+	afx_msg void OnBnClickedCandidate5();
+	afx_msg void OnBnClickedCandidate6();
+	afx_msg void OnBnClickedRasterize();
+	afx_msg void OnBnClickedBatchtransform();
+	afx_msg void OnBnClickedDenoise();
+	afx_msg void OnBnClickedRetrieve();
+	afx_msg void OnBnClickedX();
+	afx_msg void OnBnClickedY();
+	afx_msg void OnBnClickedZ();
+	afx_msg void OnBnClickedRadio1();
+	afx_msg void OnBnClickedRadio2();
+	afx_msg void OnBnClickedDisthist();
+};
+\end{lstlisting}
+
+\item MeshRetrievalMFCDlg.cpp
+
+\begin{lstlisting}[xleftmargin=0em]
+// MeshRetrievalMFCDlg.cpp : implementation file
+//
+
+#include "stdafx.h"
+#include "MeshRetrievalMFC.h"
+#include "MeshRetrievalMFCDlg.h"
+
+
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+// CAboutDlg dialog used for App About
+char fileName[256]={0};
+
+class CAboutDlg : public CDialog
+{
+public:
+	CAboutDlg();
+
+	// Dialog Data
+	enum { IDD = IDD_ABOUTBOX };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	// Implementation
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+END_MESSAGE_MAP()
+
+
+// CMeshRetrievalMFCDlg dialog
+CMeshRetrievalMFCDlg::CMeshRetrievalMFCDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CMeshRetrievalMFCDlg::IDD, pParent)
+{
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+void CMeshRetrievalMFCDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CMeshRetrievalMFCDlg, CDialog)
+	ON_WM_SYSCOMMAND()
+	ON_WM_PAINT()
+	ON_WM_QUERYDRAGICON()
+	//}}AFX_MSG_MAP
+	ON_WM_SIZE()
+	ON_WM_TIMER()
+	ON_BN_CLICKED(Load, &CMeshRetrievalMFCDlg::OnBnClickedLoad)
+	ON_BN_CLICKED(Noise, &CMeshRetrievalMFCDlg::OnBnClickedNoise)
+	ON_BN_CLICKED(Normalize, &CMeshRetrievalMFCDlg::OnBnClickedNormalize)
+	ON_BN_CLICKED(Spharm, &CMeshRetrievalMFCDlg::OnBnClickedSpharm)
+	ON_BN_CLICKED(CANDIDATE1, &CMeshRetrievalMFCDlg::OnBnClickedCandidate1)
+	ON_BN_CLICKED(CANDIDATE2, &CMeshRetrievalMFCDlg::OnBnClickedCandidate2)
+	ON_BN_CLICKED(CANDIDATE3, &CMeshRetrievalMFCDlg::OnBnClickedCandidate3)
+	ON_BN_CLICKED(CANDIDATE4, &CMeshRetrievalMFCDlg::OnBnClickedCandidate4)
+	ON_BN_CLICKED(CANDIDATE5, &CMeshRetrievalMFCDlg::OnBnClickedCandidate5)
+	ON_BN_CLICKED(CANDIDATE6, &CMeshRetrievalMFCDlg::OnBnClickedCandidate6)
+
+	ON_BN_CLICKED(Rasterize, &CMeshRetrievalMFCDlg::OnBnClickedRasterize)
+	ON_BN_CLICKED(BatchTransform, &CMeshRetrievalMFCDlg::OnBnClickedBatchtransform)
+	ON_BN_CLICKED(Denoise, &CMeshRetrievalMFCDlg::OnBnClickedDenoise)
+	ON_BN_CLICKED(Retrieve, &CMeshRetrievalMFCDlg::OnBnClickedRetrieve)
+	ON_BN_CLICKED(Rotate_X, &CMeshRetrievalMFCDlg::OnBnClickedX)
+	ON_BN_CLICKED(Rotate_Y, &CMeshRetrievalMFCDlg::OnBnClickedY)
+	ON_BN_CLICKED(Rotate_Z, &CMeshRetrievalMFCDlg::OnBnClickedZ)
+	ON_BN_CLICKED(IDC_RADIO1, &CMeshRetrievalMFCDlg::OnBnClickedRadio1)
+	ON_BN_CLICKED(IDC_RADIO2, &CMeshRetrievalMFCDlg::OnBnClickedRadio2)
+	ON_BN_CLICKED(DistHist, &CMeshRetrievalMFCDlg::OnBnClickedDisthist)
+END_MESSAGE_MAP()
+
+
+// CMeshRetrievalMFCDlg message handlers
+BOOL CMeshRetrievalMFCDlg::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// Add "About..." menu item to system menu.
+
+	// IDM_ABOUTBOX must be in the system command range.
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != NULL)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
+
+	// Set the icon for this dialog.  The framework does this automatically
+	//  when the application's main window is not a dialog
+	SetIcon(m_hIcon, TRUE);			// Set big icon
+	SetIcon(m_hIcon, FALSE);		// Set small icon
+
+	// TODO: Add extra initialization here
+
+	CRect rect;
+
+	// Get size and position of the template textfield we created before in the dialog editor
+	GetDlgItem(IDC_PIC_OPENGL)->GetWindowRect(rect);
+
+	// Convert screen coordinates to client coordinates
+	ScreenToClient(rect);
+
+	// Create OpenGL Control window
+	m_oglWindow.oglCreate(rect, this);
+
+	// Setup the OpenGL Window's timer to render
+	m_oglWindow.m_unpTimer = m_oglWindow.SetTimer(1, 1, 0);
+
+
+
+	return TRUE;  // return TRUE  unless you set the focus to a control
+}
+
+void CMeshRetrievalMFCDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
+	else
+	{
+		CDialog::OnSysCommand(nID, lParam);
+	}
+}
+
+// If you add a minimize button to your dialog, you will need the code below
+//  to draw the icon.  For MFC applications using the document/view model,
+//  this is automatically done for you by the framework.
+
+void CMeshRetrievalMFCDlg::OnPaint()
+{
+	if (IsIconic())
+	{
+		CPaintDC dc(this); // device context for painting
+
+		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+
+		// Center icon in client rectangle
+		int cxIcon = GetSystemMetrics(SM_CXICON);
+		int cyIcon = GetSystemMetrics(SM_CYICON);
+		CRect rect;
+		GetClientRect(&rect);
+		int x = (rect.Width() - cxIcon + 1) / 2;
+		int y = (rect.Height() - cyIcon + 1) / 2;
+
+		// Draw the icon
+		dc.DrawIcon(x, y, m_hIcon);
+	}
+	else
+	{
+		CDialog::OnPaint();
+	}
+}
+
+// The system calls this function to obtain the cursor to display while the user drags
+//  the minimized window.
+HCURSOR CMeshRetrievalMFCDlg::OnQueryDragIcon()
+{
+	return static_cast<HCURSOR>(m_hIcon);
+}
+
+
+void CMeshRetrievalMFCDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialog::OnSize(nType, cx, cy);
+
+	// TODO: Add your message handler code here
+	switch (nType)
+	{
+	case SIZE_RESTORED:
+		{
+			if (m_oglWindow.m_bIsMaximized)
+			{
+				m_oglWindow.OnSize(nType, cx, cy);
+				m_oglWindow.m_bIsMaximized = false;
+			}
+
+			break;
+		}
+
+	case SIZE_MAXIMIZED:
+		{
+			m_oglWindow.OnSize(nType, cx, cy);
+			m_oglWindow.m_bIsMaximized = true;
+
+			break;
+		}
+	}
+}
+
+void CMeshRetrievalMFCDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: Add your message handler code here and/or call default
+	CDialog::OnTimer(nIDEvent);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedLoad()
+{
+	CFileDialog dlg(true,NULL,NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		"all files(*.*)|*.*|model files(*.ply)|*.ply", NULL);
+	if (dlg.DoModal()!= IDOK) return;
+
+	MyMesh mesh;
+
+	/*char fileName[256]={0};*/
+	sprintf_s(fileName,"%s\0",dlg.GetPathName());
+
+	try
+	{
+		if ( !OpenMesh::IO::read_mesh(mesh, fileName) )
+		{
+			std::cerr << "Cannot read mesh from the directory" << std::endl;
+		}
+	}
+	catch( std::exception& x )
+	{
+		std::cerr << x.what() << std::endl;
+	}
+	meshQueue.reserve(3);
+	//initial
+	meshQueue.clear();
+	NORMALIZE_CONTROL = true;
+	meshQueue.push_back(mesh);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedNoise()
+{
+	NOISE_CONTROL = true;
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedNormalize()
+{
+	NORMALIZE_CONTROL = true;
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedRasterize()
+{
+	RASTERIZE_CONTROL = true;
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedSpharm()
+{
+	SPHARM_CONTROL = true;
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate1()
+{
+	ChooseCandidate(1);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate2()
+{
+	ChooseCandidate(2);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate3()
+{
+	ChooseCandidate(3);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate4()
+{
+	ChooseCandidate(4);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate5()
+{
+	ChooseCandidate(5);
+}
+
+void CMeshRetrievalMFCDlg::OnBnClickedCandidate6()
+{
+	ChooseCandidate(6);
+}
+
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedBatchtransform()
+{
+	BATCH_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedDenoise()
+{
+	DENOISE_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRetrieve()
+{
+	RETRIEVE_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedX()
+{
+	ROTATE_CONTROL = 1;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedY()
+{
+	ROTATE_CONTROL = 2;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedZ()
+{
+	ROTATE_CONTROL = 3;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRadio1()
+{
+	POLYGON_CONTROL = false;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedRadio2()
+{
+	POLYGON_CONTROL = true;
+}
+
+
+void CMeshRetrievalMFCDlg::OnBnClickedDisthist()
+{
+	DISTHIST_CONTROL = true;
+}
+
+\end{lstlisting}
+
+\end{enumerate}

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "vector.h"
+#include "Vector.h"
 #include "math.h"
 
 

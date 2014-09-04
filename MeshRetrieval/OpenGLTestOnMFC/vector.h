@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#include "point.h"
+#include "Point.h"
 
 class Vector{
 	float X;

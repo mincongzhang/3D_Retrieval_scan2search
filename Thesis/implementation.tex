@@ -53,7 +53,7 @@ $W_c$ is the spatial kernel for smoothing differences in distances, and it is a 
 
 The core part of the bilateral filter denoising function is demonstrated in the code below:
 %CODE:bilateral filter
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 //sigma_c depends on the distance of the points
 double sigma_c = 0.05; 
 //Calculate sigma_s
@@ -94,7 +94,7 @@ Therefore a kd-tree is built to get several nearest neighbours. And some outlier
 To filter out the outliers, the maximum distance between the neighbours and the vertex is acquired. Then a threshold is set according to the maximum distance. If the distance of the neighbour vertex exceeds the threshold, this neighbour vertex will be rejected. The following code shows the implementation:
 
 %CODE:nearest neighbour
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /*find nearest neighbour with kd-tree */
 	kdTree->annkSearch(		// search
 		Pt,					// query point
@@ -171,7 +171,7 @@ To fill voxels between two vertices is not difficult. Firstly compute the normal
 \newpage
 
 %CODE:rasterization between two vertices
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /* fill voxels(grid) between two vertices */
 Vector v12 = point2-point1;
 double len12 = v12.norm();
@@ -217,7 +217,7 @@ if(grid_coordinate_p2<(2*RADIUS*2*RADIUS*2*RADIUS-1) && grid_coordinate_p2>0){
 With $R = 32$, the size of the voxel grid is $2R\times2R\times2R = 262144$, which may occupy a huge memory space. So it is necessary to find a method, which can both save memory and compress the computational complexity. One approach is to create a temporary bitmap (bitset or boolean array in C++) of length $2R\times2R\times2R$ to record whether a voxel is filled. Each element of this bitmap can only show 1 or 0 (true or false), so that the whole bitmap will not occupy any redundant space. While in one traversal($O(n)$) of surfaces of the model, the voxel grid will be filled and the grid vertices should be stored. The pseudocode shows this approach: 
 
 %fill voxel grid
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /* fill voxel grid and get rasterized points in O(n) */
 
 bitmap = new bitmap(2R*2R*2R)               //temporary bitmap
@@ -271,7 +271,7 @@ Since with all the coefficients $a_{lm}$, the spherical function $f(\theta,\varp
 The pseudocode for spherical harmonics descriptors:
 
 %PSEUDOCODE:spherical harmonics
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /* spherical harmonics descriptors */
 
 for each frequency l
@@ -287,7 +287,7 @@ SH = sqrt(SH)
 The code for spherical harmonics descriptors:
 
 %CODE:spherical harmonics
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /* spherical harmonics descriptors */
 
 int idx_n = 0;
@@ -352,7 +352,7 @@ distribution of distances from vertices to the center of mass is acquired. This 
 The core code for distance histogram is as follow: 
 
 %distance histogram
-\begin{lstlisting}[xleftmargin=1em]
+\begin{lstlisting}[xleftmargin=0em]
 /* distance histogram descriptors */
 
 //move grid to the origin and get distance vector

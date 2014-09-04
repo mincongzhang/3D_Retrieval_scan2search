@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "MeshOperation.h"
 #include "PolarPoint.h"
-#include "point.h"
-#include "vector.h"
+#include "Point.h"
+#include "Vector.h"
 
 #include <math.h>
 #include <cmath>
@@ -116,7 +116,7 @@ int fillGridLine(Point point1,Point point2,vector<Point> &inter12,bool * grid,ve
 
 		int grid_coordinate	= int(temp_p.x()*2*RADIUS*2*RADIUS + temp_p.y()*2*RADIUS + temp_p.z());
 
-		//discard points out of range
+		//discard outliers
 		if(grid_coordinate>(2*RADIUS*2*RADIUS*2*RADIUS-1) || grid_coordinate<0)  continue; 
 
 		if(*(grid+grid_coordinate)!=true)
@@ -167,7 +167,7 @@ void WriteSH(string &write_filename,double SH_descriptor[])
 }
 
 /*write the output DH*/
-void WriteDH(string &write_filename,int DistHist[])
+void WriteDH(string &write_filename,double DistHist[])
 {
 	// open file
 	ofstream myfile;
@@ -421,8 +421,8 @@ void ComputeSpharm(vector<Point> &grid_points,string write_filename)
 void ComputeDistHist(vector<Point> &grid_points,string write_filename)
 {
 	//initial DistHist
-	int * DistHist;
-	DistHist = new int [MAX_DIST]();
+	double * DistHist;
+	DistHist = new double [MAX_DIST]();
 
 	//get centroid
 	Point centroid(0.0,0.0,0.0);
@@ -445,7 +445,13 @@ void ComputeDistHist(vector<Point> &grid_points,string write_filename)
 		y_dist = grid_points.at(p_it).y() - centroid.y();
 		z_dist = grid_points.at(p_it).z() - centroid.z();
 		int distance = int(round(sqrt(pow(x_dist,2.0)+pow(y_dist,2.0)+pow(z_dist,2.0))));
-		DistHist[distance]+=1;
+		DistHist[distance]+=1.0;
+	}
+
+	//normalize histogram
+	double grid_size = double (grid_points.size());
+	for(unsigned int d_it=0;d_it<MAX_DIST;d_it++){
+		DistHist[d_it]/=grid_size;
 	}
 
 	/*write out the data*/
@@ -460,9 +466,9 @@ void ComputeDistHist(vector<Point> &grid_points,string write_filename)
 void BatchTrans(void)
 {
 	//SH transform
-	int file_num = 24;
+	int file_num = 60;
 
-	for(unsigned int file_id=24;file_id<=file_num;file_id++)
+	for(unsigned int file_id=1;file_id<=file_num;file_id++)
 	{
 		//decide the suffix of the data
 		string suffix;
@@ -483,7 +489,6 @@ void BatchTrans(void)
 		RasterizeMesh(mesh_to_transform,grid_points_to_transform);
 		ComputeSpharm(grid_points_to_transform,write_SH_filename);
 		ComputeDistHist(grid_points_to_transform,write_DH_filename);
-
 	}
 
 	BATCH_CONTROL = false;
@@ -627,16 +632,12 @@ void FindNeighbours(int neighbour_num,ANNkd_tree* kdTree,ANNpointArray meshArray
 		nnIdx,					// nearest neighbors (returned)
 		dists,					// distance (returned)
 		eps);					// error bound
-
+    
 	//radius = max(dist)
 	for (int i=0;i<neighbour_num;i++)
 	{
-		if(*(dists+i)>radius)
-		{
-			radius = *(dists+i); 
-		}
+		if(*(dists+i)>radius)	radius = *(dists+i); 
 	}
-
 	radius /= 0.9; //reject outlying points 
 
 	for(int i=0;i<neighbour_num;i++)
@@ -718,7 +719,7 @@ void BilateralDenoise(MyMesh &mesh)
 
 	/*Bilateral filtering*/
 	//initial parameters for denoising
-	double radius = 0.0;
+	double radius  = 0.0;
 	double sigma_c = 0.05; //depend on the distance of the points
 	double sigma_s = 0.0;
 	int neighbour_num = 12;
