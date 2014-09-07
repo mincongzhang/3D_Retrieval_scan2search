@@ -125,6 +125,7 @@ http://liris.cnrs.fr/Documents/Liris-2276.pdf
 <!--
 新想法
 3D histogram: 3D histogram因为受rotation影响, 不妨以最大的bin为基准对齐?校准?
+搜索Shape Histograms的paper
 --> 
 
 ##Reference:
