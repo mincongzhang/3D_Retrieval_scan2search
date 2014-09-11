@@ -1,7 +1,7 @@
 3D Shape Retrieval "Scan to search"
 ========================
 
-[Video Demo](https://www.youtube.com/watch?v=eXQ3OQfv2UU)
+[Video Demo](https://www.youtube.com/watch?v=IC5RN_ZZ9Zg)
 
 ![Demo](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/overview.jpg)
 
