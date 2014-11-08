@@ -5,6 +5,8 @@
 
 ![Demo](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/overview.jpg)
 
+<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/overview.jpg" alt="Demo" title="Demo" width="200" />
+
 ![Input](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg)
 
 ![Input2](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg)
