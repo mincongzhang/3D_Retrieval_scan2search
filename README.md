@@ -11,11 +11,9 @@
 
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="400" />
 
-<div id="out"> 
-    <div id="lefttop">2222222222</div> 
-    <div id="righttop">3333333333</div> 
-    <div id="leftbottom">444444444</div> 
-    <div id="rightbottom">55555555555555</div> 
+<div> 
+    <div id="left">2222222222</div> 
+    <div id="right">3333333333</div> 
 </div> 
 
 ##Structure
