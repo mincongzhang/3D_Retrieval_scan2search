@@ -5,16 +5,19 @@
 
 [Video Demo](https://www.youtube.com/watch?v=IC5RN_ZZ9Zg)
 
-<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg" alt="Scan" title="Scan" width="200" />
-
-<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" width="200" />
+<div> 
+    <div id="left">
+        <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg" alt="Scan" title="Scan" width="200" />
+    </div> 
+    
+    <div id="right">
+        <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" width="200" />
+    </div> 
+</div> 
 
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="400" />
 
-<div> 
-    <div id="left">2222222222</div> 
-    <div id="right">3333333333</div> 
-</div> 
+
 
 ##Structure
 1. Pre-processing:  
