@@ -7,7 +7,7 @@
 
 ![Input](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/input_engine_scanned_scantosearch_test.jpg)
 
-![Input](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/input_engine_scantosearch_test.jpg)
+![Input2](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/input_engine_scantosearch_test.jpg)
 
 ![Output](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/output_engine_scantosearch_test.jpg)
 
