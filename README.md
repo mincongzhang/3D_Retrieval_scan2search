@@ -13,7 +13,7 @@
 
 
 
-<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="400" />
+<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="600" />
 
 
 
