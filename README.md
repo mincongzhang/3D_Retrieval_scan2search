@@ -5,12 +5,12 @@
 
 [Video Demo](https://www.youtube.com/watch?v=IC5RN_ZZ9Zg)
 
-<a style="float:left;"><img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg" alt="Scan" title="Scan" width="200" /></a>
-<a style="float:left;"><img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" width="200" /></a>
+<a style="float:left;">
+    <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg" alt="Scan" title="Scan" width="200" />
+</a>
+    <a style="float:left;"><img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" width="200" />
+</a>
 
-<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scanned_scantosearch_test.jpg" alt="Scan" title="Scan" width="200" />
-
-<img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" width="200" />
 
 
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="400" />
