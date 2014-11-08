@@ -11,10 +11,8 @@
     <a style="float:left;"><img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/input_engine_scantosearch_test.jpg" alt="Input" title="Input" height="200"/>
 </a>
 
-
-<p>
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="600" align="middle"/>
-</p>
+
 
 
 
