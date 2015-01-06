@@ -42,11 +42,6 @@ Distance histogram descriptors(DH)
 SH and DH database  
 Retrieval with same weight (with 0.5 on SH and DH respectively)
 
-4. Verification:
-Denoise test: Bilateral filter  
-Rotate test: SH/DH rotate invariance test
-Scan-to-search test: input scanned model
-
 ##Rasterization
 O(n) solution:
 
@@ -89,13 +84,7 @@ The Legendre polynomial P(n,x) can be defined by:
     P(1,x) = x
     P(n,x) = (2*n-1)/n * x * P(n-1,x) - (n-1)/n * P(n-2,x)
 
-
-##Verify and test
-1. input a model in the database, no noise
-2. input a model in the database, add noise/denoise
-3. input a model in the database, rotated
-4. input a scanned model 
-
+<!--
 ##Interesting descovery
 1. Bilateral filter  
 When implementing the bilateral filter I find that it is really slow when I try to get one-ring neighbours for every vertex. Then I realize that the vertex is stored as list, and so the complexity for one-ring neighbours is O(n^2). Thus I build a kd-tree to get some nearest neighbours, and filter out some outliers to approximately get the one-ring neighbours for further denoising. With the kd-tree the complexity can be reduced to O(n)+O(nlog(n)).
