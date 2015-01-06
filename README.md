@@ -88,6 +88,7 @@ The Legendre polynomial P(n,x) can be defined by:
 ##Interesting descovery
 1. Bilateral filter  
 When implementing the bilateral filter I find that it is really slow when I try to get one-ring neighbours for every vertex. Then I realize that the vertex is stored as list, and so the complexity for one-ring neighbours is O(n^2). Thus I build a kd-tree to get some nearest neighbours, and filter out some outliers to approximately get the one-ring neighbours for further denoising. With the kd-tree the complexity can be reduced to O(n)+O(nlog(n)).
+-->
 
 ##Further improvement
 1. kd-tree can be used to fast retrive in the database
