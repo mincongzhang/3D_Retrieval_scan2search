@@ -18,7 +18,10 @@ Output
 
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="600" align="middle"/>
 
-
+##Main algorithm - Spherical Harmonics
+Spherical Harmonics Basic Idea:
+(1)Fouries transform can describe the distribution of a signal, and how the signal changes along time/space domain
+(2)Spherical Harmonics can describe the distribution of a "signal" in space(sphere with certain radius), and how the "signal" changes along space domain
 
 
 ##Structure
