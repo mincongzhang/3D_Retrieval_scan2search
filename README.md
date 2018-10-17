@@ -1,7 +1,7 @@
 3D Shape Retrieval "Scan to search"
 ========================
 
-##Demo
+## Demo
 
 [Video Demo](https://www.youtube.com/watch?v=IC5RN_ZZ9Zg)
 
@@ -18,13 +18,13 @@ Output
 
 <img src="https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/Thesis/output_engine_scantosearch_test.jpg" alt="Output" title="Output" width="600" align="middle"/>
 
-##Main algorithm - Spherical Harmonics
+## Main algorithm - Spherical Harmonics
 Spherical Harmonics Basic Idea:  
 (1)Fouries transform can describe the distribution of a signal, and how the signal changes along time/space domain  
 (2)Spherical Harmonics can describe the distribution of a "signal" in space(sphere with certain radius), and how the "signal" changes along space domain  
 
 
-##Structure
+## Structure
 1. Pre-processing:  
 (1)Normalize  
 -make the center of mass of the model be at the point (R,R,R)  
@@ -45,7 +45,7 @@ Distance histogram descriptors(DH)
 SH and DH database  
 Retrieval with same weight (with 0.5 on SH and DH respectively)
 
-##Rasterization
+## Rasterization
 O(n) solution:
 
     /* fill voxel grid and get rasterized points in O(n) */
@@ -58,7 +58,7 @@ O(n) solution:
     end
     delete bitmap;
 
-##Spherical harmonics descriptor 
+## Spherical harmonics descriptor 
 
 Pseudo code for spherical harmonics:
 
@@ -93,7 +93,7 @@ The Legendre polynomial P(n,x) can be defined by:
 When implementing the bilateral filter I find that it is really slow when I try to get one-ring neighbours for every vertex. Then I realize that the vertex is stored as list, and so the complexity for one-ring neighbours is O(n^2). Thus I build a kd-tree to get some nearest neighbours, and filter out some outliers to approximately get the one-ring neighbours for further denoising. With the kd-tree the complexity can be reduced to O(n)+O(nlog(n)).
 -->
 
-##Further improvement
+## Further improvement
 1.database clustering
  
 2.rasterization algorithm updates  
@@ -136,7 +136,7 @@ http://liris.cnrs.fr/Documents/Liris-2276.pdf
 搜索Shape Histograms的paper
 --> 
 
-##Reference:
+## Reference:
 1. Spherical harmonics and Legendre polynomials ,involving solution when m is negative:  
 http://blog.sciencenet.cn/blog-548663-715825.html  
 2. Rodrigues' formula: equation dn/dxn = (d/dx)n:  
