@@ -74,7 +74,7 @@ Pseudo code for spherical harmonics:
     SH = sqrt(SH)
         
 *where F_lr is the following equation, l is m in the equation
-![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical harmonics.jpg)    
+![SH](https://github.com/mincongzhang/3D_Retrieval_scan2search/raw/master/spherical+harmonics.jpg)    
 
 
 Function: double gsl_sf_legendre_sphPlm (int l, int m, double x)  
